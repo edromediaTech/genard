@@ -1,0 +1,138 @@
+<template>
+  <v-app>
+    <v-container class="fill-height d-flex flex-column justify-center align-center">
+      <v-card class="pa-8" width="400">
+        <div v-if="!connecte" class="text-center">
+          <img src="images/logo.jpeg" alt="" width="100" />
+        </div>
+        <v-form ref="form" v-model="valid" lazy-validation>
+          <v-text-field
+            v-if="!connecte"
+            v-model="code"
+            label="Enter Code"
+            placeholder="###-##"
+            mask="###-##"
+            :rules="codeRules"
+            outlined
+            type="password"
+            class="mb-4"
+            maxlength="6"
+            @input="checkCode"
+          ></v-text-field>
+          <span v-if="connecte"> {{ salutationEtEncouragement(user.prenom) }}</span>
+          <div class="d-flex justify-center">
+            <img :color="lockColor" size="48" :src="lockIcon" />
+          </div>
+
+          <!-- <v-btn :disabled="!valid" color="primary" @click="login">Login</v-btn> -->
+        </v-form>
+      </v-card>
+    </v-container>
+  </v-app>
+</template>
+
+<script>
+import { mapActions, mapGetters } from "vuex";
+import { role } from "../role";
+
+export default {
+  data() {
+    return {
+      connecte: false,
+      code: "",
+      valid: false,
+      lockIcon: require("@/static/images/padlockClose.png"),
+      lockColor: "red", // Lock color (closed = red)
+      codeRules: [
+        (v) => !!v || "Code is required",
+        (v) => v.length === 6 || "Invalid code",
+      ],
+    };
+  },
+  computed: {
+    ...mapGetters("auth", ["user"]),
+    // ...mapGetters(['errors']),
+  },
+  mounted() {},
+  methods: {
+    ...mapActions("auth", ["sendLoginRequest"]),
+
+    checkCode() {
+      if (this.code.length === 6) this.login();
+    },
+
+    salutationEtEncouragement(prenom) {
+      const encouragements = [
+        "Continue à croire en tes rêves, tu es sur la bonne voie !",
+        "Ton ambition te mènera loin, ne lâche rien !",
+        "Les défis sont faits pour être relevés, garde confiance en toi !",
+        "Le succès est proche, continue à avancer avec détermination !",
+        "Chaque effort compte, tu construis ton avenir avec force et courage !",
+        "Ton travail acharné paiera, garde la tête haute et fonce !",
+        "La persévérance ouvre les portes du succès, continue à y croire !",
+      ];
+
+      // Sélectionner un encouragement aléatoire
+      const messageEncouragement =
+        encouragements[Math.floor(Math.random() * encouragements.length)];
+
+      return "Salut " + prenom + " ! 🌟" + messageEncouragement;
+    },
+    async login() {
+      this.loading = true;
+      await this.sendLoginRequest({ code: this.code })
+        .then(() => {
+          console.log("user", this.user);
+          if (this.user) {
+            this.connecte = true;
+            this.lockIcon = require("@/static/images/padlockOpen.png");
+            this.lockColor = "green";
+            // this.$notifier.showMessage({ content: "Succes!", color: "success" });
+
+            setTimeout(() => {
+              if (this.user.user_level === role.utilisateur) {
+                this.$router.push({ path: "/inspire" });
+              }
+              if (this.user.user_level === role.admin) {
+                this.$router.push({ path: "/contexte" });
+              }
+              if (this.user.user_level === role.investisseur) {
+                this.$router.push({ path: "/inspire" });
+              } else {
+                this.$router.push({ path: "/inspire" });
+              }
+            }, 7000);
+          } else {
+            this.$router.push({ path: "/inspire" });
+          }
+        })
+        .catch(() => {
+          this.lockIcon = require("@/static/images/padlockX.png");
+          setTimeout(() => {
+            this.code = "";
+            this.lockIcon = require("@/static/images/padlockClose.png");
+          }, 3000);
+          this.$notifier.showMessage({
+            content: "Code incorrect!",
+            color: "error",
+          });
+
+          // this.$store.dispatch('set_snackbar', { showing: true, text: 'Email ou Password incorrect!', color: 'error' })
+          this.loading = false;
+        });
+    },
+  },
+};
+</script>
+
+<style scoped>
+.v-application {
+  background: linear-gradient(to bottom, #000, #333);
+}
+.image {
+  background: url("/images/logo.jpeg") no-repeat;
+  background-size: cover;
+  height: 100vh;
+  background-color: rgb(0, 0, 0);
+}
+</style>

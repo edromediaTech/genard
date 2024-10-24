@@ -1,0 +1,17 @@
+{
+    "presets": ["@babel/preset-env"]
+  }
+
+  // presets({ isServer }) {
+    //   return [
+    //     [
+    //       '@babel/preset-env',
+    //       {
+    //         targets: isServer ? { node: 'current' } : { browsers: ['last 2 versions', 'ie >= 11'] },
+    //         corejs: { version: 3 },
+    //         useBuiltIns: 'usage'
+    //       }
+    //     ]
+    //   ];
+    // }
+  
