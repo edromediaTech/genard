@@ -6,17 +6,27 @@
           <img src="images/logo.jpeg" alt="" width="100" />
         </div>
         <v-form ref="form" v-model="valid" lazy-validation>
+          <!-- <v-text-field
+    v-model="inputValue"
+    :type="showPassword ? 'text' : 'password'"
+    label="Enter Number"
+    append-icon="mdi-eye"
+    placeholder="Enter a number"
+    @click:append="togglePasswordVisibility"
+  ></v-text-field> -->
           <v-text-field
             v-if="!connecte"
             v-model="code"
             label="Enter Code"
+             :type="showPassword ? 'number' : 'password'"
             placeholder="###-##"
             mask="###-##"
             :rules="codeRules"
-            outlined
-            type="password"
+            outlined           
+             append-icon="mdi-eye"
             class="mb-4"
             maxlength="6"
+             @click:append="togglePasswordVisibility"
             @input="checkCode"
           ></v-text-field>
           <span v-if="connecte"> {{ salutationEtEncouragement(user.prenom) }}</span>
@@ -43,6 +53,8 @@ export default {
       valid: false,
       lockIcon: require("@/static/images/padlockClose.png"),
       lockColor: "red", // Lock color (closed = red)
+      inputValue: '', // Valeur du champ
+      showPassword: false, // Contrôle l'affichage du texte
       codeRules: [
         (v) => !!v || "Code is required",
         (v) => v.length === 6 || "Invalid code",
@@ -56,7 +68,9 @@ export default {
   mounted() {},
   methods: {
     ...mapActions("auth", ["sendLoginRequest"]),
-
+    togglePasswordVisibility() {
+      this.showPassword = !this.showPassword;
+    },
     checkCode() {
       if (this.code.length === 6) this.login();
     },

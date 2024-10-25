@@ -8,7 +8,7 @@
           </v-card-title>
           <v-card-text>
             <v-img
-              src="images/4.jpeg"
+              src="images/empire.png"
               alt="MisterBo Empire Image"
               height="400px"
               class="mb-5"

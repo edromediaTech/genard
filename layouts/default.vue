@@ -82,7 +82,7 @@
       </v-btn>
       <span href="/inspire" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
         <h2 class="m-0 text-primary">
-          <img src="images/logo.jpeg" class="d-inline-block imgLogo" width="30" /> MBE
+          <img src="images/logo.jpeg" class="d-inline-block imgLogo" width="30" /> Mister Bo Empire
         </h2>
       </span>
       <!-- <div class="text-center">
