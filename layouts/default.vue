@@ -82,7 +82,7 @@
       </v-btn>
       <span href="/inspire" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
         <h2 class="m-0 text-primary">
-          <img src="images/logo.jpeg" class="d-inline-block imgLogo" width="30" /> Mister Bo Empire
+          <img src="images/logo.jpeg" class="d-inline-block imgLogo" width="30" /> MBE
         </h2>
       </span>
       <!-- <div class="text-center">
@@ -147,7 +147,11 @@
     <v-main>
       <v-alert
       v-if="nouveauUser !== null && user"
-      type="success"
+      type="primary"
+      dismissible
+    icon="mdi-check-circle"
+    border="top"
+    elevation="2"
     >
        {{ user.nom }} {{ user.prenom }} vient de connecter 
     </v-alert>
@@ -233,6 +237,12 @@ export default {
           icon: "mdi-account",
           title: "Gestion Utilisateur",
           to: "/gestionUser",
+        });
+
+        items.push({
+          icon: "mdi-account",
+          title: "Inscription User",
+          to: "/userInscription",
         });
 
         items.push({

@@ -14,21 +14,26 @@
     placeholder="Enter a number"
     @click:append="togglePasswordVisibility"
   ></v-text-field> -->
+  <v-row>
+    <v-col cols="12" md="2" sm="6"></v-col>
+    <v-col cols="12" md="8" sm="6">
           <v-text-field
             v-if="!connecte"
             v-model="code"
-            label="Enter Code"
+            label="Entrer votre Code"
              :type="showPassword ? 'number' : 'password'"
             placeholder="###-##"
             mask="###-##"
-            :rules="codeRules"
-            outlined           
+            :rules="codeRules"                    
              append-icon="mdi-eye"
             class="mb-4"
             maxlength="6"
              @click:append="togglePasswordVisibility"
             @input="checkCode"
           ></v-text-field>
+          </v-col>
+          <v-col cols="12" md="2" sm="6"></v-col>
+        </v-row>
           <span v-if="connecte"> {{ salutationEtEncouragement(user.prenom) }}</span>
           <div class="d-flex justify-center">
             <img :color="lockColor" size="48" :src="lockIcon" />
@@ -57,7 +62,7 @@ export default {
       showPassword: false, // Contrôle l'affichage du texte
       codeRules: [
         (v) => !!v || "Code is required",
-        (v) => v.length === 6 || "Invalid code",
+        (v) => v.length === 6 || " Code invalide",
       ],
     };
   },
