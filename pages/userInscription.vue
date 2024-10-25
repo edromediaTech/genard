@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-dialog v-model="loginDialog" persistent max-width="800px">
+    <!-- <v-dialog v-model="loginDialog" persistent max-width="800px"> -->
       <v-card>
         <v-card-title>
           <v-icon class="mr-2" color="#FFD700">mdi-account-multiple</v-icon>
@@ -93,7 +93,7 @@
           </v-btn>
         </v-card-text>
       </v-card>
-    </v-dialog>
+    <!-- </v-dialog> -->
     <v-dialog v-model="showCode" max-width="600px">
       <v-card>
         <v-card-title class="headline">Code MBE</v-card-title>

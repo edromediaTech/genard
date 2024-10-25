@@ -145,9 +145,10 @@
    
     </v-app-bar>    
     <v-main>
+      
       <v-alert
       v-if="nouveauUser !== null && user"
-      type="primary"
+      type="success"
       dismissible
     icon="mdi-check-circle"
     border="top"
