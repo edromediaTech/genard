@@ -84,6 +84,7 @@ export default {
         .then(() => {
           console.log("user", this.user);
           if (this.user) {
+          
             this.connecte = true;
             this.lockIcon = require("@/static/images/padlockOpen.png");
             this.lockColor = "green";

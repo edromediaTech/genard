@@ -141,37 +141,24 @@
         @click="logout"
       >
         {{ privileges[user.user_level] }}, {{ get_initial(user.prenom) }}
-      </v-btn>
-    </v-app-bar>
-    <v-alert
-      v-if="nouveauUser"
+      </v-btn> 
+   
+    </v-app-bar>    
+    <v-main>
+      <v-alert
+      v-if="nouveauUser !== null && user"
       type="success"
     >
        {{ user.nom }} {{ user.prenom }} vient de connecter 
     </v-alert>
-    <v-main>
       <!-- style="background-color: rgb(241, 241, 241);" -->
       <v-container fluid>
         <Nuxt />
       </v-container>
     </v-main>
-    <!-- <v-navigation-drawer
-      v-model="rightDrawer"
-      :right="right"
-      temporary
-      fixed
-    >
-      <v-list>
-        <v-list-item @click.native="right = !right">
-          <v-list-item-action>
-            <v-icon light>
-              mdi-repeat
-            </v-icon>
-          </v-list-item-action>
-          <v-list-item-title>Switch drawer (click me)</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer> -->
+   <div v-if="showPopup" class="notification-popup" >
+    {{ message }}
+   </div>
     <v-footer :absolute="!fixed" app>
       <span class="ecole">&copy; {{ new Date().getFullYear() }} Design by EDROMEDIA</span>
     </v-footer>
@@ -180,6 +167,7 @@
 <script>
 import axios from "axios";
 import { mapActions, mapGetters } from "vuex";
+// import {io} from 'socket.io-client'
 import autoLogout from "../components/base/autoLogout.vue";
 import Snackbar from "../components/Snackbar.vue";
 import { role } from "~/role";
@@ -189,6 +177,7 @@ export default {
   data() {
     return {
       message: "",
+      socket:null,
       loginDialog: false,
       clipped: false,
       drawer: false,
@@ -297,6 +286,7 @@ export default {
    // Écouter l'événement 'login' émis par le backend
    this.$socket.on('login', (user) => {
       this.nouveauUser = user;
+      this.showNotification(user)
     });
     this.privileges = Object.keys(role);
 
@@ -380,6 +370,23 @@ export default {
       }
     },
 
+    showNotification(user){
+      if(Notification.permission === "granted"){
+        //  new Notification('Nouvelle connexion'),
+        // {
+        //    body: user.prenom
+        //    // icon:'mdi-account-user'
+        //  }
+      }
+    },
+
+    showPopupNotification(message){
+      this.message = message
+      this.showPopup = true
+      setTimeout(() =>{
+        this.showPopup = false;
+      }, 5000)
+    },
     get_initial(name) {
       const nom = name.split(" ");
       let initial = "";
@@ -428,5 +435,17 @@ export default {
 .custom-container {
   max-width: 1200px; /* Par exemple, pour une largeur maximale de 1200px */
   margin: 0 auto; /* Centrer le conteneur */
+}
+.notification-popup{
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 9999;
+  opacity: 0.9;
 }
 </style>
