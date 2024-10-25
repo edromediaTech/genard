@@ -181,6 +181,7 @@ export default {
   data() {
     return {
       message: "",
+      showPopup:false,
       socket:null,
       loginDialog: false,
       clipped: false,
