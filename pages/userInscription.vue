@@ -68,9 +68,10 @@
                 required
               ></v-autocomplete>
             </v-col>
-            <v-col cols="12" md="12" sm="6">
+            <v-col  cols="12" md="12" sm="6">
               <v-autocomplete
-                v-model="user.intermediaire"
+              v-model="user.intermediaire"
+                :disabled="user.relation === null"
                 label="Intermediaire"
                 prepend-icon="mdi-woman"
                 :items="users"
@@ -83,18 +84,19 @@
               user.nom === null ||
               user.prenom === null ||
               user.tel === null ||
+              user.naissance === null ||
               user.intermediaire === null
             "
             color="#FFD700"
             type="button"
             @click="register"
           >
-            Continuer
+            Soumettre
           </v-btn>
         </v-card-text>
       </v-card>
     <!-- </v-dialog> -->
-    <v-dialog v-model="showCode" max-width="600px">
+    <v-dialog v-model="showCode" max-width="800px">
       <v-card>
         <v-card-title class="headline">Code MBE</v-card-title>
         <v-card-text>
@@ -103,7 +105,7 @@
           </p>
         </v-card-text>
         <v-card-actions>
-          <v-btn color="primary" @click="showCodeMembreDialog = false">Fermer</v-btn>
+          <v-btn color="primary" @click="showCode = false">Fermer</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -125,7 +127,7 @@ export default {
         prenom: null,
         naissance: null,
         email: "",
-        tel: "",
+        tel: null,
         intermediaire: null,
         relation: null,
       },
@@ -147,12 +149,19 @@ export default {
           console.log(jsonResponse);
           this.loginDialog = false;
           this.codeMembre = jsonResponse.data.user.code;
-          this.showCode = true;
-
+          this.showCode = true
+          this.user.nom = null
+          this.user.prenom= null
+          this.user. naissance= null
+          this.user.email= ""
+         this.user. tel= ""
+         this.user.intermediaire= null
+          this.user.relation= null
           this.$notifier.showMessage({
             content: "Enregistrement réussi!",
             color: "success",
           });
+
           //  this.$router.push("/loginDialog");
           this.loading = false;
         })

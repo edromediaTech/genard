@@ -73,8 +73,7 @@ export default {
       users: [],
       headers: [
         { text: "Nom", value: "user.nom" },
-        { text: "Prenom", value: "user.prenom" },
-      
+        { text: "Prenom", value: "user.prenom" },      
         { text: "Téléphone", value: "user.tel" },
         { text: "Type", value: "typeInvestisseur" },
         { text: "Actions", value: "actions", sortable: false },

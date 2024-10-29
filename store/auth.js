@@ -41,6 +41,7 @@ actions: {
           commit('setUserData', response.data)
          localStorage.setItem('authToken', response.data.token)
          localStorage.setItem('nom', response.data.nom)
+         localStorage.setItem('userId', response.data.userId)
          localStorage.setItem('prenom', response.data.prenom)         
           localStorage.setItem('user_level', response.data.user_level)
     

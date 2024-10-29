@@ -114,10 +114,10 @@ export default {
                 this.$router.push({ path: "/inspire" });
               }
               if (this.user.user_level === role.admin) {
-                this.$router.push({ path: "/contexte" });
+                this.$router.push({ path: "/inspire" });
               }
               if (this.user.user_level === role.investisseur) {
-                this.$router.push({ path: "/inspire" });
+                this.$router.push({ path: "/dashInvestisseur" });
               } else {
                 this.$router.push({ path: "/inspire" });
               }

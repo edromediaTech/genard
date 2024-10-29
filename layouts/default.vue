@@ -141,13 +141,11 @@
         @click="logout"
       >
         {{ privileges[user.user_level] }}, {{ get_initial(user.prenom) }}
-      </v-btn> 
-   
+      </v-btn>   
     </v-app-bar>    
-    <v-main>
-      
+    <v-main>      
       <v-alert
-      v-if="nouveauUser !== null && user"
+      v-if="nouveauUser !== null && user && user.user_level > 8"
       type="success"
       dismissible
     icon="mdi-check-circle"

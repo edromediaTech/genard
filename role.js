@@ -6,6 +6,8 @@ const role = {
     "gestionnaire":4,
     "superviseur":5,
     "mca":6, // membre conseil Adm
+    "comptable":7,
+    "intendant":8,
     "admin":9,
     "supadmin":10 
  }
