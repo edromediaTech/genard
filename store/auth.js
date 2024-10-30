@@ -44,25 +44,11 @@ actions: {
          localStorage.setItem('userId', response.data.userId)
          localStorage.setItem('prenom', response.data.prenom)         
           localStorage.setItem('user_level', response.data.user_level)
-    
-          // if(response.data.user_level === 3){
-          //     localStorage.removeItem('inspect')
-          //     localStorage.setItem('inspect', response.data.inspect)
-          // }
+    console.log("local",localStorage)         
           
-          // if(response.data.responsable !== 0 || response.data.responsable !== -1){
-          //    localStorage.removeItem('responsable')
-          //    localStorage.setItem('responsable', response.data.responsable)
-          // }
-          // if(response.data.user_level === 5){
-          //    localStorage.removeItem('id')
-          //    localStorage.setItem('ip', response.data.ip)
-          //    localStorage.setItem('id', response.data.user.id)
-          //    localStorage.setItem('type', response.data.type)
-          // }
           localStorage.setItem('anac', response.data.anac)
           
-          // console.log( localStorage.getItem('responsable'))
+         
          })
        },
          
@@ -85,6 +71,9 @@ actions: {
           commit('setUserData', null)
           localStorage.removeItem('authToken')
           localStorage.removeItem('user_level')  
+          localStorage.removeItem('userId')  
+          localStorage.removeItem('nom')  
+          localStorage.removeItem('prenom')  
                 
         //  localStorage.removeItem('anac')     
         })

@@ -145,7 +145,7 @@
     </v-app-bar>    
     <v-main>      
       <v-alert
-      v-if="nouveauUser !== null && user && user.user_level > 8"
+      v-if="nouveauUser !== null && user "
       type="success"
       dismissible
     icon="mdi-check-circle"
@@ -215,6 +215,11 @@ export default {
           icon: "mdi-info",
           title: "Contexte",
           to: "/contexte",
+        },
+        {
+          icon: "mdi-file",
+          title: "Suggestions",
+          to: "/suggestion",
         },
       ];
 
