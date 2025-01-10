@@ -1,5 +1,5 @@
 <template>
-  <v-carousel cycle height="600" hide-delimiter-background show-arrows-on-hover>
+  <v-carousel cycle height="700" hide-delimiter-background show-arrows-on-hover>
     <v-carousel-item
       v-for="(item, i) in items"
       :key="i"
@@ -13,20 +13,20 @@ export default {
     return {
       items: [
         {
-          src: "images/empire.png",
+          src: "images/resto.jpg",
         },
         {
-          src: "images/1.jpeg",
+          src: "images/resto1.jpg",
         },
         {
-          src: "images/2.jpeg",
+          src: "images/resto2.jpg",
         },
         {
-          src: "images/3.jpeg",
+          src: "images/resto3.jpg",
         },
 
         {
-          src: "images/4.jpeg",
+          src: "images/resto4.jpg",
         },
       ],
     };

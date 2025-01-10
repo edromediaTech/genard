@@ -227,6 +227,7 @@ export default {
       this.visible = true;
       await this.$axios.get("auth/all").then((res) => {
         this.users = res.data;
+        console.log(this.users)
         this.nbu = res.data.length;
         this.visible = false;
       });

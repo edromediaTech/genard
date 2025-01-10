@@ -4,12 +4,12 @@
       <v-card>
         <v-card-title>
           <v-icon class="mr-2" color="#FFD700">mdi-account-multiple</v-icon>
-          Fiche d'Enregistrement MBE
+          Fiche d'Enregistrement 
         </v-card-title>
 
         <v-card-text>
           <v-row>
-            <v-col cols="12" sm="6" md="4">
+            <v-col cols="12" sm="6" md="6">
               <v-text-field
                 v-model="user.nom"
                 label="Nom*"
@@ -20,7 +20,7 @@
                 @input="user.nom = toUpperCase(user.nom)"
               />
             </v-col>
-            <v-col cols="12" sm="6" md="4">
+            <v-col cols="12" sm="6" md="6">
               <v-text-field
                 v-model="user.prenom"
                 label="Prénom*"
@@ -32,16 +32,8 @@
               />
             </v-col>
 
-            <v-col cols="12" md="4" sm="6">
-              <v-text-field
-                v-model="user.naissance"
-                label="Date de Naissance"
-                prepend-icon="mdi-calendar"
-                type="date"
-                required
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="4" sm="6">
+          
+            <v-col cols="12" md="6" sm="6">
               <v-text-field
                 v-model="user.email"
                 label="Email"
@@ -50,7 +42,7 @@
                 required
               ></v-text-field>
             </v-col>
-            <v-col cols="12" md="4" sm="6">
+            <v-col cols="12" md="6" sm="6">
               <v-text-field
                 v-model="user.tel"
                 label="Télehone"
@@ -59,33 +51,14 @@
                 required
               ></v-text-field>
             </v-col>
-            <v-col cols="12" md="4" sm="6">
-              <v-autocomplete
-                v-model="user.relation"
-                :items="['Fils', 'Fille', 'Epoux', 'Epouse']"
-                label="Relation"
-                prepend-icon="mdi-link"
-                required
-              ></v-autocomplete>
-            </v-col>
-            <v-col  cols="12" md="12" sm="6">
-              <v-autocomplete
-              v-model="user.intermediaire"
-                :disabled="user.relation === null"
-                label="Intermediaire"
-                prepend-icon="mdi-woman"
-                :items="users"
-                required
-              ></v-autocomplete>
-            </v-col>
+           
+           
           </v-row>
           <v-btn
             :disabled="
               user.nom === null ||
               user.prenom === null ||
-              user.tel === null ||
-              user.naissance === null ||
-              user.intermediaire === null
+              user.tel === null            
             "
             color="#FFD700"
             type="button"
@@ -98,10 +71,10 @@
     <!-- </v-dialog> -->
     <v-dialog v-model="showCode" max-width="800px">
       <v-card>
-        <v-card-title class="headline">Code MBE</v-card-title>
+        <v-card-title class="headline">Code de Connexion</v-card-title>
         <v-card-text>
           <p>
-            Voici votre code MBE : <strong>{{ codeMembre }}</strong>
+            Voici votre code : <strong>{{ codeMembre }}</strong>
           </p>
         </v-card-text>
         <v-card-actions>
@@ -125,11 +98,10 @@ export default {
       user: {
         nom: null,
         prenom: null,
-        naissance: null,
+       
         email: "",
         tel: null,
-        intermediaire: null,
-        relation: null,
+       
       },
       msgrules: "Champ obligatoire",
     };
@@ -151,12 +123,9 @@ export default {
           this.codeMembre = jsonResponse.data.user.code;
           this.showCode = true
           this.user.nom = null
-          this.user.prenom= null
-          this.user. naissance= null
+          this.user.prenom= null         
           this.user.email= ""
-         this.user. tel= ""
-         this.user.intermediaire= null
-          this.user.relation= null
+         this.user. tel= ""       
           this.$notifier.showMessage({
             content: "Enregistrement réussi!",
             color: "success",

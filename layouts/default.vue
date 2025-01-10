@@ -81,9 +81,10 @@
         <v-icon>mdi-{{ `chevron-${miniVariant ? "right" : "left"}` }}</v-icon>
       </v-btn>
       <span href="/inspire" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
-        <h2 class="m-0 text-primary">
-          <img src="images/logo.jpeg" class="d-inline-block imgLogo" width="30" /> MBE
-        </h2>
+        <h3 class="m-0 text-primary">
+          <!-- <img src="images/logo.jpg" class="d-inline-block imgLogo" width="30" /> -->
+           Benedictions de l'Eternel
+        </h3>
       </span>
       <!-- <div class="text-center">
         <img src="images/logo.jpeg" alt="" width="30" />
@@ -211,27 +212,29 @@ export default {
           title: "Accueil",
           to: "/inspire",
         },
-        {
-          icon: "mdi-info",
-          title: "Contexte",
-          to: "/contexte",
-        },
+       
         {
           icon: "mdi-file",
           title: "Suggestions",
           to: "/suggestion",
         },
+        
       ];
 
-      if (this.user && this.user.user_level === 4) {
+      if (this.user && this.user.user_level === role.serveur) {
         items.push({
-          icon: "mdi-view-dashboard",
-          title: "Tableau de bord",
-          to: "/dashSuper",
+          icon: "mdi-food",
+          title: "Gestion des Commandes",
+          to: "/commande",
+        });
+        items.push({
+          icon: "mdi-product",
+          title: "Produits",
+          to: "/produit",
         });
       }
 
-      if (this.user && this.user.user_level > role.mca) {
+      if (this.user && this.user.user_level > role.admin) {
         items.push({
           icon: "mdi-view-dashboard",
           title: "Tableau de bord",

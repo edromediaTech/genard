@@ -13,8 +13,8 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    titleTemplate: '%s - MBE',
-    title: 'Mister Bo Empire',
+    titleTemplate: '%s - Benediction',
+    title: 'Benediction de l\'Eternel',
     htmlAttrs: {
       lang: 'en'
     },
@@ -94,10 +94,10 @@ export default {
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
  
    axios: {
-     //  baseURL : 'http://192.168.0.103:3000/api/',
-     //  baseURL : 'http://192.168.2.102:3000/api/',
+       baseURL : 'http://192.168.0.111:3000/api/',
+       // baseURL : 'http://192.168.2.102:3000/api/',
       // baseURL : 'http://172.20.10.3:3000/api/',
-        baseURL : 'https://backmbe.onrender.com/api/',
+      //  baseURL : 'https://backmbe.onrender.com/api/',
       // //credentials: false,
       // proxy: true           
   },

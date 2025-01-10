@@ -1,40 +1,34 @@
 <template>
   <v-app>
-    <v-container class="fill-height d-flex flex-column justify-center align-center">
-      <v-card class="pa-8" width="400">
+   
+    <v-container class="fill-height d-flex flex-column justify-center align-center image">
+      <v-card v-if="!user" class="pa-8" width="400">
         <div v-if="!connecte" class="text-center">
-          <img src="images/logo.jpeg" alt="" width="100" />
+          <!-- <img src="images/logo.jpeg" alt="" width="100" /> -->
         </div>
         <v-form ref="form" v-model="valid" lazy-validation>
-          <!-- <v-text-field
-    v-model="inputValue"
-    :type="showPassword ? 'text' : 'password'"
-    label="Enter Number"
-    append-icon="mdi-eye"
-    placeholder="Enter a number"
-    @click:append="togglePasswordVisibility"
-  ></v-text-field> -->
-  <v-row>
+      
+  <v-row >
     <v-col cols="12" md="2" sm="6"></v-col>
     <v-col cols="12" md="8" sm="6">
           <v-text-field
             v-if="!connecte"
             v-model="code"
             label="Entrer votre Code"
-             :type="showPassword ? 'number' : 'password'"
+            :type="showPassword ? 'number' : 'password'"
             placeholder="###-##"
             mask="###-##"
             :rules="codeRules"                    
-             append-icon="mdi-eye"
+            append-icon="mdi-eye"
             class="mb-4"
             maxlength="6"
-             @click:append="togglePasswordVisibility"
+            @click:append="togglePasswordVisibility"
             @input="checkCode"
           ></v-text-field>
           </v-col>
           <v-col cols="12" md="2" sm="6"></v-col>
         </v-row>
-          <span v-if="connecte"> {{ salutationEtEncouragement(user.prenom) }}</span>
+         
           <div class="d-flex justify-center">
             <img :color="lockColor" size="48" :src="lockIcon" />
           </div>
@@ -42,7 +36,12 @@
           <!-- <v-btn :disabled="!valid" color="primary" @click="login">Login</v-btn> -->
         </v-form>
       </v-card>
+
+      <v-card  v-if="connecte"  class="pa-8" width="400">
+        <span> {{ salutationEtEncouragement(user.prenom) }}</span>
+      </v-card>
     </v-container>
+      
   </v-app>
 </template>
 
@@ -116,8 +115,8 @@ export default {
               if (this.user.user_level === role.admin) {
                 this.$router.push({ path: "/inspire" });
               }
-              if (this.user.user_level === role.investisseur) {
-                this.$router.push({ path: "/dashInvestisseur" });
+              if (this.user.user_level === role.serveur) {
+                this.$router.push({ path: "/commande" });
               } else {
                 this.$router.push({ path: "/inspire" });
               }
@@ -147,10 +146,14 @@ export default {
 
 <style scoped>
 .v-application {
-  background: linear-gradient(to bottom, #000, #333);
+  background: url("/images/resto1.jpg") no-repeat;
+  background-size: cover;
+  height: 100vh;
+  background-color: rgb(0, 0, 0);
+  /* background: linear-gradient(to bottom, #000, #333); */
 }
 .image {
-  background: url("/images/logo.jpeg") no-repeat;
+  background: url("/images/resto1.jpg") no-repeat;
   background-size: cover;
   height: 100vh;
   background-color: rgb(0, 0, 0);
