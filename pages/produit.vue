@@ -90,7 +90,7 @@
   
           <!-- Bouton de soumission -->
           <v-col cols="12">
-            <v-btn  color="primary" @click="submitForm">
+            <v-btn  :disabled="produit.nom ===null && produit.categorie === null"  color="primary" @click="submitForm">
               {{ isEditing ? 'Modifier' : 'Ajouter' }}
             </v-btn>
           </v-col>
@@ -128,7 +128,7 @@
         isEditing: false, // Mode édition
         produit: {
           nom: null,         
-          categorie: '',
+          categorie: null,
           prix: 0,
           quantite: 12,
           ramplacement:0,

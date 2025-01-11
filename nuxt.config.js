@@ -13,8 +13,8 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    titleTemplate: '%s - Benediction',
-    title: 'Benedictions de l\'Eternel',
+    titleTemplate: '%s - Bénédictions',
+    title: 'Bénédictions de l\'Eternel',
     htmlAttrs: {
       lang: 'en'
     },

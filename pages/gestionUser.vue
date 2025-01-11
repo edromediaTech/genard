@@ -150,7 +150,7 @@
 import { mapGetters } from "vuex";
 import { role } from "~/role";
 export default {
-    middleware: "admin",
+  //  middleware: "admin",
   data() {
     return {
       dialog: false,
@@ -226,8 +226,7 @@ export default {
 
       this.visible = true;
       await this.$axios.get("auth/all").then((res) => {
-        this.users = res.data;
-        console.log(this.users)
+        this.users = res.data;        
         this.nbu = res.data.length;
         this.visible = false;
       });

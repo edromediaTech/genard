@@ -319,7 +319,7 @@ export default {
   try {
     // Récupérer les commandes depuis l'API
     const { data } = await this.$axios.get('/commandes');
-    console.log(data);
+
 
     // Récupérer l'ID de l'utilisateur connecté
     const userId = this.user.userId;
@@ -349,7 +349,6 @@ export default {
         }),
       }));
 
-    console.log(this.commandes);
   } catch (error) {
     console.error('Erreur lors du chargement des commandes :', error);
   }
@@ -531,8 +530,7 @@ async ajouterProduitCommande(commandeId, produit, quantite) {
       // Effectuer une requête PUT pour mettre à jour la commande sur le serveur
       const response = await this.$axios.put(`/commandes/add`, commande);      
       // Afficher la réponse du serveur
-      console.log('Commande mise à jour:', response.data);
-
+     
       // Optionnel : Vous pouvez mettre à jour localement les données après la mise à jour sur le serveur
       this.commandes = this.commandes.map(cmd => 
         cmd._id === commandeId ? response.data : cmd
@@ -571,8 +569,8 @@ printInvoice() {
       <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
         <thead>
           <tr>
-            <th style="border: 1px solid #ddd; padding: 8px;">Nom</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">Quantité</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Prodduit</th>
+            <th style="border: 1px solid #ddd; padding: 8px;">Qté</th>
             <th style="border: 1px solid #ddd; padding: 8px;">Prix Unitaire</th>
             <th style="border: 1px solid #ddd; padding: 8px;">Total</th>
           </tr>
@@ -595,7 +593,7 @@ printInvoice() {
           </tr>
         </tbody>
       </table>
-      <p>Une hospitalité gracieuse au coeur de la ville</p>
+      <p><i>Une hospitalité gracieuse au coeur de la ville</i></p>
     </div>
   `;
 

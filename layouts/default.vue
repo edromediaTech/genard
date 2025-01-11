@@ -83,7 +83,7 @@
       <span href="/inspire" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
         <h3 class="m-0 text-primary">
           <!-- <img src="images/logo.jpg" class="d-inline-block imgLogo" width="30" /> -->
-           Benedictions de l'Eternel
+           Bénédictions de l'Eternel
         </h3>
       </span>
       <!-- <div class="text-center">
