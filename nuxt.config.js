@@ -3,7 +3,7 @@ import colors from 'vuetify/es5/util/colors'
 export default {
   env: {
   
-    baseURL: process.env.BASE_URL  || 'https://backmbe.onrender.com/api/' 
+    baseURL: process.env.BASE_URL  || 'https://backbenediction.onrender.com/api/' 
     // : 'https://base.ddne.net/api/'
   },
 
@@ -14,7 +14,7 @@ export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     titleTemplate: '%s - Benediction',
-    title: 'Benediction de l\'Eternel',
+    title: 'Benedictions de l\'Eternel',
     htmlAttrs: {
       lang: 'en'
     },
@@ -94,10 +94,10 @@ export default {
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
  
    axios: {
-       baseURL : 'http://192.168.0.111:3000/api/',
+      // baseURL : 'http://192.168.0.104:3000/api/',
        // baseURL : 'http://192.168.2.102:3000/api/',
       // baseURL : 'http://172.20.10.3:3000/api/',
-      //  baseURL : 'https://backmbe.onrender.com/api/',
+        baseURL : 'https://backbenediction.onrender.com/api/',
       // //credentials: false,
       // proxy: true           
   },

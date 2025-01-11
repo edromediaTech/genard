@@ -51,22 +51,23 @@
       </v-card>
   
       <!-- Section des graphiques -->
-      <v-card class="mt-5">
+      <!-- <v-card class="mt-5">
         <v-card-title>Statistiques des ventes</v-card-title>
         <v-card-text>
           <apexchart type="bar" :options="chartOptions" :series="chartSeries" />
         </v-card-text>
-      </v-card>
+      </v-card> -->
     </v-container>
   </template>
   
-  <script>
-  // import VueApexCharts from "vue3-apexcharts";
+  <script> 
   
   export default {
+    
     components: {
      // apexchart: VueApexCharts,
     },
+    middleware: "admin",
     data() {
       return {
         filters: {

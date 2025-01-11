@@ -20,6 +20,7 @@
         item-key="_id"
         class="elevation-1"
       >
+        
         <template #[`item.actions`]="{ item }">
           <v-btn icon small title="Details de la Commande" @click="viewDetails(item)">
             <v-icon>mdi-eye</v-icon>
@@ -28,27 +29,10 @@
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
+       
       </v-data-table>
-    </v-card>
-    <!-- Tableau des articles -->
-    <!-- <v-card v-if="articles.length > 0">
-      <v-card-title>
-        <span class="text-h6">Articles</span>
-      </v-card-title>
-      <v-data-table
-        :headers="headers"
-        :items="articles"
-        item-value="produit"
-        class="elevation-1"
-        dense
-      >
-        <template #[`item.actions`]="{ item }">
-          <v-btn icon small @click="viewDetails(item)">
-            <v-icon>mdi-eye</v-icon> Détails
-          </v-btn>
-        </template>
-      </v-data-table>
-    </v-card> -->
+      
+    </v-card> 
     
 
     <!-- Modal pour afficher les détails -->
@@ -136,7 +120,7 @@
                 dense
               ></v-select>
             </v-col>
-            <v-col cols="12" md="4" sm="6">
+            <v-col cols="12" md="6" sm="6">
               <v-text-field
                 v-model="article.quantite"
                 type="number"
@@ -146,13 +130,13 @@
                 min="1"
               ></v-text-field>
             </v-col>
-            <v-col cols="2">
+            <!-- <v-col cols="2">
               <v-btn icon color="red" @click="removeArticle(index)">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
-            </v-col>
+            </v-col> -->
           </v-row>
-          <v-btn color="blue" @click="addArticle()"><v-icon>mdi-order</v-icon>Ajouter un article</v-btn>
+          <!-- <v-btn color="blue" @click="addArticle()"><v-icon>mdi-order</v-icon>Ajouter un article</v-btn> -->
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -216,6 +200,18 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="dialogConfirm" max-width="400">
+    <v-card>
+      <v-card-title class="headline">Confirmation</v-card-title>
+      <v-card-text>
+        Êtes-vous sûr de vouloir supprimer cet article ?
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="green" text @click="confirmDelete">Oui</v-btn>
+        <v-btn color="red" text @click="cancelDelete">Non</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
   </v-container>
 </template>
 
@@ -223,12 +219,14 @@
 import { mapGetters, mapActions } from "vuex";
 
 export default {
- 
+  middleware: "serveur",
   data() {
     return {
       selectedTableId: null, // ID de la table sélectionnée
       tablesOptions: ['Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5', 'Table 6', 'Table 7'], // Options des tables
       statutOptions: ['En attente', 'En cours', 'Terminée'],
+      dialogConfirm: false,  // État du dialogue de confirmation
+      currentDeleteId: null,
       articles: [], // Articles récupérés
       commande: {
         client: null,       
@@ -248,6 +246,7 @@ export default {
         { text: "Serveur", value: "serveur" },
         { text: "Statut", value: "statut" },
         { text: "Total (HTG)", value: "total" },
+        { text: "Date", value: "date" },
         { text: "Actions", value: "actions", sortable: false },
       ],
       productHeaders: [
@@ -316,38 +315,80 @@ export default {
         console.error('Erreur lors de la récupération des produits:', error);
       }
     },
-
-    // Récupérer les commandes existantes
-async fetchCommandes() {
+    async fetchCommandes() {
   try {
+    // Récupérer les commandes depuis l'API
     const { data } = await this.$axios.get('/commandes');
     console.log(data);
 
-    const userId = this.user.userId; // Récupérer l'ID de l'utilisateur connecté
-    const today = new Date().toISOString().split("T")[0]; // Récupérer la date d'aujourd'hui au format YYYY-MM-DD
-    // Filtrer les commandes en fonction du serveur connecté et de la date du jour
+    // Récupérer l'ID de l'utilisateur connecté
+    const userId = this.user.userId;
+
+    // Récupérer la date locale d'aujourd'hui au format YYYY-MM-DD
+    const today = new Date().toLocaleDateString('fr-CA'); // Format "YYYY-MM-DD" dans le fuseau horaire local
+
+    // Filtrer et formater les commandes
     this.commandes = data
       .filter(commande => {
-        const commandeDate = new Date(commande.createdAt).toISOString().split("T")[0]; // Date de la commande
+        // Convertir la date de la commande au format local "YYYY-MM-DD"
+        const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
+        // Filtrer par ID de serveur et date du jour
         return commande.serveur._id === userId && commandeDate === today;
       })
       .map(commande => ({
         ...commande,
-        serveur: commande.serveur.prenom, // Accéder au prénom du serveur
-        client: commande.client, // Le nom de la table ou du client
-        statut: commande.statut, // Statut de la commande
-        total: commande.total, // Total de la commande
+        serveur: commande.serveur.prenom, // Prénom du serveur
+        client: commande.client,         // Nom de la table ou du client
+        statut: commande.statut,         // Statut de la commande
+        total: commande.total,           // Total de la commande
+        // Formater la date au format dd mm yy
+        date: new Date(commande.date).toLocaleDateString('fr-FR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: '2-digit',
+        }),
       }));
-    
+
     console.log(this.commandes);
   } catch (error) {
     console.error('Erreur lors du chargement des commandes :', error);
   }
 },
 
+
+
+    // Récupérer les commandes existantes
+// async fetchCommandes() {
+//   try {
+//     const { data } = await this.$axios.get('/commandes');
+//     console.log(data);
+
+//     const userId = this.user.userId; // Récupérer l'ID de l'utilisateur connecté
+//     const today = new Date().toISOString().split("T")[0]; // Récupérer la date d'aujourd'hui au format YYYY-MM-DD
+//     // Filtrer les commandes en fonction du serveur connecté et de la date du jour
+//     this.commandes = data
+//       .filter(commande => {
+//         const commandeDate = new Date(commande.date).toISOString().split("T")[0]; // Date de la commande
+//         return commande.serveur._id === userId && commandeDate === today;
+//       })
+//       .map(commande => ({
+//         ...commande,
+//         serveur: commande.serveur.prenom, // Accéder au prénom du serveur
+//         client: commande.client, // Le nom de la table ou du client
+//         statut: commande.statut, // Statut de la commande
+//         total: commande.total, // Total de la commande
+//         date: commande.date, // Total de la commande
+//       }));
+    
+//     console.log(this.commandes);
+//   } catch (error) {
+//     console.error('Erreur lors du chargement des commandes :', error);
+//   }
+// },
+
 async addProduits() {      
       await this.$axios
-        .patch('commandes/add', {commandeId:this.selectedCommande._id, produitId:this.newProduct.produit, quantite:this.newProduct.quantite})
+        .post('commandes/add', {commandeId:this.selectedCommande._id, produitId:this.newProduct.produit, quantite:this.newProduct.quantite})
         .then((res) => {
           if (res.status === 200) {
             this.fetchCommandes()
@@ -362,37 +403,8 @@ async addProduits() {
         });
     },
 
-// async addProduites() {
-//       try {
-//        console.log(this.newProduct.produit) 
-//        const response =  await this.$axios.post('commandes/add', {commandeId:this.selectedCommande._id, produitId:this.newProduct.produit, quantite:this.newProduct.quantite});
-//        console.log(response)
 
-//        this.$notifier.showMessage({
-//         content: "Produit ajouté à la commande.",
-//         color: "success",
-//       });
-//         this.fetchCommandes()
-        
-//       } catch (error) {
-//         console.error('Erreur lors de la récupération des produits:', error);
-//       }
-//     },
 
-addProductToCommande() {
-      const totalProduit = this.newProduct.quantite * this.newProduct.prix;
-      const newProduct = { ...this.newProduct, total: totalProduit };
-
-      // Ajouter le produit à la commande sélectionnée
-      this.selectedCommande.articles.push(newProduct);
-
-      // Fermer le modal après ajout
-      this.addProductModal = false;
-      this.$notifier.showMessage({
-        content: "Produit ajouté à la commande.",
-        color: "success",
-      });
-    },
 
 
     openAddProductDialog() {
@@ -440,9 +452,10 @@ addProductToCommande() {
 
     // Fonction pour envoyer un nouvel article
     async sendArticle() {
+      this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken')
       this.commande.client = this.selectedTableId;
       this.commande.serveur = this.user.userId;
-      this.commande.statut = "En attente";
+      this.commande.statut = this.selectedOrder.statut;
 
       try {
         const response = await this.$axios.post('commandes', this.commande);
@@ -471,15 +484,37 @@ addProductToCommande() {
     },
 
     // Fonction pour supprimer un article
-    async deleteArticle(id) {     
-        try {
-          await this.$axios.delete(`/commandes/${id}`);
-          this.fetchCommandes();
-        } catch (error) {
-          console.error('Erreur lors de la suppression de la commande:', error);
-        }
-      },
+    // async deleteArticle(id) {     
+    //     try {
+    //       await this.$axios.delete(`/commandes/${id}`);
+    //       this.fetchCommandes();
+    //     } catch (error) {
+    //       console.error('Erreur lors de la suppression de la commande:', error);
+    //     }
+    //   },
     
+      // Fonction qui s'appelle avant de supprimer un article
+   deleteArticle(id) {
+      // Ouvre le dialogue de confirmation avant de supprimer
+      this.currentDeleteId = id;
+      this.dialogConfirm = true;
+    },
+    
+    // Fonction qui confirme la suppression
+    async confirmDelete() {
+      try {
+        await this.$axios.delete(`/commandes/${this.currentDeleteId}`);
+        this.fetchCommandes();
+        this.dialogConfirm = false;  // Ferme le dialogue après confirmation
+      } catch (error) {
+        console.error('Erreur lors de la suppression de la commande:', error);
+      }
+    },
+
+    // Fonction pour annuler la suppression
+    cancelDelete() {
+      this.dialogConfirm = false;  // Ferme simplement le dialogue sans action
+    },
 
     // Fonction pour ajouter un produit à une commande et mettre à jour la commande sur le serveur
 async ajouterProduitCommande(commandeId, produit, quantite) {

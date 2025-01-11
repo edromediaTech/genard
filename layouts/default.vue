@@ -203,8 +203,7 @@ export default {
   computed: {
     ...mapGetters("auth", ["anac"]),
     ...mapGetters("auth", ["user"]),
-    ...mapGetters("dataUtil", ["anac", "ecolename", "zonename", "districtname"]),
-
+  
     items() {
       const items = [
         {
@@ -213,32 +212,28 @@ export default {
           to: "/inspire",
         },
        
-        {
-          icon: "mdi-file",
-          title: "Suggestions",
-          to: "/suggestion",
-        },
+        // {
+        //   icon: "mdi-file",
+        //   title: "Suggestions",
+        //   to: "/suggestion",
+        // },
         
       ];
 
-      if (this.user && this.user.user_level === role.serveur) {
+      if (this.user && parseInt(this.user.user_level) === role.serveur) {
         items.push({
           icon: "mdi-food",
           title: "Gestion des Commandes",
           to: "/commande",
         });
-        items.push({
-          icon: "mdi-product",
-          title: "Produits",
-          to: "/produit",
-        });
+       
       }
 
-      if (this.user && this.user.user_level > role.admin) {
+      if (this.user && parseInt(this.user.user_level) === role.admin) {
         items.push({
           icon: "mdi-view-dashboard",
           title: "Tableau de bord",
-          to: "/dashAdmin",
+          to: "/admin",
         });
 
         items.push({
@@ -248,33 +243,30 @@ export default {
         });
 
         items.push({
-          icon: "mdi-account",
+          icon: "mdi-account-multiple",
           title: "Inscription User",
           to: "/userInscription",
         });
 
         items.push({
           icon: "mdi-file",
-          title: "Projets",
-          to: "/projet",
+          title: "Rapport de Ventes",
+          to: "/rapportdevente",
+        });
+        items.push({
+          icon: "mdi-basket",
+          title: "Approvisionnement",
+          to: "/appro",
         });
 
         items.push({
-          icon: "mdi-account-tie",
-          title: "Investisseurs",
-          to: "/investisseur",
+          icon: "mdi-package-variant",
+          title: "Produits",
+          to: "/produit",
         });
 
-        items.push({
-          icon: "mdi-usd",
-          title: "Investissements",
-          to: "/investissement",
-        });
-        items.push({
-          icon: "mdi-cash",
-          title: "Rendement",
-          to: "/rendement",
-        });
+       
+       
       }
       return items;
     },
@@ -308,10 +300,7 @@ export default {
     });
     this.privileges = Object.keys(role);
 
-    if (localStorage.getItem("anac") !== null) this.set_anacP();
-    else this.set_anac();
-
-    this.get_district_name();
+   
 
     if (localStorage.authToken) {
       const data = {
@@ -332,12 +321,7 @@ export default {
 
   methods: {
     ...mapActions("auth", ["sendLogoutRequest", "getUserData", "setUser"]),
-    ...mapActions("dataUtil", [
-      "getAnacData",
-      "getDistrictnameData",
-      "getZonenameData",
-      "getAnacDataP",
-    ]),
+    
 
     detectWakeup(callback) {
       const myWorker = new Worker("/DetectWakeup.js");
@@ -414,35 +398,14 @@ export default {
       return initial;
     },
 
-    get_ecole_name() {
-      this.ecole_name = localStorage.ecole;
-    },
-
-    get_district_name() {
-      if (localStorage.userl === role.inspecteurP)
-        this.getDistrictnameData(localStorage.districtname);
-    },
-
-    get_zone_name() {
-      if (localStorage.userl === role.inspecteurZ)
-        this.getZonenameData(localStorage.zonename);
-    },
-
+   
     logout() {
       this.sendLogoutRequest();
       localStorage.removeItem("userToken");
       this.$router.push("/");
     },
 
-    set_anac() {
-      this.getAnacData();
-      // this.title = 'DDNE '+ this.anac
-    },
-
-    set_anacP() {
-      this.getAnacDataP(localStorage.anac);
-      // this.title = 'DDNE '+ this.anac
-    },
+   
   },
 };
 </script>

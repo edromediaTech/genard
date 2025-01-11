@@ -121,7 +121,7 @@
   
   <script>
   export default {
-    middleware: "admin",
+    middleware : 'admin',
     data() {
       return {
         valid: false,
@@ -155,13 +155,14 @@
     async created() {
       await this.fetchProduits();
     },
+
     methods: {
       // Soumettre le formulaire
       async submitForm() {
         try {
           if (this.isEditing) {
             // Modifier un produit
-            await this.$axios.put(`/produits/${this.produit.id}`, this.produit);
+            await this.$axios.put(`/produits/${this.produit._id}`, this.produit);
           } else {
             // Ajouter un nouveau produit
             await this.$axios.post('/produits', this.produit);
@@ -175,7 +176,8 @@
       // Récupérer tous les produits
       async fetchProduits() {
         try {
-          const response = await this.$axios.get('/produits');
+          const response = await this.$axios.get('/produits/appro');
+          console.log(response)
           this.produits = response.data;
         } catch (error) {
           console.error('Erreur lors de la récupération des produits:', error);

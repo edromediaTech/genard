@@ -150,7 +150,7 @@
 import { mapGetters } from "vuex";
 import { role } from "~/role";
 export default {
-  // middleware: "admin",
+    middleware: "admin",
   data() {
     return {
       dialog: false,
@@ -257,7 +257,7 @@ export default {
     },
 
     updatePrivilege(user) {
-      // this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken')
+       this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken')
 
       this.$axios
         .patch("auth/userlevel/" + user._id, { user_level: user.user_level })
