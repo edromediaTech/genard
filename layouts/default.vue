@@ -258,6 +258,11 @@ export default {
           title: "Approvisionnement",
           to: "/appro",
         });
+        items.push({
+          icon: "mdi-basket",
+          title: "Stock",
+          to: "/stock",
+        });
 
         items.push({
           icon: "mdi-package-variant",

@@ -95,7 +95,7 @@ export default {
  
    axios: {
       // baseURL : 'http://192.168.0.104:3000/api/',
-       // baseURL : 'http://192.168.2.102:3000/api/',
+       // baseURL : 'http://192.168.1.40:3000/api/',
       // baseURL : 'http://172.20.10.3:3000/api/',
         baseURL : 'https://backbenediction.onrender.com/api/',
       // //credentials: false,

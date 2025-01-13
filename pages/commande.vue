@@ -29,6 +29,9 @@
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
+        <template #[`item.createdAt`]="{ item }">
+          {{ formatDate(item.createdAt) }}
+        </template>
        
       </v-data-table>
       
@@ -43,6 +46,9 @@
         </v-card-title>
         <v-card-text>
           <v-row>
+            <v-col cols="12" sm="6">
+              <v-text-field label="Client" :value=" formatDate(selectedOrder.createdAt)" readonly outlined dense></v-text-field>
+            </v-col>
             <v-col cols="12" sm="6">
               <v-text-field label="Client" :value="selectedOrder.client" readonly outlined dense></v-text-field>
             </v-col>
@@ -153,6 +159,7 @@
           <v-list dense>
             <v-list-item>
               <v-list-item-content>
+                <v-list-item-title><strong>Client:</strong> {{  formatDate(selectedCommande.createdAt) }}</v-list-item-title>
                 <v-list-item-title><strong>Client:</strong> {{ selectedCommande.client }}</v-list-item-title>
                 <v-list-item-title><strong>Serveur:</strong> {{ selectedCommande.serveur }}</v-list-item-title>
               </v-list-item-content>
@@ -169,7 +176,7 @@
 
         <v-card-actions>
           <!-- Bouton pour ouvrir le modal d'ajout de produit -->
-          <v-btn color="primary" @click="openAddProductDialog"><v-icon>mdi-plus</v-icon>Produit</v-btn>
+          <v-btn color="blue" @click="openAddProductDialog"><v-icon>mdi-plus</v-icon>Produit</v-btn>
           <v-btn color="success" @click="printInvoice"><v-icon>mdi-printer</v-icon></v-btn>
           <v-btn text @click="detailsModal = false">Fermer</v-btn>
         </v-card-actions>
@@ -246,7 +253,8 @@ export default {
         { text: "Serveur", value: "serveur" },
         { text: "Statut", value: "statut" },
         { text: "Total (HTG)", value: "total" },
-        { text: "Date", value: "date" },
+      
+        { text: "Date", value: "createdAt" },
         { text: "Actions", value: "actions", sortable: false },
       ],
       productHeaders: [
@@ -315,12 +323,18 @@ export default {
         console.error('Erreur lors de la récupération des produits:', error);
       }
     },
-    async fetchCommandes() {
+
+    formatDate(dateString) {
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+    const date = new Date(dateString);
+    return date.toLocaleString('fr-FR', options).replace(',', '');
+  },
+  
+  async fetchCommandes() {
   try {
     // Récupérer les commandes depuis l'API
     const { data } = await this.$axios.get('/commandes');
-
-
+    console.log(data)
     // Récupérer l'ID de l'utilisateur connecté
     const userId = this.user.userId;
 
@@ -340,7 +354,8 @@ export default {
         serveur: commande.serveur.prenom, // Prénom du serveur
         client: commande.client,         // Nom de la table ou du client
         statut: commande.statut,         // Statut de la commande
-        total: commande.total,           // Total de la commande
+        total: commande.total,
+        createdAt : commande.createdAt,           // Total de la commande
         // Formater la date au format dd mm yy
         date: new Date(commande.date).toLocaleDateString('fr-FR', {
           day: '2-digit',
@@ -451,7 +466,7 @@ async addProduits() {
 
     // Fonction pour envoyer un nouvel article
     async sendArticle() {
-      this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken')
+     // this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken')
       this.commande.client = this.selectedTableId;
       this.commande.serveur = this.user.userId;
       this.commande.statut = this.selectedOrder.statut;
@@ -546,54 +561,64 @@ async ajouterProduitCommande(commandeId, produit, quantite) {
 
     
    // Imprimer la facture
-printInvoice() {
+   printInvoice() {
   // Calcul du total de la commande
   const total = this.selectedCommande.articles.reduce(
-    (sum, article) => sum + (article.produit.prix * article.quantite),
+    (sum, article) => sum + article.produit.prix * article.quantite,
     0
   );
 
   // Génération du contenu imprimable
   const printableContent = `
-    <div style="font-family: Arial, sans-serif; padding: 20px;">
-      <div style="text-align: center; margin-bottom: 20px;">
-        <h1>Benedictions de l'Eternel</h1>
-        <p>Angle des Rues Bry & St-Charles, Fort-Liberté, Haiti</p>
-        <p>Tél: +509 3779-6764 | +509 3596-7838 | WhatsApp : +509 4195-8817</p>
-        <p> Email: info@benediction.com</p>
-        <hr />
+    <div style="font-family: 'Courier New', monospace; width: 80mm; padding: 5mm;">
+      <div style="text-align: center; margin-bottom: 10px;">
+        <h2 style="margin: 0;">Bénédictions de l'Éternel</h2>
+        <p style="margin: 0; font-size: 10px;">
+          Angle des Rues Bry & St-Charles<br />
+          Fort-Liberté, Haïti<br />
+          Tél: +509 3779-6764 / +509 3596-7838<br />
+          WhatsApp : +509 4195-8817<br />
+          Email: info@benedictionfl.com
+        </p>
+        <hr style="border: 1px dashed black; margin: 10px 0;" />
       </div>
-      <h2 style="text-align: center;">Facture</h2>
-      <p><strong>Client:</strong> ${this.selectedCommande.client}</p>
       
-      <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+      <h3 style="text-align: center; margin: 0;">FACTURE</h3>
+      <p style="font-size: 12px;"><strong>Client:</strong> ${this.selectedCommande.client}</p>
+      
+      <table style="width: 100%; font-size: 10px; border-collapse: collapse; margin-top: 10px;">
         <thead>
           <tr>
-            <th style="border: 1px solid #ddd; padding: 8px;">Prodduit</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">Qté</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">Prix Unitaire</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">Total</th>
+            <th style="text-align: left;">Produit</th>
+            <th style="text-align: right;">Qté</th>
+            <th style="text-align: right;">PU</th>
+            <th style="text-align: right;">Total</th>
           </tr>
         </thead>
         <tbody>
           ${this.selectedCommande.articles
             .map(
-              (article) => ` 
+              (article) => `
               <tr>
-                <td style="border: 1px solid #ddd; padding: 8px;">${article.produit.nom}</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${article.quantite}</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${article.produit.prix}</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${article.produit.prix * article.quantite}</td>
+                <td>${article.produit.nom}</td>
+                <td style="text-align: right;">${article.quantite}</td>
+                <td style="text-align: right;">${article.produit.prix.toFixed(2)}</td>
+                <td style="text-align: right;">${(article.produit.prix * article.quantite).toFixed(2)}</td>
               </tr>`
             )
             .join("")}
           <tr>
-            <td colspan="3" style="border: 1px solid #ddd; padding: 8px; text-align: right;">Total</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">${total}</td>
+            <td colspan="3" style="text-align: right; font-weight: bold;">Total</td>
+            <td style="text-align: right; font-weight: bold;">${total.toFixed(2)}</td>
           </tr>
         </tbody>
       </table>
-      <p><i>Une hospitalité gracieuse au coeur de la ville</i></p>
+      
+      <p style="text-align: center; font-size: 10px; margin-top: 10px;">
+        <i>Une hospitalité gracieuse au cœur de la ville</i>
+      </p>
+      <hr style="border: 1px dashed black; margin: 10px 0;" />
+      <p style="text-align: center; font-size: 10px;">Merci pour votre confiance !</p>
     </div>
   `;
 
@@ -603,6 +628,7 @@ printInvoice() {
   newWindow.document.close(); // Fermer le document après l'écriture
   newWindow.print(); // Lancer l'impression
 },
+
 
   },
 };

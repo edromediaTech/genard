@@ -114,7 +114,7 @@
       // Soumettre le formulaire
       async submitForm() {
         try {
-        console.log(this.serveur)
+        
           if (this.isEditing) {
             // Modifier un serveur
             await this.$axios.put(`/serveurs/${this.serveur.id}`, this.serveur);
@@ -133,7 +133,7 @@
         try {
           const response = await this.$axios.get('/serveurs');
           this.serveurs = response.data;
-          console.log(this.serveurs)
+          
         } catch (error) {
           console.error('Erreur lors de la récupération des serveurs:', error);
         }

@@ -320,7 +320,7 @@ export default {
 async fetchCommandes() {
   try {
     const { data } = await this.$axios.get('/commandes');
-    console.log(data);
+    
 
     const userId = this.user.userId; // Récupérer l'ID de l'utilisateur connecté
     const today = new Date().toISOString().split("T")[0]; // Récupérer la date d'aujourd'hui au format YYYY-MM-DD
@@ -338,7 +338,7 @@ async fetchCommandes() {
         total: commande.total, // Total de la commande
       }));
     
-    console.log(this.commandes);
+  
   } catch (error) {
     console.error('Erreur lors du chargement des commandes :', error);
   }
@@ -494,8 +494,7 @@ async ajouterProduitCommande(commandeId, produit, quantite) {
 
       // Effectuer une requête PUT pour mettre à jour la commande sur le serveur
       const response = await this.$axios.put(`/commandes/add`, commande);      
-      // Afficher la réponse du serveur
-      console.log('Commande mise à jour:', response.data);
+      // Afficher la réponse du serveur     
 
       // Optionnel : Vous pouvez mettre à jour localement les données après la mise à jour sur le serveur
       this.commandes = this.commandes.map(cmd => 

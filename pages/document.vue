@@ -249,7 +249,7 @@ export default {
     async fetchCommandes() {
       try {
         const { data } = await this.$axios.get('/commandes');
-        console.log(data);
+       
         this.commandes = data.map((commande) => ({
           ...commande,
           serveur: commande.serveur.prenom, // Assurez-vous d'avoir accès à `prenom` dans serveur
@@ -301,7 +301,7 @@ export default {
       this.commande.client = this.selectedTableId;
       this.commande.serveur = this.user.userId;
       
-      console.log(this.commande)
+     
       try {
         const response = await this.$axios.post('commandes', this.commande);
         this.commandes.push({

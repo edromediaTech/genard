@@ -161,26 +161,36 @@ export default {
 
     async fetchCommandes() {
   try {
+    // Récupérer les commandes depuis l'API
     const { data } = await this.$axios.get('/commandes');
-    console.log(data);
+    // Récupérer l'ID de l'utilisateur connecté
+    // const userId = this.user.userId;
 
-    const userId = this.user.userId; // Récupérer l'ID de l'utilisateur connecté
-    const today = new Date().toISOString().split("T")[0]; // Récupérer la date d'aujourd'hui au format YYYY-MM-DD
-    // Filtrer les commandes en fonction du serveur connecté et de la date du jour
+    // Récupérer la date locale d'aujourd'hui au format YYYY-MM-DD
+    const today = new Date().toLocaleDateString('fr-CA'); // Format "YYYY-MM-DD" dans le fuseau horaire local
+
+    // Filtrer et formater les commandes
     this.commandes = data
       .filter(commande => {
-        const commandeDate = new Date(commande.createdAt).toISOString().split("T")[0]; // Date de la commande
-        return commande.serveur._id === userId && commandeDate === today;
+        // Convertir la date de la commande au format local "YYYY-MM-DD"
+        const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
+        // Filtrer par ID de serveur et date du jour
+        return  commandeDate === today;
       })
       .map(commande => ({
         ...commande,
-        serveur: commande.serveur.prenom, // Accéder au prénom du serveur
-        client: commande.client, // Le nom de la table ou du client
-        statut: commande.statut, // Statut de la commande
-        total: commande.total, // Total de la commande
+        serveur: commande.serveur.prenom, // Prénom du serveur
+        client: commande.client,         // Nom de la table ou du client
+        statut: commande.statut,         // Statut de la commande
+        total: commande.total,           // Total de la commande
+        // Formater la date au format dd mm yy
+        date: new Date(commande.date).toLocaleDateString('fr-FR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: '2-digit',
+        }),
       }));
-    
-    console.log(this.commandes);
+
   } catch (error) {
     console.error('Erreur lors du chargement des commandes :', error);
   }
