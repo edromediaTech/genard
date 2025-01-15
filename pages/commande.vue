@@ -1,15 +1,6 @@
 <template>
-  <v-container>
-    <!-- Sélection de la table -->
-    <!-- <v-row>
-      <v-col cols="12" md="6" sm="6">
-        <v-btn color="secondary" class="mb-4" @click="openAddModal">
-          Ajouter un article
-        </v-btn>
-      </v-col>
-    </v-row> -->
+  <v-container>   
     <v-btn color="primary" class="mb-4" @click="openAddModal">Créer une Commande</v-btn>
-
     <v-card>
       <v-card-title>Liste des Commandes</v-card-title>
       <v-data-table
@@ -31,61 +22,11 @@
         </template>
         <template #[`item.createdAt`]="{ item }">
           {{ formatDate(item.createdAt) }}
-        </template>
-       
-      </v-data-table>
-      
-    </v-card> 
-    
+        </template>       
+      </v-data-table>      
+    </v-card>   
 
-    <!-- Modal pour afficher les détails -->
-    <v-dialog v-model="detailModal" max-width="800px">
-      <v-card>
-        <v-card-title>
-          Détails de la commande
-        </v-card-title>
-        <v-card-text>
-          <v-row>
-            <v-col cols="12" sm="6">
-              <v-text-field label="Client" :value=" formatDate(selectedOrder.createdAt)" readonly outlined dense></v-text-field>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-text-field label="Client" :value="selectedOrder.client" readonly outlined dense></v-text-field>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-text-field label="Serveur" :value="selectedOrder.serveur" readonly outlined dense></v-text-field>
-            </v-col>
-            <v-col cols="12" sm="12">
-              <v-select
-                v-model="selectedOrder.statut"
-                label="Statut"
-                :items="statutOptions"
-                disabled
-                outlined
-                dense
-              ></v-select>
-            </v-col>
-          </v-row>
-
-          <!-- Détails des articles -->
-          <v-divider class="my-3"></v-divider>
-          <v-row>
-            <v-col v-for="(article, index) in selectedOrder.articles" :key="index" cols="12" sm="4">
-              <v-card outlined>
-                <v-card-title>{{ article.produit.nom }}</v-card-title>
-                <v-card-subtitle>Quantité: {{ article.quantite }}</v-card-subtitle>
-                <v-card-text>Prix: {{ article.produit.prix }} X {{ article.quantite }}</v-card-text>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn text @click="closeDetailModal">Fermer</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
+   
     <!-- Modal pour ajouter un article -->
     <v-dialog v-model="addModal" max-width="800px">
       <v-card>
@@ -116,7 +57,7 @@
           </v-row>
           <v-row v-for="(article, index) in commande.articles" :key="index" class="mb-3">
             <v-col cols="12" md="6" sm="6">
-              <v-select
+              <v-autocomplete
                 v-model="article.produit"
                 :items="produitsOptions"
                 item-text="text"
@@ -124,7 +65,7 @@
                 label="Choisir un produit"
                 outlined
                 dense
-              ></v-select>
+              ></v-autocomplete>
             </v-col>
             <v-col cols="12" md="6" sm="6">
               <v-text-field
@@ -136,11 +77,7 @@
                 min="1"
               ></v-text-field>
             </v-col>
-            <!-- <v-col cols="2">
-              <v-btn icon color="red" @click="removeArticle(index)">
-                <v-icon>mdi-delete</v-icon>
-              </v-btn>
-            </v-col> -->
+          
           </v-row>
           <!-- <v-btn color="blue" @click="addArticle()"><v-icon>mdi-order</v-icon>Ajouter un article</v-btn> -->
         </v-card-text>
@@ -154,7 +91,7 @@
      <!-- Modal des détails de la commande -->
      <v-dialog v-model="detailsModal" max-width="800px">
       <v-card>
-        <v-card-title>Détails de la Commande</v-card-title>
+        <v-card-title>Détails de la Commande {{ selectedCommande.total }}</v-card-title>
         <v-card-text>
           <v-list dense>
             <v-list-item>
@@ -188,12 +125,12 @@
       <v-card>
         <v-card-title>Ajouter un Produit</v-card-title>
         <v-card-text>
-          <v-select
+          <v-autocomplete
             v-model="newProduct.produit"
             :items="produitsOptions"
             label="Choisir un produit"
             outlined
-          ></v-select>
+          ></v-autocomplete>
           <v-text-field
             v-model="newProduct.quantite"
             label="Quantité"
@@ -224,7 +161,8 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-
+import html2canvas from 'html2canvas';
+  
 export default {
   middleware: "serveur",
   data() {
@@ -296,10 +234,10 @@ export default {
   },
   computed: {
     ...mapGetters("auth", ["user"]),
-    selectedTableNumero() {
-      const table = this.tablesOptions.find((table) => table.value === this.selectedTableId);
-      return table ? table.text : '';
-    },
+    // selectedTableNumero() {
+    //   const table = this.tablesOptions.find((table) => table.value === this.selectedTableId);
+    //   return table ? table.text : '';
+    // },
     filteredArticles() {
       return this.articles.filter((article) => article.tableId === this.selectedTableId);
     },
@@ -316,7 +254,7 @@ export default {
       try {
         const response = await this.$axios.get('/produits');
         this.produitsOptions = response.data.map((produits) => ({
-          text: produits.nom,
+          text: produits.nom +'   --- '+produits.prix  +' HTG',
           value: produits._id,
         }));
       } catch (error) {
@@ -367,57 +305,46 @@ export default {
   } catch (error) {
     console.error('Erreur lors du chargement des commandes :', error);
   }
+},    
+
+async addProduits() {
+  this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken')
+  try {
+    const response = await this.$axios.post('commandes/add', {
+      commandeId: this.selectedCommande._id,
+      produitId: this.newProduct.produit,
+      quantite: this.newProduct.quantite,
+    });
+    console.log(response)
+    if (response.status === 200) {
+      this.selectedCommande.articles = response.data.commande.articles;
+      this.$notifier.showMessage({
+        content: "Produit ajouté à la commande.",
+        color: "success",
+      });
+      this.addProductModal = false;
+    } else {
+      this.$notifier.showMessage({
+        content: "Opération échouée!",
+        color: "error",
+      });
+    }
+  } catch (error) {
+    if (error.response && error.response.status === 500 || error.response.data.message === "Stock insuffisant") {
+      // Gestion spécifique du stock insuffisant
+      this.$notifier.showMessage({
+        content: "Stock insuffisant pour ce produit.",
+        color: "warning",
+      });
+    } else {
+      // Gestion des autres erreurs
+      this.$notifier.showMessage({
+        content: "Une erreur s'est produite. Veuillez réessayer.",
+        color: "error",
+      });
+    }
+  }
 },
-
-
-
-    // Récupérer les commandes existantes
-// async fetchCommandes() {
-//   try {
-//     const { data } = await this.$axios.get('/commandes');
-//     console.log(data);
-
-//     const userId = this.user.userId; // Récupérer l'ID de l'utilisateur connecté
-//     const today = new Date().toISOString().split("T")[0]; // Récupérer la date d'aujourd'hui au format YYYY-MM-DD
-//     // Filtrer les commandes en fonction du serveur connecté et de la date du jour
-//     this.commandes = data
-//       .filter(commande => {
-//         const commandeDate = new Date(commande.date).toISOString().split("T")[0]; // Date de la commande
-//         return commande.serveur._id === userId && commandeDate === today;
-//       })
-//       .map(commande => ({
-//         ...commande,
-//         serveur: commande.serveur.prenom, // Accéder au prénom du serveur
-//         client: commande.client, // Le nom de la table ou du client
-//         statut: commande.statut, // Statut de la commande
-//         total: commande.total, // Total de la commande
-//         date: commande.date, // Total de la commande
-//       }));
-    
-//     console.log(this.commandes);
-//   } catch (error) {
-//     console.error('Erreur lors du chargement des commandes :', error);
-//   }
-// },
-
-async addProduits() {      
-      await this.$axios
-        .post('commandes/add', {commandeId:this.selectedCommande._id, produitId:this.newProduct.produit, quantite:this.newProduct.quantite})
-        .then((res) => {
-          if (res.status === 200) {
-            this.fetchCommandes()
-            this.$notifier.showMessage({
-              content: "Produit ajouté à la commande.",
-              color: "success",
-            });
-            this.addProductModal = false;
-          } else {
-            this.$notifier.showMessage({ content: "Opération échouée!", color: "echec" });
-          }
-        });
-    },
-
-
 
 
 
@@ -466,11 +393,11 @@ async addProduits() {
 
     // Fonction pour envoyer un nouvel article
     async sendArticle() {
-     // this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken')
+      this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken')
       this.commande.client = this.selectedTableId;
       this.commande.serveur = this.user.userId;
       this.commande.statut = this.selectedOrder.statut;
-
+      console.log(this.commande)
       try {
         const response = await this.$axios.post('commandes', this.commande);
         this.fetchCommandes()
@@ -496,16 +423,7 @@ async addProduits() {
     async editArticle(article) {
       // Logique pour modifier un article existant
     },
-
-    // Fonction pour supprimer un article
-    // async deleteArticle(id) {     
-    //     try {
-    //       await this.$axios.delete(`/commandes/${id}`);
-    //       this.fetchCommandes();
-    //     } catch (error) {
-    //       console.error('Erreur lors de la suppression de la commande:', error);
-    //     }
-    //   },
+   
     
       // Fonction qui s'appelle avant de supprimer un article
    deleteArticle(id) {
@@ -516,6 +434,7 @@ async addProduits() {
     
     // Fonction qui confirme la suppression
     async confirmDelete() {
+      this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken')
       try {
         await this.$axios.delete(`/commandes/${this.currentDeleteId}`);
         this.fetchCommandes();
@@ -530,105 +449,165 @@ async addProduits() {
       this.dialogConfirm = false;  // Ferme simplement le dialogue sans action
     },
 
-    // Fonction pour ajouter un produit à une commande et mettre à jour la commande sur le serveur
-async ajouterProduitCommande(commandeId, produit, quantite) {
-  try {
-    // Trouver la commande dans le tableau local
-    const commande = this.commandes.find(cmd => cmd._id === commandeId);    
-    if (commande) {
-      // Ajouter un nouvel article à la liste des articles de la commande
-      commande.articles.push({
-         produit,  // Le produit à ajouter
-         quantite, // La quantité du produit
-      });      
-
-      // Effectuer une requête PUT pour mettre à jour la commande sur le serveur
-      const response = await this.$axios.put(`/commandes/add`, commande);      
-      // Afficher la réponse du serveur
-     
-      // Optionnel : Vous pouvez mettre à jour localement les données après la mise à jour sur le serveur
-      this.commandes = this.commandes.map(cmd => 
-        cmd._id === commandeId ? response.data : cmd
-      );
-    } else {
-      console.error("Commande non trouvée !");
-    }
-  } catch (error) {
-    console.error("Erreur lors de la mise à jour de la commande:", error);
-  }
-},
-  
-
     
-   // Imprimer la facture
-   printInvoice() {
-  // Calcul du total de la commande
+
+
+// Imprimer la facture
+async printInvoice1() {
+        try {
+          // Attendre que le DOM soit mis à jour
+          await this.$nextTick();
+  
+          // Récupérer l'élément à capturer
+          const printableElement = this.$refs.printableContent;
+  
+          // Vérifier si l'élément existe
+          if (!printableElement) {
+            throw new Error("L'élément à capturer n'existe pas dans le DOM.");
+          }
+  
+          // Utiliser html2canvas pour capturer l'élément
+          const canvas = await html2canvas(printableElement, {
+            width: 80, // Largeur en mm
+            height: printableElement.clientHeight,
+            scale: 1,
+          });
+  
+          // Convertir le canvas en image
+          const imgData = canvas.toDataURL('image/png');
+  
+          // Ouvrir une nouvelle fenêtre avec l'image
+          const windowContent = '<!DOCTYPE html>';
+          const printWindow = window.open('', '', 'width=80mm,height=200mm');
+          printWindow.document.write(windowContent);
+          printWindow.document.write('<img src="' + imgData + '" />');
+          printWindow.document.close();
+          printWindow.focus();
+          printWindow.print();
+          printWindow.close();
+        } catch (error) {
+          console.error('Erreur lors de la capture de la facture :', error);
+        }
+      },
+    
+//  Imprimer la facture
+ printInvoice() {
   const total = this.selectedCommande.articles.reduce(
     (sum, article) => sum + article.produit.prix * article.quantite,
     0
   );
 
-  // Génération du contenu imprimable
   const printableContent = `
-    <div style="font-family: 'Courier New', monospace; width: 80mm; padding: 5mm;">
-      <div style="text-align: center; margin-bottom: 10px;">
-        <h2 style="margin: 0;">Bénédictions de l'Éternel</h2>
-        <p style="margin: 0; font-size: 10px;">
-          Angle des Rues Bry & St-Charles<br />
-          Fort-Liberté, Haïti<br />
-          Tél: +509 3779-6764 / +509 3596-7838<br />
-          WhatsApp : +509 4195-8817<br />
-          Email: info@benedictionfl.com
-        </p>
-        <hr style="border: 1px dashed black; margin: 10px 0;" />
+    <html>
+    <head>
+      <style>
+        @page {
+          margin: 10mm;
+        }
+        body {
+          margin: 0;
+          padding: 0;
+        }
+        .container {
+          font-family: 'Courier New', monospace;
+          width: 100mm;
+          padding: 5mm;
+          box-sizing: border-box;
+        }
+        .header {
+          text-align: center;
+          margin-bottom: 10px;
+        }
+
+        .header h2, .header p {
+          margin: 0;
+          font-size: 10px;
+        }
+
+        table {
+          width: 100%;
+          font-size: 10px;
+          border-collapse: collapse;
+          margin-top: 10px;
+        }
+        table th, table td {
+          text-align: right;
+        }
+        table th:first-child, table td:first-child {
+          text-align: left;
+        }
+        .footer {
+          text-align: center;
+          font-size: 10px;
+          margin-top: 10px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h4>Bénédictions de l'Éternel</h4>
+          <h5>Hotel - Bar - Restaurant</h5>
+          <p>
+            Angle des Rues Bry & St-Charles<br />
+            Fort-Liberté, Haïti<br />
+            Tél: +509 3779-6764 / +509 3596-7838<br />        
+          </p>
+          <hr style="border: 1px dashed black; margin: 10px 0;" />
+        </div>        
+        <h5 style="text-align: center; margin: 0;">FACTURE</h5>
+        <p style="font-size: 12px;"><strong>Client:</strong> ${this.selectedCommande.client}</p>
+        
+        <table>
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th>Qté</th>
+              <th>PU</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${this.selectedCommande.articles
+              .map(
+                (article) => `
+                <tr>
+                  <td>${article.produit.nom}</td>
+                  <td>${article.quantite}</td>
+                  <td>${article.produit.prix.toFixed(2)}</td>
+                  <td>${(article.produit.prix * article.quantite).toFixed(2)}</td>
+                </tr>`
+              )
+              .join("")}
+            <tr>
+              <td colspan="3" style="text-align: right; font-weight: bold;">Total</td>
+              <td style="font-weight: bold;">${total.toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
+        <br>
+        
+        <div class="footer">
+          <i>Une hospitalité gracieuse au cœur de la ville</i>
+          <hr style="border: 1px dashed black; margin: 10px 0;" />
+          Merci pour votre confiance !
+        </div>
       </div>
-      
-      <h3 style="text-align: center; margin: 0;">FACTURE</h3>
-      <p style="font-size: 12px;"><strong>Client:</strong> ${this.selectedCommande.client}</p>
-      
-      <table style="width: 100%; font-size: 10px; border-collapse: collapse; margin-top: 10px;">
-        <thead>
-          <tr>
-            <th style="text-align: left;">Produit</th>
-            <th style="text-align: right;">Qté</th>
-            <th style="text-align: right;">PU</th>
-            <th style="text-align: right;">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${this.selectedCommande.articles
-            .map(
-              (article) => `
-              <tr>
-                <td>${article.produit.nom}</td>
-                <td style="text-align: right;">${article.quantite}</td>
-                <td style="text-align: right;">${article.produit.prix.toFixed(2)}</td>
-                <td style="text-align: right;">${(article.produit.prix * article.quantite).toFixed(2)}</td>
-              </tr>`
-            )
-            .join("")}
-          <tr>
-            <td colspan="3" style="text-align: right; font-weight: bold;">Total</td>
-            <td style="text-align: right; font-weight: bold;">${total.toFixed(2)}</td>
-          </tr>
-        </tbody>
-      </table>
-      
-      <p style="text-align: center; font-size: 10px; margin-top: 10px;">
-        <i>Une hospitalité gracieuse au cœur de la ville</i>
-      </p>
-      <hr style="border: 1px dashed black; margin: 10px 0;" />
-      <p style="text-align: center; font-size: 10px;">Merci pour votre confiance !</p>
-    </div>
+    </body>
+    </html>
   `;
 
-  // Ouvrir une nouvelle fenêtre et afficher la facture
   const newWindow = window.open("", "_blank", "width=600,height=600");
   newWindow.document.write(printableContent);
-  newWindow.document.close(); // Fermer le document après l'écriture
-  newWindow.print(); // Lancer l'impression
-},
-
+  newWindow.document.close();
+  
+  
+  // Delay to allow the content to render before printing
+  setTimeout(() => {
+    newWindow.print();
+    newWindow.close();
+  }, 1000);
+}
 
   },
 };

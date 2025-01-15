@@ -1,7 +1,7 @@
 <template>
   <v-container>
+    <!-- Statistiques principales -->
     <v-row>
-      <!-- Statistiques principales -->
       <v-col cols="12" md="3">
         <v-card class="pa-4">
           <v-icon color="primary" large>mdi-cash-register</v-icon>
@@ -9,7 +9,7 @@
           <p class="headline">{{ formatCurrency(totalSales) }}</p>
         </v-card>
       </v-col>
-      <v-col cols="12" md="3">
+      <!-- <v-col cols="12" md="3">
         <v-card class="pa-4">
           <v-icon color="green" large>mdi-cart</v-icon>
           <h5>Commandes Terminées</h5>
@@ -28,6 +28,20 @@
           <v-icon color="red" large>mdi-alert-circle-outline</v-icon>
           <h5>Commandes Annulées</h5>
           <p class="headline">{{ canceledOrders }}</p>
+        </v-card>
+      </v-col> -->
+      <v-col cols="12" md="3">
+        <v-card class="pa-4">
+          <v-icon color="blue" large>mdi-account-group</v-icon>
+          <h5>Clients Aujourd'hui</h5>
+          <p class="headline">{{ todayCustomers }}</p>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="3">
+        <v-card class="pa-4">
+          <v-icon color="purple" large>mdi-cart-arrow-down</v-icon>
+          <h5>Panier Moyen</h5>
+          <p class="headline">{{ formatCurrency(averageOrderValue) }}</p>
         </v-card>
       </v-col>
     </v-row>
@@ -68,16 +82,29 @@
         </v-card>
       </v-col>
     </v-row>
+
+    <!-- Commandes récentes -->
+    <v-row>
+      <v-col cols="12">
+        <v-card class="pa-4">
+          <v-card-title>Commandes Récentes</v-card-title>
+          <v-card-text>
+            <v-data-table
+              :headers="recentOrdersHeaders"
+              :items="recentOrders"
+              dense
+              outlined
+            ></v-data-table>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
 <script>
-// import VueApexCharts from "vue3-apexcharts";
-
 export default {
-  components: {
-   // apexchart: VueApexCharts,
-  },
+  middleware:"superviseur",
   data() {
     return {
       // Statistiques principales
@@ -85,14 +112,14 @@ export default {
       completedOrders: 0,
       ongoingOrders: 0,
       canceledOrders: 0,
+      todayCustomers: 0,
+      averageOrderValue: 0,
 
-      // Graphique des ventes par catégorie
+      // Graphiques
       pieChartOptions: {
         labels: ["Plats Principaux", "Boissons", "Desserts"],
       },
       pieChartSeries: [50, 30, 20], // Exemple de données (en %)
-
-      // Graphique des ventes hebdomadaires
       barChartOptions: {
         chart: {
           id: "weekly-sales",
@@ -110,107 +137,90 @@ export default {
 
       // Articles à faible stock
       lowStockHeaders: [
-        { text: "Nom", value: "nom"},
+        { text: "Nom", value: "nom" },
         { text: "Qté", value: "quantite" },
       ],
-      lowStockItems: [ ],
+      lowStockItems: [],
+
+      // Commandes récentes
+      recentOrdersHeaders: [
+        { text: "Date", value: "date" },
+        { text: "Client", value: "client" },
+        { text: "Serveur", value: "serveur.prenom" },
+        { text: "Statut", value: "statut" },
+        { text: "Total", value: "total" },
+      ],
+      recentOrders: [],
     };
   },
   mounted() {
     this.fetchDashboardData();
-    this.fetchProduits()
-    this.fetchCommandes()
   },
-  
   methods: {
-    async fetchDashboardData() {
-      try {
-        // Exemple d'appel à l'API pour obtenir les données
-        const response = await this.$axios.get("/api/restaurant/dashboard");
-        const data = response.data;
-
-        // Mise à jour des statistiques principales
-        this.totalSales = data.totalSales;
-        this.completedOrders = data.completedOrders;
-        this.ongoingOrders = data.ongoingOrders;
-        this.canceledOrders = data.canceledOrders;
-
-        // Mise à jour des données de graphique
-        this.pieChartSeries = data.pieChartSeries;
-        this.barChartSeries[0].data = data.weeklySales;
-
-        // Mise à jour des stocks faibles       
-      } catch (error) {
-        console.error("Erreur lors de la récupération des données du dashboard :", error);
-      }
-    },
-
-    async fetchProduits() {
-      try {
-        const response = await this.$axios.get('/produits');
-        const allProducts = response.data;
-
-        // Filtrer les produits dont la quantité est inférieure ou égale au seuil critique
-        // Seuil critique à définir
-        this.lowStockItems = allProducts.filter(product => product.quantite <= product.critique);
-
-      } catch (error) {
-        console.error('Erreur lors de la récupération des produits:', error);
-      }
-    },
-
-    async fetchCommandes() {
-  try {
-    // Récupérer les commandes depuis l'API
-    const { data } = await this.$axios.get('/commandes');
-    // Récupérer l'ID de l'utilisateur connecté
-    // const userId = this.user.userId;
-
-    // Récupérer la date locale d'aujourd'hui au format YYYY-MM-DD
-    const today = new Date().toLocaleDateString('fr-CA'); // Format "YYYY-MM-DD" dans le fuseau horaire local
-
-    // Filtrer et formater les commandes
-    this.commandes = data
-      .filter(commande => {
-        // Convertir la date de la commande au format local "YYYY-MM-DD"
-        const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
-        // Filtrer par ID de serveur et date du jour
-        return  commandeDate === today;
-      })
-      .map(commande => ({
-        ...commande,
-        serveur: commande.serveur.prenom, // Prénom du serveur
-        client: commande.client,         // Nom de la table ou du client
-        statut: commande.statut,         // Statut de la commande
-        total: commande.total,           // Total de la commande
-        // Formater la date au format dd mm yy
-        date: new Date(commande.date).toLocaleDateString('fr-FR', {
-          day: '2-digit',
-          month: '2-digit',
-          year: '2-digit',
-        }),
-      }));
-
-  } catch (error) {
-    console.error('Erreur lors du chargement des commandes :', error);
-  }
-},
-
-    // async fetchProduits() {
-    //     try {
-    //       const response = await this.$axios.get('/produits');
-    //       this.lowStockItems =response.data;         
-    //     } catch (error) {
-    //       console.error('Erreur lors de la récupération des produits:', error);
-    //     }
-    //   },
-
     formatCurrency(value) {
       return new Intl.NumberFormat("fr-FR", {
         style: "currency",
         currency: "HTG",
       }).format(value);
     },
+    async fetchDashboardData() {
+  try {
+    // Récupérer les commandes
+    const ordersResponse = await this.$axios.get("/commandes");
+    const orders = ordersResponse.data;
+
+    // Récupérer les produits
+    const productsResponse = await this.$axios.get("/produits");
+    const products = productsResponse.data;
+
+    // Calculer les statistiques principales
+    this.totalSales = orders.reduce((sum, order) => sum + order.total, 0);
+    this.completedOrders = orders.filter(order => order.statut === "Terminée").length;
+    this.ongoingOrders = orders.filter(order => order.statut === "En cours").length;
+    this.canceledOrders = orders.filter(order => order.statut === "Annulée").length;
+
+    // Calculer le nombre de clients aujourd'hui
+    const today = new Date().toISOString().split("T")[0];
+    this.todayCustomers = orders.filter(order => order.date.split("T")[0] === today).length;
+
+    // Calculer le panier moyen
+    this.averageOrderValue = this.totalSales / orders.length || 0;
+
+    // Récupérer les articles à faible stock
+    this.lowStockItems = products.filter(product => product.quantite <= product.critique);
+
+    // Récupérer les commandes récentes (5 dernières commandes)
+    this.recentOrders = orders.slice(-5).map(order => ({
+      ...order,
+      date: new Date(order.date).toLocaleDateString("fr-FR"),
+    }));
+
+    // Calculer les ventes par catégorie
+    const categories = {};
+    orders.forEach(order => {
+      const category = order.produit.categorie; // Supposons que la catégorie est dans order.produit.categorie
+      if (!categories[category]) {
+        categories[category] = 0;
+      }
+      categories[category] += order.total; // Ajouter le total de la commande à la catégorie
+    });
+
+    // Mettre à jour les données du graphique des ventes par catégorie
+    this.pieChartOptions.labels = Object.keys(categories);
+    this.pieChartSeries = Object.values(categories);
+
+    // Exemple de données pour les ventes hebdomadaires (à adapter selon vos besoins)
+    this.barChartSeries[0].data = [120, 200, 150, 300, 400, 250, 320]; // Exemple de données
+  } catch (error) {
+    console.error("Erreur lors de la récupération des données du dashboard :", error);
+  }
+},
   },
 };
 </script>
+
+<style scoped>
+.v-card {
+  margin-bottom: 20px;
+}
+</style>

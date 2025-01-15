@@ -33,6 +33,7 @@
               outlined
               dense
               :rules="[rules.required, rules.positiveNumber]"
+              @keyup.enter="submitForm"
             ></v-text-field>
   
             <!-- Bouton soumettre -->
@@ -51,6 +52,7 @@
   </template>
 <script>
 export default {
+  middleware:"admin",
   data() {
     return {
       valid: false,

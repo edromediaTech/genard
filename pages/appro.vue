@@ -20,7 +20,7 @@
       </v-data-table>
   
       <!-- Modal d'édition -->
-      <v-dialog v-model="editModal" max-width="800px">
+      <v-dialog v-if="isAdmin" v-model="editModal" max-width="800px">
         <v-card>
           <v-card-title class="headline">
             {{ isEditing ? 'Modifier Produit' : 'Ajouter Produit' }}
@@ -112,7 +112,10 @@
   </template>
   
   <script>
+  import { mapGetters, mapActions } from "vuex";
+  import { role } from "../role";
   export default {
+    middleware:"superviseur",
     data() {
       return {
         valid: false,
@@ -132,21 +135,24 @@
           { text: 'Nom', value: 'nom' },
           { text: 'Catégorie', value: 'categorie' },
           { text: 'Prix (HTG)', value: 'prix' },
-          { text: 'Qté', value: 'quantite' },
-          { text: 'Remplacés', value: 'ramplacement' },
-          { text: 'Défectueux', value: 'defectue' },
-          { text: 'Critiques', value: 'critique' },
-          { text: 'Alertes', value: 'alerte' },
+          { text: 'Qté', value: 'quantite' },         
           { text: 'Actions', align: 'end', value: 'actions' },
         ],
         produits: [],
         categoriesOptions: ['Plat', 'Boisson', 'Dessert'],
       };
     },
+    computed: {
+    ...mapGetters("auth", ["user"]),
+    isAdmin() {
+      return this.user && parseInt(this.user.user_level) === role.admin;
+    },
+  },
     async created() {
       await this.fetchProduits();
     },
     methods: {
+      ...mapActions("auth", ["sendLoginRequest"]),
       openEditModal(item) {
         this.isEditing = true;
         this.produit = { ...item };
@@ -179,6 +185,8 @@
         this.isEditing = false;
       },
       async submitForm() {
+        this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken')
+
         try {
           if (this.isEditing) {
             await this.$axios.put(`/produits/${this.produit.id}`, this.produit);
@@ -192,6 +200,7 @@
         }
       },
       async deleteProduit(id) {
+        this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken')
         try {
           await this.$axios.delete(`/produits/${id}`);
           this.fetchProduits();

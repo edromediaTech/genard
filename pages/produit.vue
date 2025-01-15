@@ -2,7 +2,7 @@
   <v-container>     
     <!-- Formulaire de produit -->
     <v-form v-model="valid" @submit.prevent="submitForm">
-      <v-card class="px-4">
+      <v-card  v-if="isAdmin"  class="px-4">
         <v-row class="mt-4">
           <!-- Nom du produit -->
           <v-col cols="12" sm="6" md="4">
@@ -108,10 +108,10 @@
       class="elevation-1"
     >
       <template #[`item.actions`]="{ item }">
-        <v-btn icon @click="editProduit(item)">
+        <v-btn  v-if="isAdmin"  icon @click="editProduit(item)">
           <v-icon>mdi-pencil</v-icon>
         </v-btn>
-        <v-btn icon @click="deleteProduit(item.id)">
+        <v-btn  v-if="isAdmin"  icon @click="deleteProduit(item.id)">
           <v-icon>mdi-delete</v-icon>
         </v-btn>
       </template>
@@ -120,7 +120,11 @@
 </template>
 
 <script>
+
+import { mapGetters, mapActions } from "vuex";
+import { role } from "../role";
 export default {
+  middleware:"superviseur",
   data() {
     return {
       valid: false,
@@ -151,11 +155,20 @@ export default {
       categoriesOptions: ['Plat', 'Boisson', 'Dessert'],
     };
   },
+  computed: {
+    ...mapGetters("auth", ["user"]),
+    isAdmin() {
+      return this.user && parseInt(this.user.user_level) === role.admin;
+    },
+  },
   async created() {
     await this.fetchProduits();
   },
   methods: {
+    ...mapActions("auth", ["sendLoginRequest"]),
     async submitForm() {
+      this.$axios.defaults.headers.common.Authorization =
+      "Bearer " + localStorage.getItem("authToken");
       try {
         if (this.isEditing) {
           await this.$axios.put(`/produits/${this.produit._id}`, this.produit);
@@ -176,6 +189,7 @@ export default {
         console.error('Erreur lors de la soumission du produit:', error);
       }
     },
+
     async fetchProduits() {
       try {
         const response = await this.$axios.get('/produits');
@@ -204,6 +218,8 @@ export default {
       this.isEditing = true;
     },
     async deleteProduit(id) {
+      this.$axios.defaults.headers.common.Authorization =
+      "Bearer " + localStorage.getItem("authToken");
       try {
         await this.$axios.delete(`/produits/${id}`);
         this.fetchProduits();

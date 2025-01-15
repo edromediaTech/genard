@@ -210,13 +210,7 @@ export default {
           icon: "mdi-apps",
           title: "Accueil",
           to: "/inspire",
-        },
-       
-        // {
-        //   icon: "mdi-file",
-        //   title: "Suggestions",
-        //   to: "/suggestion",
-        // },
+        },       
         
       ];
 
@@ -229,7 +223,41 @@ export default {
        
       }
 
-      if (this.user && parseInt(this.user.user_level) === role.admin) {
+      if (this.user && parseInt(this.user.user_level) === role.superviseur) {
+        items.push({
+          icon: "mdi-view-dashboard",
+          title: "Tableau de bord",
+          to: "/admin",
+        });
+        items.push({
+          icon: "mdi-file",
+          title: "Rapport de Ventes",
+          to: "/rapportdevente",
+        });
+        items.push({
+          icon: "mdi-package-variant",
+          title: "Produits",
+          to: "/produit",
+        });
+        items.push({
+          icon: "mdi-basket",
+          title: "Approvisionnement",
+          to: "/appro",
+        });
+       
+
+        items.push({
+          icon: "mdi-package-variant",
+          title: "Produits",
+          to: "/produit",
+        });
+        items.push({
+          icon: "mdi-basket",
+          title: "Achats",
+          to: "/achat",
+        });
+      }
+      if (this.user && parseInt(this.user.user_level) >= role.admin) {
         items.push({
           icon: "mdi-view-dashboard",
           title: "Tableau de bord",
@@ -260,7 +288,7 @@ export default {
         });
         items.push({
           icon: "mdi-basket",
-          title: "Stock",
+          title: "Stockage",
           to: "/stock",
         });
 
@@ -269,8 +297,21 @@ export default {
           title: "Produits",
           to: "/produit",
         });
+        items.push({
+          icon: "mdi-basket",
+          title: "Achats",
+          to: "/achat",
+        });
 
+        if (this.user && parseInt(this.user.user_level) === role.supadmin) {
        
+
+        items.push({
+          icon: "mdi-account",
+          title: "Gestion Utilisateur",
+          to: "/gestionUser",
+        });
+      }
        
       }
       return items;

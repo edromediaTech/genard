@@ -150,7 +150,7 @@
 import { mapGetters } from "vuex";
 import { role } from "~/role";
 export default {
-  //  middleware: "admin",
+    middleware: "admin",
   data() {
     return {
       dialog: false,
@@ -181,7 +181,7 @@ export default {
         { text: "Nom", value: "prenom" },
         { text: "Code", value: "code" },
         { text: "Email", value: "email" },
-        { text: "Dernière Visite", value: "lastSeen" },
+        // { text: "Dernière Visite", value: "lastSeen" },
         { text: "Privilège", value: "userLevel" },
         { text: "Actions", value: "actions", sortable: false },
       ],
@@ -256,10 +256,9 @@ export default {
     },
 
     updatePrivilege(user) {
-       this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken')
-
-      this.$axios
-        .patch("auth/userlevel/" + user._id, { user_level: user.user_level })
+      this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken')
+      
+      this.$axios.put("auth/userlevel", {_id : user._id, user_level: user.userLevel })
         .then((res) => {
           if (res.status === 201) {
             this.$notifier.showMessage({
