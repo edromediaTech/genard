@@ -282,6 +282,11 @@ export default {
           to: "/rapportdevente",
         });
         items.push({
+          icon: "mdi-food",
+          title: "Gestion des Commandes",
+          to: "/commandeAdmin",
+        });
+        items.push({
           icon: "mdi-basket",
           title: "Approvisionnement",
           to: "/appro",

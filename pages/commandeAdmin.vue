@@ -1,596 +1,405 @@
 <template>
-    <v-container>
-     
-      <v-btn color="blue" class="mb-4" @click="openAddModal">Créer une Commande</v-btn>
-      <v-btn color="success" class="mb-4" @click="fetchAllCommandes"><v-icon>mdi-eye</v-icon> Commandes</v-btn>
+  <v-container>
   
-      <v-card>
-        <v-card-title>Liste des Commandes</v-card-title>
-        <v-data-table
-          :headers="headers"
-          :items="commandes"
-          item-value="id"
+    <!-- <v-btn color="blue" class="mb-4" @click="openAddModal">
+    <v-icon left>mdi-plus</v-icon>Commande
+    </v-btn> -->
+
+    <!-- Bouton pour afficher toutes les commandes -->
+    <v-btn color="primary" class="mb-4" @click="toggleShowAllCommands">
+      {{ showAllCommands ? "Commandes du jour" : "Toutes les commandes" }}
+    </v-btn><v-spacer></v-spacer>
+    <!-- Bouton d'export global -->
+   
+    <!-- Filtres supplémentaires -->
+    <!-- <v-row class="mb-4">
+      <v-col cols="12" md="4">
+        <v-select
+          v-model="selectedStatut"
+          :items="statutOptions"
+          label="Filtrer par statut"
+          outlined
           dense
-          item-key="_id"
-          class="elevation-1"
+          clearable
+        ></v-select>
+      </v-col>
+      <v-col cols="12" md="4">
+        <v-menu
+          v-model="datePickerMenu"
+          :close-on-content-click="false"
+          transition="scale-transition"
+          offset-y
+          min-width="auto"
         >
-          
-          <template #[`item.actions`]="{ item }">
-            <v-btn icon small title="Details de la Commande" @click="viewDetails(item)">
-              <v-icon>mdi-eye</v-icon>
-            </v-btn>
-            <v-btn icon small color="error" @click="deleteArticle(item._id)">
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
-          </template>
-          <template #[`item.createdAt`]="{ item }">
-            {{ formatDate(item.createdAt) }}
-          </template>         
-        </v-data-table>        
-      </v-card> 
-      
-  
-      <!-- Modal pour afficher les détails -->
-      <v-dialog v-model="detailModal" max-width="800px">
-        <v-card>
-          <v-card-title>
-            Détails de la commande
-          </v-card-title>
-          <v-card-text>
-            <v-row>
-              <v-col cols="12" sm="6">
-                <v-text-field label="Client" :value=" formatDate(selectedOrder.createdAt)" readonly outlined dense></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field label="Client" :value="selectedOrder.client" readonly outlined dense></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6">
-                <v-text-field label="Serveur" :value="selectedOrder.serveur" readonly outlined dense></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="12">
-                <v-select
-                  v-model="selectedOrder.statut"
-                  label="Statut"
-                  :items="statutOptions"
-                  disabled
-                  outlined
-                  dense
-                ></v-select>
-              </v-col>
-            </v-row>
-  
-            <!-- Détails des articles -->
-            <v-divider class="my-3"></v-divider>
-            <v-row>
-              <v-col v-for="(article, index) in selectedOrder.articles" :key="index" cols="12" sm="4">
-                <v-card outlined>
-                  <v-card-title>{{ article.produit.nom }}</v-card-title>
-                  <v-card-subtitle>Quantité: {{ article.quantite }}</v-card-subtitle>
-                  <v-card-text>Prix: {{ article.produit.prix }} X {{ article.quantite }}</v-card-text>
-                </v-card>
-              </v-col>
-            </v-row>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn text @click="closeDetailModal">Fermer</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-  
-      <!-- Modal pour ajouter un article -->
-      <v-dialog v-model="addModal" max-width="800px">
-        <v-card>
-          <v-card-title>
-            Ajouter un article
-          </v-card-title>
-          <v-card-text>
-            <v-row>
-              <v-col cols="12" md="6" sm="6">
-                <v-combobox
-                  v-model="selectedTableId"
-                  :items="tablesOptions"
-                  label="Client"
-                  outlined
-                  dense
-                ></v-combobox>
-              </v-col>
-              <!-- Statut -->
-              <v-col cols="12" sm="6">
-                <v-select
-                  v-model="commande.statut"
-                  :items="statutOptions"
-                  label="Statut"
-                  required
-                  outlined
-                ></v-select>
-              </v-col>
-            </v-row>
-            <v-row v-for="(article, index) in commande.articles" :key="index" class="mb-3">
-              <v-col cols="12" md="6" sm="6">
-                <v-select
-                  v-model="article.produit"
-                  :items="produitsOptions"
-                  item-text="text"
-                  item-value="value"
-                  label="Choisir un produit"
-                  outlined
-                  dense
-                ></v-select>
-              </v-col>
-              <v-col cols="12" md="6" sm="6">
-                <v-text-field
-                  v-model="article.quantite"
-                  type="number"
-                  label="Quantité"
-                  outlined
-                  dense
-                  min="1"
-                ></v-text-field>
-              </v-col>
-              <!-- <v-col cols="2">
-                <v-btn icon color="red" @click="removeArticle(index)">
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
-              </v-col> -->
-            </v-row>
-            <!-- <v-btn color="blue" @click="addArticle()"><v-icon>mdi-order</v-icon>Ajouter un article</v-btn> -->
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" @click="sendArticle">Ajouter</v-btn>
-            <v-btn text @click="closeAddModal">Annuler</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-       <!-- Modal des détails de la commande -->
-       <v-dialog v-model="detailsModal" max-width="800px">
-        <v-card>
-          <v-card-title>Détails de la Commande</v-card-title>
-          <v-card-text>
-            <v-list dense>
-              <v-list-item>
-                <v-list-item-content>
-                  <v-list-item-title><strong>Client:</strong> {{  formatDate(selectedCommande.createdAt) }}</v-list-item-title>
-                  <v-list-item-title><strong>Client:</strong> {{ selectedCommande.client }}</v-list-item-title>
-                  <v-list-item-title><strong>Serveur:</strong> {{ selectedCommande.serveur }}</v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-  
-              <!-- Liste des produits -->
-              <v-data-table
-                :headers="productHeaders"
-                :items="selectedCommande.articles"
-                dense
-              ></v-data-table>
-            </v-list>
-          </v-card-text>
-  
-          <v-card-actions>
-            <!-- Bouton pour ouvrir le modal d'ajout de produit -->
-            <v-btn color="blue" @click="openAddProductDialog"><v-icon>mdi-plus</v-icon>Produit</v-btn>
-            <v-btn color="success" @click="printInvoice"><v-icon>mdi-printer</v-icon></v-btn>
-            <v-btn text @click="detailsModal = false">Fermer</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-  
-      <!-- Modal pour ajouter un produit à la commande -->
-      <v-dialog v-model="addProductModal" max-width="500px">
-        <v-card>
-          <v-card-title>Ajouter un Produit</v-card-title>
-          <v-card-text>
-            <v-select
-              v-model="newProduct.produit"
-              :items="produitsOptions"
-              label="Choisir un produit"
-              outlined
-            ></v-select>
+          <template #activator="{ on, attrs }">
             <v-text-field
-              v-model="newProduct.quantite"
-              label="Quantité"
-              type="number"
+              v-model="selectedDate"
+              label="Filtrer par date"
+              readonly
               outlined
+              dense
+              v-bind="attrs"
+              v-on="on"
             ></v-text-field>
-          </v-card-text>
-          <v-card-actions>
-            <v-btn color="primary" @click="addProduits()">Ajouter</v-btn>
-            <v-btn text @click="closeAddProductDialog">Annuler</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-      <v-dialog v-model="dialogConfirm" max-width="400">
+          </template>
+          <v-date-picker
+            v-model="selectedDate"
+            @input="datePickerMenu = false"
+          ></v-date-picker>
+        </v-menu>
+      </v-col> 
+    </v-row>-->
+
+    <!-- Affichage des totaux généraux -->
+    <v-card class="mb-4">
+      <v-card-title>
+        Total des ventes : {{ totalVentes }} HTG
+      </v-card-title>  <!-- Bouton pour créer une commande -->
+      <download-excel
+      :data="filteredCommandes"
+      :name="`commandes_${new Date().toISOString().substr(0, 10)}.xls`"
+      :fields="excelFields"
+      worksheet="Commandes"
+    >
+      <v-btn color="success" class="mt-4">
+        <v-icon>mdi-file-export</v-icon>
+       
+      </v-btn>
+    </download-excel>
+    </v-card>
+
+    <!-- Table des commandes -->
+    <v-card>
+      <v-card-title>Liste des Commandes</v-card-title>
+      <v-data-table
+        :headers="headers"
+        :items="filteredCommandes"
+        item-value="id"
+        dense
+        item-key="_id"
+        class="elevation-1"
+      >
+        <template #[`item.actions`]="{ item }">
+          <v-btn icon x-small title="Details de la Commande" @click="viewDetails(item)">
+            <v-icon>mdi-eye</v-icon>
+          </v-btn>
+          <download-excel
+            :data="formatCommandeForExcel(item)"
+            :name="`facture_${item._id}.xls`"
+            :fields="excelFields"
+            worksheet="Facture"
+          >
+            <v-btn icon x-small color="success">
+              <v-icon>mdi-file-excel</v-icon>
+            </v-btn>
+          </download-excel>
+          <v-btn icon x-small color="error" @click="deleteArticle(item._id)">
+            <v-icon >mdi-delete</v-icon>
+          </v-btn>
+        </template>
+        <template #[`item.createdAt`]="{ item }">
+          {{ formatDate(item.createdAt) }}
+        </template>
+      </v-data-table>
+    </v-card>
+
+    
+
+    <!-- Modal pour créer une commande -->
+    <v-dialog v-model="addModal" max-width="800px">
       <v-card>
-        <v-card-title class="headline">Confirmation</v-card-title>
+        <v-card-title>Créer une Commande</v-card-title>
         <v-card-text>
-          Êtes-vous sûr de vouloir supprimer cet article ?
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model="newCommande.client"
+                label="Client"
+                outlined
+                dense
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-select
+                v-model="newCommande.statut"
+                :items="statutOptions"
+                label="Statut"
+                outlined
+                dense
+              ></v-select>
+            </v-col>
+          </v-row>
+          <v-row v-for="(article, index) in newCommande.articles" :key="index" class="mb-3">
+            <v-col cols="12" md="6">
+              <v-autocomplete
+                v-model="article.produit"
+                :items="produitsOptions"
+                item-text="text"
+                item-value="value"
+                label="Choisir un produit"
+                outlined
+                dense
+              ></v-autocomplete>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model="article.quantite"
+                type="number"
+                label="Quantité"
+                outlined
+                dense
+                min="1"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+          <v-btn color="blue" @click="addArticle">Ajouter un article</v-btn>
         </v-card-text>
         <v-card-actions>
-          <v-btn color="green" text @click="confirmDelete">Oui</v-btn>
-          <v-btn color="red" text @click="cancelDelete">Non</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" @click="createCommande">Créer</v-btn>
+          <v-btn text @click="closeAddModal">Annuler</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-    </v-container>
-  </template>
-  
-  <script>
-  import { mapGetters, mapActions } from "vuex";
-  
-  export default {
-    middleware: "serveur",
-    data() {
-      return {
-        selectedTableId: null, // ID de la table sélectionnée
-        tablesOptions: ['Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5', 'Table 6', 'Table 7'], // Options des tables
-        statutOptions: ['En attente', 'En cours', 'Terminée'],
-        dialogConfirm: false,  // État du dialogue de confirmation
-        currentDeleteId: null,
-        articles: [], // Articles récupérés
-        commande: {
-          client: null,       
-          serveur: '',
-          statut: null,
-          articles: [{ 
-            produit: null, 
-            quantite: 1 }], // Initialiser un article avec produit et quantité par défaut
-          total: 0,
-        },
-        produitsOptions: [], // Produits disponibles
-  
-        commandes: [], // Liste des commandes
-        headers: [
-          
-          { text: "Client", value: "client" },
-          { text: "Serveur", value: "serveur" },
-          { text: "Statut", value: "statut" },
-          { text: "Total (HTG)", value: "total" },
-        
-          { text: "Date", value: "createdAt" },
-          { text: "Actions", value: "actions", sortable: false },
-        ],
-        productHeaders: [
-          { text: "Produit", value: "produit.nom" },
-          { text: "Quantité", value: "quantite" },
-          { text: "Prix Unitaire (HTG)", value: "produit.prix" },       
-        ],
-        newCommande: {
-          client: "",
-          serveur: "",
-          statut: "En cours",
-          articles: [],
-        },
-        newProduit: {
-          produit: "",
-          quantite: 1,
-          prix: 0,
-        },
-        newProduct: {
-          produit: "",
-          quantite: 1,
-          prix: 0,
-        },
-        addCommandeModal: false, // Contrôle du modal pour ajouter la commande
-        detailsModal: false, // Contrôle du modal pour afficher les détails de la commande
-        addProductModal: false, // Contrôle du modal pour ajouter un produit à la commande
-        selectedCommande: {
-          id: "",
-          client: "",
-          serveur: "",
-          statut: "",
-          articles: [],
-        },
-        addModal: false, // État du modal pour ajouter un article
-        detailModal: false, // État du modal pour afficher les détails
-        selectedOrder: {}, // Commande sélectionnée pour afficher les détails
-        commandeId: '', // ID de la commande actuelle
-      };
-    },
-    computed: {
-      ...mapGetters("auth", ["user"]),
-      selectedTableNumero() {
-        const table = this.tablesOptions.find((table) => table.value === this.selectedTableId);
-        return table ? table.text : '';
+
+    <!-- Modal des détails de la commande -->
+    <v-dialog v-model="detailsModal" max-width="800px">
+      <v-card>
+        <v-card-title>Détails de la Commande {{ selectedCommande.total }} HTG</v-card-title>
+        <v-card-text>
+          <v-list dense>
+            <v-list-item>
+              <v-list-item-content>
+                <v-list-item-title><strong>Client:</strong> {{ formatDate(selectedCommande.createdAt) }}</v-list-item-title>
+                <v-list-item-title><strong>Client:</strong> {{ selectedCommande.client }}</v-list-item-title>
+                <v-list-item-title><strong>Serveur:</strong> {{ selectedCommande.serveur }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+
+            <!-- Liste des produits -->
+            <v-data-table
+              :headers="productHeaders"
+              :items="selectedCommande.articles"
+              dense
+            ></v-data-table>
+          </v-list>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-btn text @click="detailsModal = false">Fermer</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-container>
+</template>
+
+<script>
+import { mapGetters } from "vuex";
+import jsonExcel from "vue-json-excel";
+
+export default {
+  components: {
+    DownloadExcel: jsonExcel,
+  },
+  middleware: "admin",
+  data() {
+    return {
+      showAllCommands: false, // Afficher toutes les commandes ou seulement celles du jour
+      selectedStatut: null, // Filtre par statut
+      selectedDate: new Date().toISOString().substr(0, 10), // Filtre par date (par défaut, la date du jour)
+      datePickerMenu: false, // Contrôle l'affichage du date picker
+      commandes: [], // Liste des commandes
+      headers: [
+        { text: "Client", value: "client" },
+        { text: "Serveur", value: "serveur" },
+        // { text: "Statut", value: "statut" },
+        { text: "Total (HTG)", value: "total" },
+        { text: "Date", value: "createdAt" },
+        { text: "Actions", value: "actions", sortable: false },
+      ],
+      productHeaders: [
+        { text: "Produit", value: "produit.nom" },
+        { text: "Quantité", value: "quantite" },
+        { text: "Prix Unitaire (HTG)", value: "produit.prix" },
+      ],
+      selectedCommande: {
+        id: "",
+        client: "",
+        serveur: "",
+        statut: "",
+        articles: [],
       },
-      filteredArticles() {
-        return this.articles.filter((article) => article.tableId === this.selectedTableId);
+      detailsModal: false, // Contrôle l'affichage du modal des détails
+      addModal: false, // Contrôle l'affichage du modal de création de commande
+      newCommande: {
+        client: "",
+        statut: "En attente",
+        articles: [{ produit: null, quantite: 1 }],
       },
-    },
-    async mounted() {
-      await this.fetchCommandes();
-      await this.fetchProduits();
-    },
-    methods: {
-      ...mapActions("auth", ["sendLoginRequest"]),
-      
-      // Récupérer les produits disponibles
-      async fetchProduits() {
-        try {
-          const response = await this.$axios.get('/produits');
-          this.produitsOptions = response.data.map((produits) => ({
-            text: produits.nom,
-            value: produits._id,
-          }));
-        } catch (error) {
-          console.error('Erreur lors de la récupération des produits:', error);
-        }
+      produitsOptions: [], // Liste des produits disponibles
+      excelFields: {
+        "En-tête": "header",
+        "Détails": "details",
+        "Produit": "produit",
+        "Quantité": "quantite",
+        "Prix Unitaire": "prixUnitaire",
+        "Total": "total",
       },
-  
-      formatDate(dateString) {
-      const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
-      const date = new Date(dateString);
-      return date.toLocaleString('fr-FR', options).replace(',', '');
+    };
+  },
+  computed: {
+    ...mapGetters("auth", ["user"]),
+    // Filtre les commandes en fonction des sélections
+    filteredCommandes() {
+      let commandes = this.commandes;
+
+      // Filtrer par date
+      if (!this.showAllCommands) {
+        const today = new Date(this.selectedDate).toLocaleDateString('fr-CA');
+        commandes = commandes.filter(commande => {
+          const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
+          return commandeDate === today;
+        });
+      }
+
+      // Filtrer par statut
+      if (this.selectedStatut) {
+        commandes = commandes.filter(commande => commande.statut === this.selectedStatut);
+      }
+
+      return commandes;
     },
-    
-   
-  
-      // Charger toutes les commandes
-     async fetchAllCommandes() {
-        try {
+    // Calcule le total des ventes
+    totalVentes() {
+      return this.filteredCommandes.reduce((sum, commande) => sum + commande.total, 0);
+    },
+  },
+  async mounted() {
+    await this.fetchCommandes();
+    await this.fetchProduits();
+  },
+  methods: {
+    // Basculer entre les commandes du jour et toutes les commandes
+    toggleShowAllCommands() {
+      this.showAllCommands = !this.showAllCommands;
+    },
+
+    // Récupérer les commandes depuis l'API
+    async fetchCommandes() {
+      try {
         const { data } = await this.$axios.get('/commandes');
-       
-        this.commandes = data.map((commande) => ({
+        this.commandes = data.map(commande => ({
           ...commande,
-          serveur: commande.serveur.prenom, // Assurez-vous d'avoir accès à `prenom` dans serveur
-          client: commande.client, // Le nom de la table ou du client
-          statut: commande.statut, // Statut de la commande
-          total: commande.total, // Total de la commande
+          serveur: commande.serveur.prenom,
+          client: commande.client,
+          statut: commande.statut,
+          total: commande.total,
+          createdAt: commande.createdAt,
+          date: new Date(commande.date).toISOString().substr(0, 10),
         }));
       } catch (error) {
         console.error('Erreur lors du chargement des commandes :', error);
       }
-      },
-  
-     
-  
-    async fetchCommandes() {
-    try {
-      // Récupérer les commandes depuis l'API
-      const { data } = await this.$axios.get('/commandes');
-      console.log(data)
-      // Récupérer l'ID de l'utilisateur connecté
-      const userId = this.user.userId;
-  
-      // Récupérer la date locale d'aujourd'hui au format YYYY-MM-DD
-      const today = new Date().toLocaleDateString('fr-CA'); // Format "YYYY-MM-DD" dans le fuseau horaire local
-  
-      // Filtrer et formater les commandes
-      this.commandes = data
-        .filter(commande => {
-          // Convertir la date de la commande au format local "YYYY-MM-DD"
-          const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
-          // Filtrer par ID de serveur et date du jour
-          return commande.serveur._id === userId && commandeDate === today;
-        })
-        .map(commande => ({
-          ...commande,
-          serveur: commande.serveur.prenom, // Prénom du serveur
-          client: commande.client,         // Nom de la table ou du client
-          statut: commande.statut,         // Statut de la commande
-          total: commande.total,
-          createdAt : commande.createdAt,           // Total de la commande
-          // Formater la date au format dd mm yy
-          date: new Date(commande.date).toLocaleDateString('fr-FR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: '2-digit',
-          }),
-        }));
-  
-    } catch (error) {
-      console.error('Erreur lors du chargement des commandes :', error);
-    }
-  },  
-    
-  
-  async addProduits() {  
-    this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken')
-   
-        await this.$axios
-          .post('commandes/add', {commandeId:this.selectedCommande._id, produitId:this.newProduct.produit, quantite:this.newProduct.quantite})
-          .then((res) => {
-            if (res.status === 200) {
-              this.fetchCommandes()
-              this.$notifier.showMessage({
-                content: "Produit ajouté à la commande.",
-                color: "success",
-              });
-              this.addProductModal = false;
-            } else {
-              this.$notifier.showMessage({ content: "Opération échouée!", color: "echec" });
-            }
-          });
-      }, 
-  
-      openAddProductDialog() {
-        this.newProduct = { produit: "", quantite: 1, prix: 0 }; // Réinitialiser les valeurs
-        this.addProductModal = true; // Ouvrir le modal
-      },
-      // Ouvrir le modal pour créer une nouvelle commande
-      openAddCommandeDialog() {
-        this.newCommande = { client: "", serveur: "", statut: "En cours", articles: [] }; // Réinitialiser la commande
-        this.newProduit = { produit: "", quantite: 1, prix: 0 }; // Réinitialiser les produits
-        this.addCommandeModal = true; // Ouvrir le modal
-      },
-      closeAddProductDialog() {
-        this.addProductModal = false; // Fermer le modal
-      },
-      // Fermer le modal sans ajouter
-      closeAddCommandeDialog() {
-        this.addCommandeModal = false; // Fermer le modal
-      },
-      viewDetails(commande) {
-        this.selectedCommande = { ...commande };
-        this.detailsModal = true;
-      },
-      openAddModal() {
-        this.addModal = true;
-      },
-      closeAddModal() {
-        this.addModal = false;
-      },
-      openDetailModal(order) {
-        this.selectedOrder = order; // Affecter la commande sélectionnée
-        this.detailModal = true;
-      },
-      closeDetailModal() {
-        this.detailModal = false;
-      },
-  
-      // Ajouter un article
-      addArticle() {
-        this.commande.articles.push({ produit: '', quantite: 0 });
-      },
-      removeArticle(index) {
-        this.commande.articles.splice(index, 1);
-      },
-  
-      // Fonction pour envoyer un nouvel article
-      async sendArticle() {
-        this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken')
-        this.commande.client = this.selectedTableId;
-        this.commande.serveur = this.user.userId;
-        this.commande.statut = this.selectedOrder.statut;
-  
-        try {
-          const response = await this.$axios.post('commandes', this.commande);
-          this.fetchCommandes()
-          this.articles.push({
-            ...response.data,
-            tableId: this.selectedTableId,
-          });
-          this.$notifier.showMessage({
-            content: "Article ajouté avec succès.",
-            color: "success",
-          });
-          this.closeAddModal();
-        } catch (error) {
-          console.error('Erreur lors de l’ajout de l’article :', error);
-          this.$notifier.showMessage({
-            content: "Impossible d’ajouter l’article.",
-            color: "error",
-          });
-        }
-      },
-  
-      // Fonction d'édition d'un article (non implémentée)
-      async editArticle(article) {
-        // Logique pour modifier un article existant
-      },
-  
-      // Fonction pour supprimer un article
-      // async deleteArticle(id) {     
-      //     try {
-      //       await this.$axios.delete(`/commandes/${id}`);
-      //       this.fetchCommandes();
-      //     } catch (error) {
-      //       console.error('Erreur lors de la suppression de la commande:', error);
-      //     }
-      //   },
-      
-        // Fonction qui s'appelle avant de supprimer un article
-     deleteArticle(id) {
-        // Ouvre le dialogue de confirmation avant de supprimer
-        this.currentDeleteId = id;
-        this.dialogConfirm = true;
-      },
-      
-      // Fonction qui confirme la suppression
-      async confirmDelete() {
-        this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken')
-        try {
-          await this.$axios.delete(`/commandes/${this.currentDeleteId}`);
-          this.fetchCommandes();
-          this.dialogConfirm = false;  // Ferme le dialogue après confirmation
-        } catch (error) {
-          console.error('Erreur lors de la suppression de la commande:', error);
-        }
-      },
-  
-      // Fonction pour annuler la suppression
-      cancelDelete() {
-        this.dialogConfirm = false;  // Ferme simplement le dialogue sans action
-      },
-  
-      
-      
-     // Imprimer la facture
-     printInvoice() {
-    // Calcul du total de la commande
-    const total = this.selectedCommande.articles.reduce(
-      (sum, article) => sum + article.produit.prix * article.quantite,
-      0
-    );
-  
-    // Génération du contenu imprimable
-    const printableContent = `
-      <div style="font-family: 'Courier New', monospace; width: 80mm; padding: 5mm;">
-        <div style="text-align: center; margin-bottom: 10px;">
-          <h2 style="margin: 0;">Bénédictions de l'Éternel</h2>
-          <p style="margin: 0; font-size: 10px;">
-            Angle des Rues Bry & St-Charles<br />
-            Fort-Liberté, Haïti<br />
-            Tél: +509 3779-6764 / +509 3596-7838<br />
-            WhatsApp : +509 4195-8817<br />
-            Email: info@benedictionfl.com
-          </p>
-          <hr style="border: 1px dashed black; margin: 10px 0;" />
-        </div>
-        
-        <h3 style="text-align: center; margin: 0;">FACTURE</h3>
-        <p style="font-size: 12px;"><strong>Client:</strong> ${this.selectedCommande.client}</p>
-        
-        <table style="width: 100%; font-size: 10px; border-collapse: collapse; margin-top: 10px;">
-          <thead>
-            <tr>
-              <th style="text-align: left;">Produit</th>
-              <th style="text-align: right;">Qté</th>
-              <th style="text-align: right;">PU</th>
-              <th style="text-align: right;">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${this.selectedCommande.articles
-              .map(
-                (article) => `
-                <tr>
-                  <td>${article.produit.nom}</td>
-                  <td style="text-align: right;">${article.quantite}</td>
-                  <td style="text-align: right;">${article.produit.prix.toFixed(2)}</td>
-                  <td style="text-align: right;">${(article.produit.prix * article.quantite).toFixed(2)}</td>
-                </tr>`
-              )
-              .join("")}
-            <tr>
-              <td colspan="3" style="text-align: right; font-weight: bold;">Total</td>
-              <td style="text-align: right; font-weight: bold;">${total.toFixed(2)}</td>
-            </tr>
-          </tbody>
-        </table>
-        
-        <p style="text-align: center; font-size: 10px; margin-top: 10px;">
-          <i>Une hospitalité gracieuse au cœur de la ville</i>
-        </p>
-        <hr style="border: 1px dashed black; margin: 10px 0;" />
-        <p style="text-align: center; font-size: 10px;">Merci pour votre confiance !</p>
-      </div>
-    `;
-  
-    // Ouvrir une nouvelle fenêtre et afficher la facture
-    const newWindow = window.open("", "_blank", "width=600,height=600");
-    newWindow.document.write(printableContent);
-    newWindow.document.close(); // Fermer le document après l'écriture
-    newWindow.print(); // Lancer l'impression
-  },
-  
-  
     },
-  };
-  </script>
-  
-  <style scoped>
-  .table {
-    width: 100%;
-  }
-  </style>
-  
+
+    // Récupérer les produits disponibles
+    async fetchProduits() {
+      try {
+        const response = await this.$axios.get('/produits');
+        this.produitsOptions = response.data.map(produit => ({
+          text: produit.nom + ' --- ' + produit.prix + ' HTG',
+          value: produit._id,
+          prix: produit.prix,
+        }));
+      } catch (error) {
+        console.error('Erreur lors de la récupération des produits:', error);
+      }
+    },
+
+    // Afficher les détails d'une commande
+    viewDetails(commande) {
+      this.selectedCommande = { ...commande };
+      this.detailsModal = true;
+    },
+
+    // Formater une commande pour l'export Excel
+    formatCommandeForExcel(commande) {
+      const enTete = [
+        { header: "Bénédictions de l'Éternel" },
+        { header: "Adresse: Angle des Rues Bory & St-Charles, Fort-Liberté, Haïti" },
+        { header: "Téléphone: +509 3779-6764 / +509 3596-7838" },
+        { header: "Facture" },
+        { header: `Client: ${commande.client}` },
+        { header: `Date: ${commande.date}` },
+        { header: "" }, // Ligne vide
+      ];
+
+      const details = commande.articles.map(article => ({
+        produit: article.produit.nom,
+        quantite: article.quantite,
+        prixUnitaire: article.produit.prix,
+        total: article.produit.prix * article.quantite,
+      }));
+
+      const total = [
+        { header: "" }, // Ligne vide
+        { header: `Total: ${commande.total} HTG` },
+      ];
+
+      return [...enTete, ...details, ...total];
+    },
+
+    // Ouvrir le modal de création de commande
+    openAddModal() {
+      this.addModal = true;
+    },
+
+    // Fermer le modal de création de commande
+    closeAddModal() {
+      this.addModal = false;
+      this.newCommande = {
+        client: "",
+        statut: "En attente",
+        articles: [{ produit: null, quantite: 1 }],
+      };
+    },
+
+    // Ajouter un article à la nouvelle commande
+    addArticle() {
+      this.newCommande.articles.push({ produit: null, quantite: 1 });
+    },
+
+    // Créer une nouvelle commande
+    async createCommande() {
+      try {
+        const response = await this.$axios.post('/commandes', this.newCommande);
+        this.commandes.push(response.data);
+        this.closeAddModal();
+        this.$notifier.showMessage({
+          content: "Commande créée avec succès.",
+          color: "success",
+        });
+      } catch (error) {
+        console.error('Erreur lors de la création de la commande :', error);
+        this.$notifier.showMessage({
+          content: "Erreur lors de la création de la commande.",
+          color: "error",
+        });
+      }
+    },
+
+    // Formater la date
+    formatDate(dateString) {
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+      const date = new Date(dateString);
+      return date.toLocaleString('fr-FR', options).replace(',', '');
+    },
+  },
+};
+</script>
+
+<style scoped>
+.table {
+  width: 100%;
+}
+</style>
