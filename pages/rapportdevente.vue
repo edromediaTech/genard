@@ -26,21 +26,15 @@
             ></v-text-field>
           </v-col>
           <v-col cols="12" md="4" class="d-flex align-center">
-            <v-btn color="primary" class="ml-4" @click="validateAndFetchReport">
+            <v-btn color="success" class="ml-4" @click="validateAndFetchReport">
               Générer
             </v-btn>
-            <v-btn
-              v-if="salesReport.length > 0"
-              color="success"
-              class="ml-2"
-              @click="generatePDF"
-            >
-              <v-icon>mdi-printer</v-icon> Imprimer
-            </v-btn>
+            
           </v-col>
         </v-row>
       </v-card-title>
       <v-card-text>
+
         <v-data-table
           :headers="headers"
           :items="salesReport"
@@ -49,6 +43,62 @@
           dense
           outlined
         >
+        <template #top>
+    <v-row class="mx-4 my-4">
+               <v-progress-circular
+                    v-show="visible"
+                    :size="50"
+                    :width="3"
+                    color="info"
+                    indeterminate                    
+                    /> 
+                    <v-card class="mb-4">
+      <v-card-title>
+        Total des ventes : {{ totalVentes }} HTG
+      </v-card-title>  <!-- Bouton pour créer une commande -->
+     
+     
+    </v-card>
+           
+              <v-spacer />
+      
+    <!-- Bouton et composant pour exporter en PDF -->
+    <v-btn
+              v-if="salesReport.length > 0"
+             
+              class="mx-2 mt-2"
+              fab
+              x-small
+              color="primary"
+              @click="generateReport"
+            >
+              PDF
+              <client-only>
+                <vue-html2pdf
+                  ref="html2Pdf"
+                  :show-layout="false"
+                  :float-layout="true"
+                  :enable-download="true"
+                  :preview-modal="false"
+                  :paginate-elements-by-height="1300"
+                  filename="Rapport de Vente"
+                  :pdf-quality="2"
+                  :manual-pagination="false"
+                  pdf-format="letter"
+                  pdf-orientation="landscape"
+                  pdf-content-width="1000px"
+                >
+                  <template slot="pdf-content">
+                    <vente-printer
+                      :salesreport="salesReport"
+                      :totalventes ="totalVentes"
+                    />
+                  </template>
+                </vue-html2pdf>
+              </client-only>
+            </v-btn>
+ </v-row>
+ </template>
           <template #[`item.total`]="{ item }">
             {{ formatCurrency(item.total) }}
           </template>
@@ -90,12 +140,15 @@
 </template>
 
 <script>
-import html2pdf from "html2pdf.js";
+
+import ventePrinter from '~/components/ventePrinter.vue';
 
 export default {
+  components: { ventePrinter },
   middleware:"superviseur",
   data() {
     return {
+      visible:false,
       filters: {
         dateDebut: "",
         dateFin: "",
@@ -116,6 +169,11 @@ export default {
       dateDebutErrors: [],
       dateFinErrors: [],
     };
+  },
+  computed : {
+    totalVentes() {
+      return this.salesReport.reduce((sum, commande) => sum + commande.total, 0);
+    },
   },
   mounted() {
     const today = new Date();
@@ -184,16 +242,7 @@ export default {
         this.loading = false;
       }
     },
-    generatePDF() {
-      const element = this.$refs.reportContent;
-      const options = {
-        margin: 10,
-        filename: `rapport_vente_${this.filters.dateDebut}_to_${this.filters.dateFin}.pdf`,
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      };
-      html2pdf().set(options).from(element).save();
-    },
+  
     formatCurrency(value) {
       return new Intl.NumberFormat("fr-FR", {
         style: "currency",

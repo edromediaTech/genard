@@ -15,28 +15,27 @@
        <v-simple-table id="pdf-container" class="theme--light no-dark-theme">
                 <thead>
                   <tr>
-                    <th>Nom</th>
-                <th>Catégorie</th>
-                <th>Prix (HTG)</th>
-                <th>Qté</th>
-                <th>Remplacés</th>
-                <th>Défectueux</th>
-                <th>Critiques</th>
-                <th>Alertes</th>                                   
+                    <th>Produit</th>
+                    <th>Qté</th>
+                <th>Prix (HTG)</th>             
+               
+                <th>Total</th>                                   
                   </tr>
                </thead>
                 <tbody>                                   
-                  <tr v-for="produit in produits" :key="produit.id"  style="page-break-inside: avoid">
-                    <td>{{ produit.nom }}</td>
-                <td>{{ produit.categorie }}</td>
-                <td>{{ produit.prix }}</td>
-                <td>{{ produit.quantite }}</td>
-                <td>{{ produit.ramplacement }}</td>
-                <td>{{ produit.defectue }}</td>
-                <td>{{ produit.critique }}</td>
-                <td>{{ produit.alerte }}</td>                                        
+                  <tr v-for="item in salesreport" :key="item._id"  style="page-break-inside: avoid">
+                    <td>{{ item.nom }}</td>
+                    <td>{{ item.quantite }}</td>
+                    <td>{{ formatCurrency(item.prix) }}</td>
+                    <td>{{ formatCurrency(item.total) }}</td>                                        
                   </tr>                                                                                       
                 </tbody>
+                <tfoot>
+          <tr>
+            <td colspan="3" style="text-align: right; font-weight: bold;">Total Général :</td>
+            <td style="font-weight: bold;">{{ formatCurrency(totalventes) }}</td>
+          </tr>
+        </tfoot>
               </v-simple-table>
              
           </div>
@@ -44,8 +43,8 @@
   </template>
   <script>
   export default {
-    props : {produits: { type: Array, default: () => []} ,
-     texte:{ type:String, default: ''},
+    props : {salesreport: { type: Array, default: () => []} ,
+     totalventes:{ type:Number, default: 0},
     
     },
       data (){
@@ -54,6 +53,12 @@
         }
       },
       methods : {
+        formatCurrency(value) {
+      return new Intl.NumberFormat("fr-FR", {
+        style: "currency",
+        currency: "HTG",
+      }).format(value);
+    },
           check_n (){
               if(this.n % 14 === 0){                  
                   return true

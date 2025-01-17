@@ -9,6 +9,8 @@
       item-key="_id"
       :search="search"    
       class="elevation-1"
+       :loading="loading"
+       loading-text="Chargement en cours..."
       
     >
     <template #top>
@@ -39,12 +41,12 @@
     <v-btn
               v-if="produits.length > 0"
              
-              class="mx-2 mt-2 theme--light no-dark-theme"
-              fab
-              x-small
-              color="primary"
+              class="mx-2 mt-4 "
+              
+              small
+              color="success"
               @click="generateReport"
-            >
+            ><v-icon left>mdi-printer</v-icon>
               PDF
               <client-only>
                 <vue-html2pdf
@@ -186,6 +188,7 @@ export default {
   data() {
     return {
       search:'',
+      loading:false,
       valid: false,
       visible: false,
       editModal: false, // Contrôle l'affichage du modal
@@ -232,12 +235,14 @@ export default {
       this.editModal = false;
     },
     async fetchProduits() {
+      this.loading = true
       try {
         const response = await this.$axios.get('/produits/appro');
         this.produits = response.data;
       } catch (error) {
         console.error('Erreur lors de la récupération des produits:', error);
       }
+      this.loading = false
     },
     clearForm() {
       this.produit = {
@@ -255,7 +260,7 @@ export default {
     },
     async submitForm() {
       this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken');
-
+      this.loading = true
       try {
         if (this.isEditing) {
           await this.$axios.put(`/produits/${this.produit.id}`, this.produit);
@@ -267,8 +272,10 @@ export default {
       } catch (error) {
         console.error('Erreur lors de la soumission:', error);
       }
+      this.loading = false
     },
     async deleteProduit(id) {
+      this.loading = true
       this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken');
       try {
         await this.$axios.delete(`/produits/${id}`);
@@ -276,6 +283,7 @@ export default {
       } catch (error) {
         console.error('Erreur lors de la suppression:', error);
       }
+      this.loading = false
     },
     async beforeDownload({ html2pdf, options, pdfContent }) {
       await html2pdf()

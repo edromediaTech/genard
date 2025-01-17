@@ -107,7 +107,8 @@
     <v-data-table
       :headers="headers"
       :items="produits"
-     
+      :loading="loading"
+          loading-text="Chargement en cours..."
       class="elevation-1"
       item-key="_id"
       :search="search" 
@@ -202,6 +203,7 @@ export default {
       search:'',
       valid: false,
       visible: false,
+      loading: false,
       isEditing: false,
       produit: {
         id: null,
@@ -264,12 +266,14 @@ export default {
       }
     },
     async fetchProduits() {
+      this.loading = true
       try {
         const response = await this.$axios.get("/produits");
         this.produits = response.data;
       } catch (error) {
         console.error("Erreur lors de la récupération des produits:", error);
       }
+      this.loading = false
     },
     clearForm() {
       this.produit = {
@@ -291,6 +295,7 @@ export default {
       this.isEditing = true;
     },
     async deleteProduit(id) {
+      this.loading = true
       this.$axios.defaults.headers.common.Authorization =
         "Bearer " + localStorage.getItem("authToken");
       try {
@@ -299,6 +304,7 @@ export default {
       } catch (error) {
         console.error("Erreur lors de la suppression du produit:", error);
       }
+      this.loading = false
     },
     async beforeDownload({ html2pdf, options, pdfContent }) {
       await html2pdf()

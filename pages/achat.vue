@@ -139,6 +139,8 @@
         :items-per-page="10"
         class="elevation-1"
         :search="search"
+         :loading="loading"
+       loading-text="Chargement en cours..."
       >
       <template #top>
         <v-row class="mx-4 my-4">

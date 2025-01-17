@@ -10,6 +10,8 @@
         dense
         item-key="_id"
         class="elevation-1"
+         :loading="loading"
+       loading-text="Chargement en cours..."
       >
         <template #[`item.actions`]="{ item }">
           <v-btn icon small title="Details de la Commande" @click="viewDetails(item)">
@@ -118,6 +120,8 @@
               :headers="productHeaders"
               :items="selectedCommande.articles"
               dense
+               :loading="loading"
+       loading-text="Chargement en cours..."
             ></v-data-table>
           </v-list>
         </v-card-text>

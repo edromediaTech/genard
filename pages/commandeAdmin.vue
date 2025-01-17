@@ -1,101 +1,54 @@
 <template>
   <v-container>
   
-    <!-- <v-btn color="blue" class="mb-4" @click="openAddModal">
-    <v-icon left>mdi-plus</v-icon>Commande
-    </v-btn> -->
-
-    <!-- Bouton pour afficher toutes les commandes -->
-    <v-btn color="primary" class="mb-4" @click="toggleShowAllCommands">
-      {{ showAllCommands ? "Commandes du jour" : "Toutes les commandes" }}
-    </v-btn><v-spacer></v-spacer>
-    <!-- Bouton d'export global -->
-   
-    <!-- Filtres supplémentaires -->
-    <!-- <v-row class="mb-4">
-      <v-col cols="12" md="4">
-        <v-select
-          v-model="selectedStatut"
-          :items="statutOptions"
-          label="Filtrer par statut"
-          outlined
-          dense
-          clearable
-        ></v-select>
-      </v-col>
-      <v-col cols="12" md="4">
-        <v-menu
-          v-model="datePickerMenu"
-          :close-on-content-click="false"
-          transition="scale-transition"
-          offset-y
-          min-width="auto"
-        >
-          <template #activator="{ on, attrs }">
-            <v-text-field
-              v-model="selectedDate"
-              label="Filtrer par date"
-              readonly
-              outlined
-              dense
-              v-bind="attrs"
-              v-on="on"
-            ></v-text-field>
-          </template>
-          <v-date-picker
-            v-model="selectedDate"
-            @input="datePickerMenu = false"
-          ></v-date-picker>
-        </v-menu>
-      </v-col> 
-    </v-row>-->
-
-    <!-- Affichage des totaux généraux -->
-    <v-card class="mb-4">
-      <v-card-title>
-        Total des ventes : {{ totalVentes }} HTG
-      </v-card-title>  <!-- Bouton pour créer une commande -->
-      <download-excel
-      :data="filteredCommandes"
-      :name="`commandes_${new Date().toISOString().substr(0, 10)}.xls`"
-      :fields="excelFields"
-      worksheet="Commandes"
-    >
-      <v-btn color="success" class="mt-4">
-        <v-icon>mdi-file-export</v-icon>
-       
-      </v-btn>
-    </download-excel>
-    </v-card>
-
-    <!-- Table des commandes -->
     <v-card>
       <v-card-title>Liste des Commandes</v-card-title>
+       
       <v-data-table
         :headers="headers"
-        :items="filteredCommandes"
+        :items="commandes"
         item-value="id"
         dense
+        :search="search"
         item-key="_id"
         class="elevation-1"
+         :loading="loading"
+       loading-text="Chargement en cours..."
       >
+      <template #top>
+        <v-row>
+          <v-col cols="12"
+                sm="6"        
+                md="3">
+              <v-text-field
+                  v-if="commandes.length > 0"  
+                  v-model="search"
+                  class="ml-4 "
+                  append-icon="mdi-magnify"
+                  label="Search"
+                  single-line
+                  hide-details
+               ></v-text-field>
+             </v-col>             
+
+       
+        <v-spacer></v-spacer>
+     <!-- Bouton pour basculer entre les commandes du jour et toutes les commandes -->
+     <v-btn color="success"  class="mx-4"  fab x-small @click="openAddModal"><v-icon >mdi-plus</v-icon></v-btn>
+     <v-btn color="blue" class="mb-4 mx-4 mr-4 pr-4" @click="toggleShowAllCommands"><v-icon left>mdi-food</v-icon>
+      <h6>{{ showAllCommands ? "Commandes du jour" : "Toutes les commandes" }}</h6>
+    </v-btn>
+  
+  </v-row>
+      </template>
         <template #[`item.actions`]="{ item }">
-          <v-btn icon x-small title="Details de la Commande" @click="viewDetails(item)">
+          <v-btn icon small title="Details de la Commande" @click="viewDetails(item)">
             <v-icon>mdi-eye</v-icon>
           </v-btn>
-          <download-excel
-            :data="formatCommandeForExcel(item)"
-            :name="`facture_${item._id}.xls`"
-            :fields="excelFields"
-            worksheet="Facture"
-          >
-            <v-btn icon x-small color="success">
-              <v-icon>mdi-file-excel</v-icon>
-            </v-btn>
-          </download-excel>
-          <v-btn icon x-small color="error" @click="deleteArticle(item._id)">
-            <v-icon >mdi-delete</v-icon>
+          <v-btn icon small color="error" @click="deleteArticle(item._id)">
+            <v-icon>mdi-delete</v-icon>
           </v-btn>
+       
         </template>
         <template #[`item.createdAt`]="{ item }">
           {{ formatDate(item.createdAt) }}
@@ -103,34 +56,34 @@
       </v-data-table>
     </v-card>
 
-    
-
-    <!-- Modal pour créer une commande -->
+    <!-- Modal pour ajouter un article -->
     <v-dialog v-model="addModal" max-width="800px">
       <v-card>
-        <v-card-title>Créer une Commande</v-card-title>
+        <v-card-title>Ajouter un article</v-card-title>
         <v-card-text>
           <v-row>
-            <v-col cols="12" md="6">
-              <v-text-field
-                v-model="newCommande.client"
+            <v-col cols="12" md="6" sm="6">
+              <v-combobox
+                v-model="selectedTableId"
+                :items="tablesOptions"
                 label="Client"
                 outlined
                 dense
-              ></v-text-field>
+              ></v-combobox>
             </v-col>
-            <v-col cols="12" md="6">
+            <!-- Statut -->
+            <v-col cols="12" sm="6">
               <v-select
-                v-model="newCommande.statut"
+                v-model="commande.statut"
                 :items="statutOptions"
                 label="Statut"
+                required
                 outlined
-                dense
               ></v-select>
             </v-col>
           </v-row>
-          <v-row v-for="(article, index) in newCommande.articles" :key="index" class="mb-3">
-            <v-col cols="12" md="6">
+          <v-row v-for="(article, index) in commande.articles" :key="index" class="mb-3">
+            <v-col cols="12" md="6" sm="6">
               <v-autocomplete
                 v-model="article.produit"
                 :items="produitsOptions"
@@ -139,9 +92,17 @@
                 label="Choisir un produit"
                 outlined
                 dense
+                required
+                @change="onProductChange"
               ></v-autocomplete>
+               <!-- Afficher les détails du produit -->
+        <v-card v-if="selectedProductDetails" class="mt-4">
+          <v-card-text>
+            <strong>Prix :</strong>  {{ selectedProductDetails.prix }} HTG
+          </v-card-text>
+        </v-card>
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col cols="12" md="6" sm="6">
               <v-text-field
                 v-model="article.quantite"
                 type="number"
@@ -152,11 +113,18 @@
               ></v-text-field>
             </v-col>
           </v-row>
-          <v-btn color="blue" @click="addArticle">Ajouter un article</v-btn>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" @click="createCommande">Créer</v-btn>
+          <v-btn color="primary" @click="sendArticle">
+            <!-- <v-progress-circular
+                    v-if="loading"
+                    :disabled="loading"
+                    :size="30"
+                    color="white"
+                    indeterminate
+                  />                       -->
+            Ajouter</v-btn>
           <v-btn text @click="closeAddModal">Annuler</v-btn>
         </v-card-actions>
       </v-card>
@@ -165,7 +133,7 @@
     <!-- Modal des détails de la commande -->
     <v-dialog v-model="detailsModal" max-width="800px">
       <v-card>
-        <v-card-title>Détails de la Commande {{ selectedCommande.total }} HTG</v-card-title>
+        <v-card-title>Détails de la Commande {{ totalCommande }} HTG</v-card-title>
         <v-card-text>
           <v-list dense>
             <v-list-item>
@@ -181,12 +149,61 @@
               :headers="productHeaders"
               :items="selectedCommande.articles"
               dense
+               :loading="loading"
+       loading-text="Chargement en cours..."
             ></v-data-table>
           </v-list>
         </v-card-text>
 
         <v-card-actions>
+          <!-- Bouton pour ouvrir le modal d'ajout de produit -->
+          <v-btn color="blue" @click="openAddProductDialog"><v-icon>mdi-plus</v-icon>Produit</v-btn>
+          <v-btn color="success" @click="printInvoice"><v-icon>mdi-printer</v-icon></v-btn>
           <v-btn text @click="detailsModal = false">Fermer</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Modal pour ajouter un produit à la commande -->
+    <v-dialog v-model="addProductModal" max-width="500px">
+      <v-card>
+        <v-card-title>Ajouter un Produit</v-card-title>
+        <v-card-text>
+          <v-autocomplete
+            v-model="newProduct.produit"
+            :items="produitsOptions"
+            label="Choisir un produit"
+            outlined
+            @change="onProductChange"
+          ></v-autocomplete>
+          <v-card v-if="selectedProductDetails" class="mt-4">
+          <v-card-text>
+            <strong>Prix :</strong>  {{ selectedProductDetails.prix }} HTG
+          </v-card-text>
+        </v-card>
+          <v-text-field
+            v-model="newProduct.quantite"
+            label="Quantité"
+            type="number"
+            outlined
+          ></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn :disabled="!newProduct.produit" color="primary" @click="addProduits">Ajouter</v-btn>
+          <v-btn text @click="closeAddProductDialog">Annuler</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="dialogConfirm" max-width="400">
+      <v-card>
+        <v-card-title class="headline">Confirmation</v-card-title>
+        <v-card-text>
+          Êtes-vous sûr de vouloir supprimer cet article ?
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="green" text @click="confirmDelete">Oui</v-btn>
+          <v-btn color="red" text @click="cancelDelete">Non</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -194,25 +211,36 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
-import jsonExcel from "vue-json-excel";
+
+import { mapGetters, mapActions } from "vuex";
 
 export default {
-  components: {
-    DownloadExcel: jsonExcel,
-  },
-  middleware: "admin",
+  middleware: "serveur",
   data() {
     return {
-      showAllCommands: false, // Afficher toutes les commandes ou seulement celles du jour
-      selectedStatut: null, // Filtre par statut
-      selectedDate: new Date().toISOString().substr(0, 10), // Filtre par date (par défaut, la date du jour)
-      datePickerMenu: false, // Contrôle l'affichage du date picker
+      loading : false,
+      search:'',
+      showAllCommands: false,
+      selectedTableId: null, // ID de la table sélectionnée
+      tablesOptions: ['Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5', 'Table 6', 'Table 7'], // Options des tables
+      statutOptions: ['En attente', 'En préparation', 'Servie', 'Terminée'],
+      dialogConfirm: false,  // État du dialogue de confirmation
+      currentDeleteId: null,
+      selectedProductDetails: null,
+      articles: [], // Articles récupérés
+      commande: {
+        client: null,
+        serveur: '',
+        statut: null,
+        articles: [{ produit: null, quantite: 1 }], // Initialiser un article avec produit et quantité par défaut
+        total: 0,
+      },
+      produitsOptions: [], // Produits disponibles
       commandes: [], // Liste des commandes
       headers: [
         { text: "Client", value: "client" },
         { text: "Serveur", value: "serveur" },
-        // { text: "Statut", value: "statut" },
+        { text: "Statut", value: "statut" },
         { text: "Total (HTG)", value: "total" },
         { text: "Date", value: "createdAt" },
         { text: "Actions", value: "actions", sortable: false },
@@ -222,6 +250,26 @@ export default {
         { text: "Quantité", value: "quantite" },
         { text: "Prix Unitaire (HTG)", value: "produit.prix" },
       ],
+      newCommande: {
+        client: "",
+        serveur: "",
+        statut: "En cours",
+        articles: [],
+      },
+      newProduit: {
+        produit: null,
+        quantite: 1,
+        prix: 0,
+      },
+      newProduct: {
+        produit: null,
+        quantite: 1,
+        prix: 0,
+      },
+      total: 0,
+      addCommandeModal: false, // Contrôle du modal pour ajouter la commande
+      detailsModal: false, // Contrôle du modal pour afficher les détails de la commande
+      addProductModal: false, // Contrôle du modal pour ajouter un produit à la commande
       selectedCommande: {
         id: "",
         client: "",
@@ -229,49 +277,28 @@ export default {
         statut: "",
         articles: [],
       },
-      detailsModal: false, // Contrôle l'affichage du modal des détails
-      addModal: false, // Contrôle l'affichage du modal de création de commande
-      newCommande: {
+      addModal: false, // État du modal pour ajouter un article
+      detailModal: false, // État du modal pour afficher les détails
+      selectedOrder: {}, // Commande sélectionnée pour afficher les détails
+      commandeId: '', // ID de la commande actuelle
+      errors: {
         client: "",
-        statut: "En attente",
-        articles: [{ produit: null, quantite: 1 }],
-      },
-      produitsOptions: [], // Liste des produits disponibles
-      excelFields: {
-        "En-tête": "header",
-        "Détails": "details",
-        "Produit": "produit",
-        "Quantité": "quantite",
-        "Prix Unitaire": "prixUnitaire",
-        "Total": "total",
+        statut: "",
+        articles: [],
       },
     };
   },
   computed: {
     ...mapGetters("auth", ["user"]),
-    // Filtre les commandes en fonction des sélections
-    filteredCommandes() {
-      let commandes = this.commandes;
-
-      // Filtrer par date
-      if (!this.showAllCommands) {
-        const today = new Date(this.selectedDate).toLocaleDateString('fr-CA');
-        commandes = commandes.filter(commande => {
-          const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
-          return commandeDate === today;
-        });
-      }
-
-      // Filtrer par statut
-      if (this.selectedStatut) {
-        commandes = commandes.filter(commande => commande.statut === this.selectedStatut);
-      }
-
-      return commandes;
-    },
-    // Calcule le total des ventes
-    totalVentes() {
-      return this.filteredCommandes.reduce((sum, commande) => sum + commande.total, 0);
+    // Propriété calculée pour le total de la commande
+    totalCommande() {
+      if (!this.selectedCommande.articles) return 0;
+      return this.selectedCommande.articles.reduce((sum, article) => {
+        if (article.produit && article.produit.prix && article.quantite) {
+          return sum + (article.produit.prix * article.quantite);
+        }
+        return sum;
+      }, 0);
     },
   },
   async mounted() {
@@ -279,120 +306,376 @@ export default {
     await this.fetchProduits();
   },
   methods: {
-    // Basculer entre les commandes du jour et toutes les commandes
+    ...mapActions("auth", ["sendLoginRequest"]),
+    onProductChange(selectedValue) {
+      const selectedProduct = this.produitsOptions.find(
+        (produit) => produit.value === selectedValue
+      );
+      this.selectedProductDetails = selectedProduct || null;
+    },
+
     toggleShowAllCommands() {
       this.showAllCommands = !this.showAllCommands;
     },
-
-    // Récupérer les commandes depuis l'API
-    async fetchCommandes() {
-      try {
-        const { data } = await this.$axios.get('/commandes');
-        this.commandes = data.map(commande => ({
-          ...commande,
-          serveur: commande.serveur.prenom,
-          client: commande.client,
-          statut: commande.statut,
-          total: commande.total,
-          createdAt: commande.createdAt,
-          date: new Date(commande.date).toISOString().substr(0, 10),
-        }));
-      } catch (error) {
-        console.error('Erreur lors du chargement des commandes :', error);
-      }
-    },
-
+    
     // Récupérer les produits disponibles
     async fetchProduits() {
       try {
         const response = await this.$axios.get('/produits');
-        this.produitsOptions = response.data.map(produit => ({
-          text: produit.nom ,
-          value: produit._id,
-          prix: produit.prix,
+        this.produitsOptions = response.data.map((produits) => ({
+          text: produits.nom,
+          value: produits._id,
+          prix:produits.prix
         }));
       } catch (error) {
         console.error('Erreur lors de la récupération des produits:', error);
       }
     },
 
-    // Afficher les détails d'une commande
+    
+    formatDate(dateString) {
+      const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+      const date = new Date(dateString);
+      return date.toLocaleString('fr-FR', options).replace(',', '');
+    },
+
+  async fetchCommandes() {
+    this.loading = true
+    try {
+      const { data } = await this.$axios.get('/commandes');
+     // const userId = this.user.userId;
+
+      // Filtrer les commandes en fonction de showAllCommandes
+      this.commandes = data
+        .filter(commande => {
+         // if (this.showAllCommandes) {
+            // Afficher toutes les commandes pour l'utilisateur
+         //   return commande.serveur._id === userId;
+          // } else {
+            // Afficher uniquement les commandes du jour pour l'utilisateur
+            const today = new Date().toLocaleDateString('fr-CA');
+            const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
+            return  commandeDate === today;
+          // }
+        })
+        .map(commande => {
+          // Si le total est égal à 0, le recalculer en fonction des articles
+          if (commande.total === 0) {
+            commande.total = commande.articles.reduce((sum, article) => {
+              return sum + (article.produit.prix * article.quantite);
+            }, 0);
+          }
+
+          return {
+            ...commande,
+            serveur: commande.serveur.prenom,
+            client: commande.client,
+            statut: commande.statut,
+            total: commande.total, // Utiliser le total calculé ou existant
+            createdAt: commande.createdAt,
+            date: new Date(commande.date).toLocaleDateString('fr-FR', {
+              day: '2-digit',
+              month: '2-digit',
+              year: '2-digit',
+            }),
+          };
+        });
+
+    } catch (error) {
+      console.error('Erreur lors du chargement des commandes :', error);
+    }
+    this.loading = false
+  },
+
+  
+
+
+    validateForm() {
+      let isValid = true;
+
+      // Réinitialiser les erreurs
+      this.errors.client = "";
+      this.errors.statut = "";
+      this.errors.articles = [];
+
+      // Validation du champ "Client"
+      if (!this.commande.client) {
+        this.errors.client = "Le champ Client est requis.";
+        isValid = false;
+      }
+
+      // Validation du champ "Statut"
+      if (!this.commande.statut) {
+        this.errors.statut = "Le champ Statut est requis.";
+        isValid = false;
+      }
+
+      // Validation des articles
+      this.commande.articles.forEach((article, index) => {
+        this.errors.articles[index] = {};
+        if (!article.produit) {
+          this.errors.articles[index].produit = "Le champ Produit est requis.";
+          isValid = false;
+        }
+        if (!article.quantite || article.quantite <= 0) {
+          this.errors.articles[index].quantite = "La quantité doit être supérieure à 0.";
+          isValid = false;
+        }
+      });
+
+      return isValid;
+    },
+
+    async sendArticle() {
+      this.loading = true
+      this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken');
+      this.commande.client = this.selectedTableId;
+      this.commande.serveur = this.user.userId;
+
+      if (this.commande.client === null || this.commande.statut === null) {
+        this.$notifier.showMessage({ content: "Il y a un champ vide", color: "error", });
+        return false;
+      }
+      // Validation des articles
+      this.commande.articles.forEach((article, index) => {
+        if (article.produit === null) {
+          this.$notifier.showMessage({ content: "Le champ produit est requis", color: "error", });
+          return false;
+        }
+        if (article.quantite <= 0) {
+          this.$notifier.showMessage({
+            content: "La quantité doit être supérieure à 0",
+            color: "error",
+          });
+          return false;
+        }
+      });
+
+      try {
+        const response = await this.$axios.post('commandes', this.commande);
+        this.fetchCommandes();
+        this.articles.push({
+          ...response.data,
+          tableId: this.selectedTableId,
+        });
+        this.$notifier.showMessage({
+          content: "Article ajouté avec succès.",
+          color: "success",
+        });
+        this.closeAddModal();
+      } catch (error) {
+        console.error('Erreur lors de l’ajout de l’article :', error);
+        this.$notifier.showMessage({
+          content: "Impossible d’ajouter l’article.",
+          color: "error",
+        });
+      }
+      this.loading = false
+    },
+
+    openAddModal() {
+      this.addModal = true;
+    },
+
+    closeAddModal() {
+      this.addModal = false;
+    },
+
     viewDetails(commande) {
       this.selectedCommande = { ...commande };
       this.detailsModal = true;
     },
 
-    // Formater une commande pour l'export Excel
-    formatCommandeForExcel(commande) {
-      const enTete = [
-        { header: "Bénédictions de l'Éternel" },
-        { header: "Adresse: Angle des Rues Bory & St-Charles, Fort-Liberté, Haïti" },
-        { header: "Téléphone: +509 3779-6764 / +509 3596-7838" },
-        { header: "Facture" },
-        { header: `Client: ${commande.client}` },
-        { header: `Date: ${commande.date}` },
-        { header: "" }, // Ligne vide
-      ];
-
-      const details = commande.articles.map(article => ({
-        produit: article.produit.nom,
-        quantite: article.quantite,
-        prixUnitaire: article.produit.prix,
-        total: article.produit.prix * article.quantite,
-      }));
-
-      const total = [
-        { header: "" }, // Ligne vide
-        { header: `Total: ${commande.total} HTG` },
-      ];
-
-      return [...enTete, ...details, ...total];
+    openAddProductDialog() {
+      this.newProduct = { produit: "", quantite: 1, prix: 0 }; // Réinitialiser les valeurs
+      this.addProductModal = true; // Ouvrir le modal
     },
 
-    // Ouvrir le modal de création de commande
-    openAddModal() {
-      this.addModal = true;
+    closeAddProductDialog() {
+      this.addProductModal = false; // Fermer le modal
     },
 
-    // Fermer le modal de création de commande
-    closeAddModal() {
-      this.addModal = false;
-      this.newCommande = {
-        client: "",
-        statut: "En attente",
-        articles: [{ produit: null, quantite: 1 }],
-      };
-    },
+    async addProduits() {
+      this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken');
 
-    // Ajouter un article à la nouvelle commande
-    addArticle() {
-      this.newCommande.articles.push({ produit: null, quantite: 1 });
-    },
-
-    // Créer une nouvelle commande
-    async createCommande() {
       try {
-        const response = await this.$axios.post('/commandes', this.newCommande);
-        this.commandes.push(response.data);
-        this.closeAddModal();
-        this.$notifier.showMessage({
-          content: "Commande créée avec succès.",
-          color: "success",
+        if (this.newProduct.produit === null) {
+          this.$notifier.showMessage({
+            content: "Veuillez choisir un produit",
+            color: "error",
+          });
+          return false;
+        }
+        const response = await this.$axios.post('commandes/add', {
+          commandeId: this.selectedCommande._id,
+          produitId: this.newProduct.produit,
+          quantite: this.newProduct.quantite,
         });
+        if (response.status === 200) {
+          // Mettre à jour selectedCommande
+          this.selectedCommande.articles = response.data.commande.articles;
+          this.selectedCommande.total = this.totalCommande;
+
+          // Mettre à jour la commande dans la liste commandes
+          const index = this.commandes.findIndex(c => c._id === this.selectedCommande._id);
+          if (index !== -1) {
+            this.commandes[index].articles = response.data.commande.articles;
+            this.commandes[index].total = this.totalCommande;
+          }
+
+          this.$notifier.showMessage({
+            content: "Produit ajouté à la commande.",
+            color: "success",
+          });
+          this.addProductModal = false;
+        } else {
+          this.$notifier.showMessage({
+            content: "Opération échouée!",
+            color: "error",
+          });
+        }
       } catch (error) {
-        console.error('Erreur lors de la création de la commande :', error);
-        this.$notifier.showMessage({
-          content: "Erreur lors de la création de la commande.",
-          color: "error",
-        });
+        if (error.response && (error.response.status === 500 || error.response.data.message === "Stock insuffisant")) {
+          this.$notifier.showMessage({
+            content: "Stock insuffisant pour ce produit.",
+            color: "warning",
+          });
+        } else {
+          this.$notifier.showMessage({
+            content: "Une erreur s'est produite. Veuillez réessayer.",
+            color: "error",
+          });
+        }
       }
     },
 
-    // Formater la date
-    formatDate(dateString) {
-      const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
-      const date = new Date(dateString);
-      return date.toLocaleString('fr-FR', options).replace(',', '');
+    deleteArticle(id) {
+      this.currentDeleteId = id;
+      this.dialogConfirm = true;
+    },
+
+    async confirmDelete() {
+      this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken');
+      try {
+        await this.$axios.delete(`/commandes/${this.currentDeleteId}`);
+        this.fetchCommandes();
+        this.dialogConfirm = false;
+      } catch (error) {
+        console.error('Erreur lors de la suppression de la commande:', error);
+      }
+    },
+
+    cancelDelete() {
+      this.dialogConfirm = false;
+    },
+
+    printInvoice() {
+      const total = this.selectedCommande.articles.reduce(
+        (sum, article) => sum + article.produit.prix * article.quantite,
+        0
+      );
+
+      const printableContent = `
+        <html>
+        <head>
+          <style>
+            @page {
+              margin: 10mm;
+            }
+            body {
+              margin: 0;
+              padding: 0;
+            }
+            .container {
+              font-family: 'Courier New', monospace;
+              width: 100mm;
+              padding: 5mm;
+              box-sizing: border-box;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 10px;
+            }
+            .header h2, .header p {
+              margin: 0;
+              font-size: 10px;
+            }
+            table {
+              width: 100%;
+              font-size: 10px;
+              border-collapse: collapse;
+              margin-top: 10px;
+            }
+            table th, table td {
+              text-align: right;
+            }
+            table th:first-child, table td:first-child {
+              text-align: left;
+            }
+            .footer {
+              text-align: center;
+              font-size: 10px;
+              margin-top: 10px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h5>Bénédictions de l'Éternel</h5>             
+              <p>               
+                Tél: +509 3779-6764 / +509 3596-7838<br />        
+              </p>
+              <hr style="border: 1px dashed black; margin: 10px 0;" />
+            </div>        
+            <h5 style="text-align: center; margin: 0;">FACTURE</h5>
+            <p style="font-size: 12px;"><strong>Client:</strong> ${this.selectedCommande.client}</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Produit</th>
+                  <th>Qté</th>
+                  <th>PU</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${this.selectedCommande.articles
+                  .map(
+                    (article) => `
+                    <tr>
+                      <td>${article.produit.nom}</td>
+                      <td>${article.quantite}</td>
+                      <td>${article.produit.prix.toFixed(2)}</td>
+                      <td>${(article.produit.prix * article.quantite).toFixed(2)}</td>
+                    </tr>`
+                  )
+                  .join("")}
+                <tr>
+                  <td colspan="3" style="text-align: right; font-weight: bold;">Total</td>
+                  <td style="font-weight: bold;">${total.toFixed(2)}</td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+            <div class="footer">
+              <i>Une hospitalité gracieuse au cœur de la ville</i>
+              <hr style="border: 1px dashed black; margin: 10px 0;" />
+              Merci pour votre confiance !
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+
+      const newWindow = window.open("", "_blank", "width=600,height=600");
+      newWindow.document.write(printableContent);
+      newWindow.document.close();
+
+      setTimeout(() => {
+        newWindow.print();
+        newWindow.close();
+      }, 1000);
     },
   },
 };
