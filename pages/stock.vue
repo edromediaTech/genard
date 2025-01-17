@@ -52,7 +52,7 @@
   </template>
 <script>
 export default {
-  middleware:"admin",
+  middleware:"supadmin",
   data() {
     return {
       valid: false,

@@ -64,6 +64,14 @@
             type="button"
             @click="register"
           >
+          <v-progress-circular
+                    v-if="loading"
+                    :disabled="loading"
+                    :size="30"
+                    color="white"
+                    indeterminate
+                  />
+                      
             Soumettre
           </v-btn>
         </v-card-text>
@@ -91,6 +99,7 @@ export default {
   data() {
     return {
       loginDialog: true,
+      loading: false,
       showCode: false,
       codeMembre: null,
       step: 1,

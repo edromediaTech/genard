@@ -117,7 +117,15 @@
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn text @click="closeModal">Annuler</v-btn>
-                <v-btn type="submit" color="primary">Enregistrer</v-btn>
+                <v-btn type="submit" color="primary"> 
+                   <v-progress-circular
+                    v-if="loading"
+                    :disabled="loading"
+                    :size="30"
+                    color="white"
+                    indeterminate
+                  />
+                      Enregistrer</v-btn>
               </v-card-actions>
             </v-form>
           </v-card-text>
@@ -131,7 +139,7 @@
         :items-per-page="10"
         class="elevation-1"
       >
-        <template #[`item.actions`]="{ item }">
+        <template v-if="isAdmin" #[`item.actions`]="{ item }">
           <v-btn icon small @click="editTransaction(item)">
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
@@ -150,6 +158,7 @@
     data() {
       return {
         modalOpen: false, // Contrôle l'ouverture du modal
+        loading:false,
         form: {
           fournisseur: '', // Fournisseur
           produitId: null, // ID du produit
@@ -174,14 +183,14 @@
           { text: 'Versement', value: 'versement' },
           { text: 'Règlement', value: 'reglement' },
           { text: 'Livraison', value: 'livraison' },
-          { text: 'Actions', value: 'actions', sortable: false },
+          { text: '', value: 'actions', sortable: false },
         ],
       };
     },
     computed: {
     ...mapGetters("auth", ["user"]),
     isAdmin() {
-      return this.user && parseInt(this.user.user_level) === role.admin;
+      return this.user && parseInt(this.user.user_level) === role.supadmin;
     },
   
     formattedTransactions() {
@@ -228,26 +237,31 @@
   
       // Récupérer la liste des produits
       async fetchProduits() {
+        this.loading = true
         try {
           const response = await this.$axios.get('/produits');
           this.produits = response.data;
         } catch (error) {
           console.error('Erreur lors du chargement des produits :', error);
         }
+        this.loading = false
       },
   
       // Récupérer la liste des transactions
       async fetchTransactions() {
+        this.loading = true
         try {
           const response = await this.$axios.get('achats');
           this.transactions = response.data;
         } catch (error) {
           console.error('Erreur lors du chargement des transactions :', error);
         }
+        this.loading = false
       },
   
       // Soumettre le formulaire
       async submitForm() {
+        this.loading = true
         this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken')
 
         try {
@@ -275,6 +289,7 @@
             color: 'error',
           });
         }
+        this.loading = false
       },
   
       // Modifier une transaction
@@ -285,6 +300,7 @@
   
       // Supprimer une transaction
       async deleteTransaction(transaction) {
+        this.loading = true
         try {
           await this.$axios.delete(`achats/${transaction._id}`);
           await this.fetchTransactions(); // Rafraîchir la liste des transactions
@@ -299,6 +315,7 @@
             color: 'error',
           });
         }
+        this.loading = false
       },
     },
   };

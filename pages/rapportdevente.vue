@@ -109,9 +109,9 @@ export default {
         { text: "Total des ventes", value: "total" },
       ],
       companyInfo: {
-        name: "Nom de l'entreprise",
-        address: "Adresse de l'entreprise",
-        phone: "Téléphone de l'entreprise",
+        name: "Bénédiction de l'Eternel",
+        address: " Angle des Rues Bry & St-Charles, Fort-Liberté, Haïti",
+        phone: "+509 3779-6764 / +509 3596-7838",
       },
       dateDebutErrors: [],
       dateFinErrors: [],

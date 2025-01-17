@@ -158,7 +158,7 @@ export default {
   computed: {
     ...mapGetters("auth", ["user"]),
     isAdmin() {
-      return this.user && parseInt(this.user.user_level) === role.admin;
+      return this.user && parseInt(this.user.user_level) === role.supadmin;
     },
   },
   async created() {

@@ -2,6 +2,7 @@
   <v-container>
     <!-- Statistiques principales -->
     <v-row>
+      <!-- Total des ventes -->
       <v-col cols="12" md="3">
         <v-card class="pa-4">
           <v-icon color="primary" large>mdi-cash-register</v-icon>
@@ -9,39 +10,31 @@
           <p class="headline">{{ formatCurrency(totalSales) }}</p>
         </v-card>
       </v-col>
-      <!-- <v-col cols="12" md="3">
+
+      <!-- Ventes aujourd'hui -->
+      <v-col cols="12" md="3">
         <v-card class="pa-4">
-          <v-icon color="green" large>mdi-cart</v-icon>
-          <h5>Commandes Terminées</h5>
-          <p class="headline">{{ completedOrders }}</p>
+          <v-icon color="green" large>mdi-calendar-today</v-icon>
+          <h5>Ventes Aujourd'hui</h5>
+          <p class="headline">{{ formatCurrency(dailySales) }}</p>
         </v-card>
       </v-col>
+
+      <!-- Ventes ce mois -->
       <v-col cols="12" md="3">
         <v-card class="pa-4">
-          <v-icon color="orange" large>mdi-clock-outline</v-icon>
-          <h5>Commandes En Cours</h5>
-          <p class="headline">{{ ongoingOrders }}</p>
+          <v-icon color="blue" large>mdi-calendar-month</v-icon>
+          <h5>Ventes Ce Mois</h5>
+          <p class="headline">{{ formatCurrency(monthlySales) }}</p>
         </v-card>
       </v-col>
+
+      <!-- Clients aujourd'hui -->
       <v-col cols="12" md="3">
         <v-card class="pa-4">
-          <v-icon color="red" large>mdi-alert-circle-outline</v-icon>
-          <h5>Commandes Annulées</h5>
-          <p class="headline">{{ canceledOrders }}</p>
-        </v-card>
-      </v-col> -->
-      <v-col cols="12" md="3">
-        <v-card class="pa-4">
-          <v-icon color="blue" large>mdi-account-group</v-icon>
+          <v-icon color="purple" large>mdi-account-group</v-icon>
           <h5>Clients Aujourd'hui</h5>
           <p class="headline">{{ todayCustomers }}</p>
-        </v-card>
-      </v-col>
-      <v-col cols="12" md="3">
-        <v-card class="pa-4">
-          <v-icon color="purple" large>mdi-cart-arrow-down</v-icon>
-          <h5>Panier Moyen</h5>
-          <p class="headline">{{ formatCurrency(averageOrderValue) }}</p>
         </v-card>
       </v-col>
     </v-row>
@@ -104,16 +97,17 @@
 
 <script>
 export default {
-  middleware:"superviseur",
+  middleware: "superviseur",
   data() {
     return {
       // Statistiques principales
       totalSales: 0,
+      dailySales: 0, // Total des ventes par jour
+      monthlySales: 0, // Total des ventes par mois
       completedOrders: 0,
       ongoingOrders: 0,
       canceledOrders: 0,
-      todayCustomers: 0,
-      averageOrderValue: 0,
+      todayCustomers: 0, // Nombre de clients aujourd'hui
 
       // Graphiques
       pieChartOptions: {
@@ -164,57 +158,65 @@ export default {
       }).format(value);
     },
     async fetchDashboardData() {
-  try {
-    // Récupérer les commandes
-    const ordersResponse = await this.$axios.get("/commandes");
-    const orders = ordersResponse.data;
+      try {
+        // Récupérer les commandes
+        const ordersResponse = await this.$axios.get("/commandes");
+        const orders = ordersResponse.data;
 
-    // Récupérer les produits
-    const productsResponse = await this.$axios.get("/produits");
-    const products = productsResponse.data;
+        // Récupérer les produits
+        const productsResponse = await this.$axios.get("/produits");
+        const products = productsResponse.data;
 
-    // Calculer les statistiques principales
-    this.totalSales = orders.reduce((sum, order) => sum + order.total, 0);
-    this.completedOrders = orders.filter(order => order.statut === "Terminée").length;
-    this.ongoingOrders = orders.filter(order => order.statut === "En cours").length;
-    this.canceledOrders = orders.filter(order => order.statut === "Annulée").length;
+        // Calculer les statistiques principales
+        this.totalSales = orders.reduce((sum, order) => sum + order.total, 0);
+        this.completedOrders = orders.filter(order => order.statut === "Terminée").length;
+        this.ongoingOrders = orders.filter(order => order.statut === "En cours").length;
+        this.canceledOrders = orders.filter(order => order.statut === "Annulée").length;
 
-    // Calculer le nombre de clients aujourd'hui
-    const today = new Date().toISOString().split("T")[0];
-    this.todayCustomers = orders.filter(order => order.date.split("T")[0] === today).length;
+        // Calculer le nombre de clients aujourd'hui
+        const today = new Date().toISOString().split("T")[0];
+        this.todayCustomers = orders.filter(order => order.date.split("T")[0] === today).length;
 
-    // Calculer le panier moyen
-    this.averageOrderValue = this.totalSales / orders.length || 0;
+        // Calculer les ventes par jour
+        this.dailySales = orders
+          .filter(order => order.date.split("T")[0] === today)
+          .reduce((sum, order) => sum + order.total, 0);
 
-    // Récupérer les articles à faible stock
-    this.lowStockItems = products.filter(product => product.quantite <= product.critique);
+        // Calculer les ventes par mois
+        const currentMonth = new Date().toISOString().slice(0, 7); // Format YYYY-MM
+        this.monthlySales = orders
+          .filter(order => order.date.slice(0, 7) === currentMonth)
+          .reduce((sum, order) => sum + order.total, 0);
 
-    // Récupérer les commandes récentes (5 dernières commandes)
-    this.recentOrders = orders.slice(-5).map(order => ({
-      ...order,
-      date: new Date(order.date).toLocaleDateString("fr-FR"),
-    }));
+        // Récupérer les articles à faible stock
+        this.lowStockItems = products.filter(product => product.quantite <= product.critique);
 
-    // Calculer les ventes par catégorie
-    const categories = {};
-    orders.forEach(order => {
-      const category = order.produit.categorie; // Supposons que la catégorie est dans order.produit.categorie
-      if (!categories[category]) {
-        categories[category] = 0;
+        // Récupérer les commandes récentes (5 dernières commandes)
+        this.recentOrders = orders.slice(-5).map(order => ({
+          ...order,
+          date: new Date(order.date).toLocaleDateString("fr-FR"),
+        }));
+
+        // Calculer les ventes par catégorie
+        const categories = {};
+        orders.forEach(order => {
+          const category = order.produit.categorie; // Supposons que la catégorie est dans order.produit.categorie
+          if (!categories[category]) {
+            categories[category] = 0;
+          }
+          categories[category] += order.total; // Ajouter le total de la commande à la catégorie
+        });
+
+        // Mettre à jour les données du graphique des ventes par catégorie
+        this.pieChartOptions.labels = Object.keys(categories);
+        this.pieChartSeries = Object.values(categories);
+
+        // Exemple de données pour les ventes hebdomadaires (à adapter selon vos besoins)
+        this.barChartSeries[0].data = [120, 200, 150, 300, 400, 250, 320]; // Exemple de données
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données du dashboard :", error);
       }
-      categories[category] += order.total; // Ajouter le total de la commande à la catégorie
-    });
-
-    // Mettre à jour les données du graphique des ventes par catégorie
-    this.pieChartOptions.labels = Object.keys(categories);
-    this.pieChartSeries = Object.values(categories);
-
-    // Exemple de données pour les ventes hebdomadaires (à adapter selon vos besoins)
-    this.barChartSeries[0].data = [120, 200, 150, 300, 400, 250, 320]; // Exemple de données
-  } catch (error) {
-    console.error("Erreur lors de la récupération des données du dashboard :", error);
-  }
-},
+    },
   },
 };
 </script>

@@ -78,7 +78,15 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" @click="sendArticle">Ajouter</v-btn>
+          <v-btn color="primary" @click="sendArticle">
+            <v-progress-circular
+                    v-if="loading"
+                    :disabled="loading"
+                    :size="30"
+                    color="white"
+                    indeterminate
+                  />                      
+            Ajouter</v-btn>
           <v-btn text @click="closeAddModal">Annuler</v-btn>
         </v-card-actions>
       </v-card>
@@ -163,6 +171,7 @@ export default {
   middleware: "serveur",
   data() {
     return {
+      loading : false,
       selectedTableId: null, // ID de la table sélectionnée
       tablesOptions: ['Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5', 'Table 6', 'Table 7'], // Options des tables
       statutOptions: ['En attente', 'En préparation', 'Servie', 'Terminée'],
@@ -345,6 +354,7 @@ export default {
     },
 
     async sendArticle() {
+      this.loading = true
       this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken');
       this.commande.client = this.selectedTableId;
       this.commande.serveur = this.user.userId;
@@ -387,6 +397,7 @@ export default {
           color: "error",
         });
       }
+      this.loading = false
     },
 
     openAddModal() {
@@ -538,11 +549,8 @@ export default {
         <body>
           <div class="container">
             <div class="header">
-              <h4>Bénédictions de l'Éternel</h4>
-              <h5>Hotel - Bar - Restaurant</h5>
-              <p>
-                Angle des Rues Bry & St-Charles<br />
-                Fort-Liberté, Haïti<br />
+              <h5>Bénédictions de l'Éternel</h5>             
+              <p>               
                 Tél: +509 3779-6764 / +509 3596-7838<br />        
               </p>
               <hr style="border: 1px dashed black; margin: 10px 0;" />

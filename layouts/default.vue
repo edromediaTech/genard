@@ -145,16 +145,7 @@
       </v-btn>   
     </v-app-bar>    
     <v-main>      
-      <v-alert
-      v-if="nouveauUser !== null && user "
-      type="success"
-      dismissible
-    icon="mdi-check-circle"
-    border="top"
-    elevation="2"
-    >
-       {{ user.nom }} {{ user.prenom }} vient de connecter 
-    </v-alert>
+      
       <!-- style="background-color: rgb(241, 241, 241);" -->
       <v-container fluid>
         <Nuxt />
@@ -243,37 +234,84 @@ export default {
           icon: "mdi-basket",
           title: "Approvisionnement",
           to: "/appro",
-        });
-       
+        });      
 
-        items.push({
-          icon: "mdi-package-variant",
-          title: "Produits",
-          to: "/produit",
-        });
+        
         items.push({
           icon: "mdi-basket",
           title: "Achats",
           to: "/achat",
         });
       }
-      if (this.user && parseInt(this.user.user_level) >= role.admin) {
+      if (this.user && parseInt(this.user.user_level) === role.admin) {
         items.push({
           icon: "mdi-view-dashboard",
           title: "Tableau de bord",
           to: "/admin",
+        });    
+
+      
+        items.push({
+          icon: "mdi-food",
+          title: "Gestion des Commandes",
+          to: "/commandeAdmin",
+        });       
+       
+        items.push({
+          icon: "mdi-basket",
+          title: "Achats",
+          to: "/achat",
         });
 
+        items.push({
+          icon: "mdi-basket",
+          title: "Approvisionnement",
+          to: "/appro",
+        });
+        
+
+        items.push({
+          icon: "mdi-package-variant",
+          title: "Produits",
+          to: "/produit",
+        });
+
+      }
+        if (this.user && parseInt(this.user.user_level) === role.supadmin) {       
+          items.push({
+          icon: "mdi-view-dashboard",
+          title: "Tableau de bord",
+          to: "/admin",
+        });    
+
+      
+        items.push({
+          icon: "mdi-food",
+          title: "Gestion des Commandes",
+          to: "/commandeAdmin",
+        });       
+       
+        items.push({
+          icon: "mdi-basket",
+          title: "Achats",
+          to: "/achat",
+        });
         items.push({
           icon: "mdi-account",
           title: "Gestion Utilisateur",
           to: "/gestionUser",
         });
-
-        items.push({
+      
+      items.push({
           icon: "mdi-account-multiple",
           title: "Inscription User",
           to: "/userInscription",
+        });
+
+        items.push({
+          icon: "mdi-basket",
+          title: "Approvisionnement",
+          to: "/appro",
         });
 
         items.push({
@@ -281,16 +319,7 @@ export default {
           title: "Rapport de Ventes",
           to: "/rapportdevente",
         });
-        items.push({
-          icon: "mdi-food",
-          title: "Gestion des Commandes",
-          to: "/commandeAdmin",
-        });
-        items.push({
-          icon: "mdi-basket",
-          title: "Approvisionnement",
-          to: "/appro",
-        });
+
         items.push({
           icon: "mdi-basket",
           title: "Stockage",
@@ -302,21 +331,6 @@ export default {
           title: "Produits",
           to: "/produit",
         });
-        items.push({
-          icon: "mdi-basket",
-          title: "Achats",
-          to: "/achat",
-        });
-
-        if (this.user && parseInt(this.user.user_level) === role.supadmin) {
-       
-
-        items.push({
-          icon: "mdi-account",
-          title: "Gestion Utilisateur",
-          to: "/gestionUser",
-        });
-      }
        
       }
       return items;
