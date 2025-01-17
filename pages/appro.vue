@@ -1,16 +1,77 @@
 <template>
   <v-container>
-    <!-- Bouton pour exporter en PDF -->
-    <v-btn color="primary" class="mb-4" @click="exportToPDF">Exporter en PDF</v-btn>
-
+  
     <!-- Liste des produits -->
     <v-data-table
       id="printable-table"
       :headers="headers"
       :items="produits"
-      item-key="id"
+      item-key="_id"
+      :search="search"    
       class="elevation-1"
+      
     >
+    <template #top>
+      <v-row class="mx-4 my-4">
+               <v-progress-circular
+                    v-show="visible"
+                    :size="50"
+                    :width="3"
+                    color="info"
+                    indeterminate                    
+                    /> 
+            <v-col cols="12"
+                sm="6"        
+                md="3">
+              <v-text-field
+                  v-if="produits.length > 0"  
+                  v-model="search"
+                  append-icon="mdi-magnify"
+                  label="Search"
+                  single-line
+                  hide-details
+               ></v-text-field>
+             </v-col>             
+
+              <v-spacer />
+      
+          <!-- Bouton et composant pour exporter en PDF -->
+    <v-btn
+              v-if="produits.length > 0"
+             
+              class="mx-2 mt-2 theme--light no-dark-theme"
+              fab
+              x-small
+              color="primary"
+              @click="generateReport"
+            >
+              PDF
+              <client-only>
+                <vue-html2pdf
+                  ref="html2Pdf"
+                  :show-layout="false"
+                  :float-layout="true"
+                  :enable-download="true"
+                  :preview-modal="false"
+                  :paginate-elements-by-height="1300"
+                  filename="Approvisionnement"
+                  :pdf-quality="2"
+                  :manual-pagination="false"
+                  pdf-format="letter"
+                  pdf-orientation="landscape"
+                  pdf-content-width="1000px"
+                >
+                  <template slot="pdf-content">
+                    <appro-printer
+                      :produits="produits"
+                     
+                    />
+                  </template>
+                </vue-html2pdf>
+              </client-only>
+            </v-btn>
+      </v-row>
+ </template>
       <template v-if="isAdmin" #[`item.actions`]="{ item }">
         <!-- Bouton pour éditer -->
         <v-btn icon @click="openEditModal(item)">
@@ -117,14 +178,16 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-import html2pdf from "html2pdf.js"; // Importer html2pdf
+
 import { role } from "../role";
 
 export default {
   middleware: "superviseur",
   data() {
     return {
+      search:'',
       valid: false,
+      visible: false,
       editModal: false, // Contrôle l'affichage du modal
       isEditing: false, // Mode édition ou ajout
       produit: {
@@ -214,18 +277,30 @@ export default {
         console.error('Erreur lors de la suppression:', error);
       }
     },
-    exportToPDF() {
-      const element = document.getElementById('printable-table'); // Cibler le tableau
-      const options = {
-        margin: [10, 10, 10, 10], // Marges du PDF
-        filename: 'liste_produits.pdf', // Nom du fichier PDF
-        image: { type: 'jpeg', quality: 0.98 }, // Qualité des images
-        html2canvas: { scale: 2 }, // Améliorer la qualité du rendu
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, // Format A4 portrait
-      };
-
-      // Générer le PDF
-      html2pdf().from(element).set(options).save();
+    async beforeDownload({ html2pdf, options, pdfContent }) {
+      await html2pdf()
+        .set(options)
+        .from(pdfContent)
+        .toPdf()
+        .get("pdf")
+        .then((pdf) => {
+          const totalPages = pdf.internal.getNumberOfPages();
+          for (let i = 1; i <= totalPages; i++) {
+            pdf.setPage(i);
+            pdf.setFontSize(10);
+            pdf.setTextColor(150);
+            pdf.text(
+              "Page " + i + " sur " + totalPages,
+              pdf.internal.pageSize.getWidth() * 0.88,
+              pdf.internal.pageSize.getHeight() - 0.3
+            );
+          }
+        })
+        .save();
+    },
+   
+    generateReport() {      
+      this.$refs.html2Pdf.generatePdf();
     },
   },
 };

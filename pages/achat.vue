@@ -138,7 +138,69 @@
         :items="transactions"
         :items-per-page="10"
         class="elevation-1"
+        :search="search"
       >
+      <template #top>
+        <v-row class="mx-4 my-4">
+               <v-progress-circular
+                    v-show="visible"
+                    :size="50"
+                    :width="3"
+                    color="info"
+                    indeterminate                    
+                    /> 
+            <v-col cols="12"
+                sm="6"        
+                md="3">
+              <v-text-field
+                  v-if="transactions.length > 0"  
+                  v-model="search"
+                  append-icon="mdi-magnify"
+                  label="Search"
+                  single-line
+                  hide-details
+               ></v-text-field>
+             </v-col>             
+
+              <v-spacer />
+      
+          <!-- Bouton et composant pour exporter en PDF -->
+           <v-btn
+              v-if="transactions.length > 0"
+             
+              class="mx-2 mt-2 theme--light no-dark-theme"
+              fab
+              x-small
+              color="primary"
+              @click="generateReport"
+            >
+              PDF
+              <client-only>
+                <vue-html2pdf
+                  ref="html2Pdf"
+                  :show-layout="false"
+                  :float-layout="true"
+                  :enable-download="true"
+                  :preview-modal="false"
+                  :paginate-elements-by-height="1300"
+                  filename="Achats"
+                  :pdf-quality="2"
+                  :manual-pagination="false"
+                  pdf-format="letter"
+                  pdf-orientation="landscape"
+                  pdf-content-width="1000px"
+                >
+                  <template slot="pdf-content">
+                    <AchatPrinter
+                      :transactions="transactions"
+                     
+                    />
+                  </template>
+                </vue-html2pdf>
+              </client-only>
+            </v-btn>
+            </v-row>
+      </template>
         <template v-if="isAdmin" #[`item.actions`]="{ item }">
           <v-btn icon small @click="editTransaction(item)">
             <v-icon>mdi-pencil</v-icon>
@@ -154,9 +216,13 @@
   <script>
   import { mapGetters, mapActions } from "vuex";
   import { role } from "../role";
+import AchatPrinter from "~/components/achatPrinter.vue";
   export default {
+    components:{AchatPrinter},
     data() {
       return {
+        search:'',
+        visible: false,
         modalOpen: false, // Contrôle l'ouverture du modal
         loading:false,
         form: {
@@ -317,6 +383,31 @@
         }
         this.loading = false
       },
+      async beforeDownload({ html2pdf, options, pdfContent }) {
+      await html2pdf()
+        .set(options)
+        .from(pdfContent)
+        .toPdf()
+        .get("pdf")
+        .then((pdf) => {
+          const totalPages = pdf.internal.getNumberOfPages();
+          for (let i = 1; i <= totalPages; i++) {
+            pdf.setPage(i);
+            pdf.setFontSize(10);
+            pdf.setTextColor(150);
+            pdf.text(
+              "Page " + i + " sur " + totalPages,
+              pdf.internal.pageSize.getWidth() * 0.88,
+              pdf.internal.pageSize.getHeight() - 0.3
+            );
+          }
+        })
+        .save();
+    },
+   
+    generateReport() {      
+      this.$refs.html2Pdf.generatePdf();
+    },
     },
   };
   </script>

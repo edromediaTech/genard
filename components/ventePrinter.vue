@@ -3,15 +3,16 @@
   <div class="card-body " >
   <div class="header" >
       <div>
-        <center><img src='images/amoirie.jpg' width="80" class="imag"></center>
+        <!-- <center><img src='images/logo.jpg' width="60" class="imag"></center> -->
     </div>
-      <div  class="entete"><h4>MINISTERE DE L'EDUCATION NATIONALE ET DE LA FORMATION PROFESSIONNELLE</h4>
-         <center> <h4>Direction Départementale d'Education du Nord'Est</h4></center>
+      <div  class="entete"><h3>Bénédiction de l'Eternel</h3>
+         <center> <h5>Rue Bory & St-Charles, Fort-Liberté, Haiti</h5></center>
       </div>      
       
     </div>
-    <!-- <center ><h5 class="ecole">{{texte}}</h5></center> -->
-       <v-simple-table >
+    <center ><h5 class="ecole">Rapport de Vente</h5></center>
+    <h5 style="text-align:right; padding-right:20%"  >Date : {{new Date() | moment(" Do/MM/YYYY")}}</h5>
+       <v-simple-table id="pdf-container" class="theme--light no-dark-theme">
                 <thead>
                   <tr>
                     <th>Nom</th>
@@ -67,11 +68,21 @@
   }
   </script>
   <style scoped>
+  .no-dark-theme {
+  background-color: white !important;
+  color: black !important;
+}
+
+.no-dark-theme * {
+  background-color: white !important;
+  color: black !important;
+  box-shadow: none !important;
+}
+
   table{
   border-collapse: collapse; 
   width: 100%;
-  margin-top: 20px;
-  
+  margin-top: 20px;  
   }
   th,td{
      border:1px solid #ddd;
