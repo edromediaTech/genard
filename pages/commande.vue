@@ -62,7 +62,14 @@
                 outlined
                 dense
                 required
+                @change="onProductChange"
               ></v-autocomplete>
+               <!-- Afficher les détails du produit -->
+        <v-card v-if="selectedProductDetails" class="mt-4">
+          <v-card-text>
+            <strong>Prix :</strong>  {{ selectedProductDetails.prix }} HTG
+          </v-card-text>
+        </v-card>
             </v-col>
             <v-col cols="12" md="6" sm="6">
               <v-text-field
@@ -134,7 +141,13 @@
             :items="produitsOptions"
             label="Choisir un produit"
             outlined
+            @change="onProductChange"
           ></v-autocomplete>
+          <v-card v-if="selectedProductDetails" class="mt-4">
+          <v-card-text>
+            <strong>Prix :</strong>  {{ selectedProductDetails.prix }} HTG
+          </v-card-text>
+        </v-card>
           <v-text-field
             v-model="newProduct.quantite"
             label="Quantité"
@@ -177,6 +190,7 @@ export default {
       statutOptions: ['En attente', 'En préparation', 'Servie', 'Terminée'],
       dialogConfirm: false,  // État du dialogue de confirmation
       currentDeleteId: null,
+      selectedProductDetails: null,
       articles: [], // Articles récupérés
       commande: {
         client: null,
@@ -257,14 +271,21 @@ export default {
   },
   methods: {
     ...mapActions("auth", ["sendLoginRequest"]),
+    onProductChange(selectedValue) {
+      const selectedProduct = this.produitsOptions.find(
+        (produit) => produit.value === selectedValue
+      );
+      this.selectedProductDetails = selectedProduct || null;
+    },
 
     // Récupérer les produits disponibles
     async fetchProduits() {
       try {
         const response = await this.$axios.get('/produits');
         this.produitsOptions = response.data.map((produits) => ({
-          text: produits.nom + '   --- ' + produits.prix + ' HTG',
+          text: produits.nom,
           value: produits._id,
+          prix:produits.prix
         }));
       } catch (error) {
         console.error('Erreur lors de la récupération des produits:', error);

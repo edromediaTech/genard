@@ -307,7 +307,7 @@ export default {
       try {
         const response = await this.$axios.get('/produits');
         this.produitsOptions = response.data.map(produit => ({
-          text: produit.nom + ' --- ' + produit.prix + ' HTG',
+          text: produit.nom ,
           value: produit._id,
           prix: produit.prix,
         }));

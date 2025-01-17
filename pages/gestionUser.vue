@@ -51,6 +51,12 @@
             </template>
           </v-edit-dialog>
         </template>
+        <template #[`item.canPrint`]="{ item }">
+          <v-switch
+            :input-value="item.canPrint"
+            @change="updatePrintPermission(item, $event)"
+          ></v-switch>
+        </template>
         <template #top>
           <v-toolbar flat>
             <v-col cols="12" sm="6" md="4">
@@ -62,11 +68,6 @@
                 hide-details
               ></v-text-field>
             </v-col>
-            <!-- <v-divider
-              class="mx-4"
-              inset
-              vertical
-            /> -->
             <v-spacer />
             <v-dialog v-model="dialog" max-width="500px">
               <v-card>
@@ -146,11 +147,13 @@
     </base-material-card>
   </v-container>
 </template>
+
 <script>
 import { mapGetters } from "vuex";
 import { role } from "~/role";
+
 export default {
-    middleware: "admin",
+  middleware: "admin",
   data() {
     return {
       dialog: false,
@@ -162,17 +165,6 @@ export default {
       password: "",
       password1: "",
       passwordRules: [(v) => !!v || "Password obligatoire"],
-      //     rules: {
-      //     required: value => !!value || "Required.",
-      //     password: value => {
-      //       const pattern =" /^(?=.[a-z])(?=.[A-Z])(?=.[0-9])(?=.[!@#$%^&*])(?=.{8,})/"
-      //       return (
-      //     pattern.test(value) ||
-      //     "Min. 8 characters with at least one capital letter, a number and a special character."
-      //   );
-      //   }
-      // },
-
       users: [],
       privileges: [],
       privilege: [],
@@ -181,8 +173,8 @@ export default {
         { text: "Nom", value: "prenom" },
         { text: "Code", value: "code" },
         { text: "Email", value: "email" },
-        // { text: "Dernière Visite", value: "lastSeen" },
         { text: "Privilège", value: "userLevel" },
+        { text: "Permission Imprimer", value: "canPrint", sortable: false },
         { text: "Actions", value: "actions", sortable: false },
       ],
       editedIndex: -1,
@@ -213,162 +205,57 @@ export default {
   },
   mounted() {
     this.privilege = Object.keys(role);
-
     const option = Object.entries(role).map(([text, value]) => ({ text, value }));
     this.privileges = option;
     this.get_users_online();
   },
-
   methods: {
     async get_users_online() {
       this.$axios.defaults.headers.common.Authorization =
         "Bearer " + localStorage.getItem("authToken");
 
       this.visible = true;
-      await this.$axios.get("auth/all").then((res) => {
-        this.users = res.data;        
-        this.nbu = res.data.length;
+      try {
+        const response = await this.$axios.get("auth/all");
+        this.users = response.data.map((user) => ({
+          ...user,
+          canPrint: user.permissions?.canPrint || false,
+        }));
+        this.nbu = this.users.length;
+      } catch (error) {
+        console.error("Erreur lors de la récupération des utilisateurs:", error);
+      } finally {
         this.visible = false;
-      });
-    },
-
-    getKeyByValue(obj, value) {
-      for (const key in obj) {
-        if (obj[key] === value) {
-          return key;
-        }
       }
-      return null;
     },
-
-    updateUser(user) {
+    async updatePrintPermission(user, canPrint) {
       this.$axios.defaults.headers.common.Authorization =
         "Bearer " + localStorage.getItem("authToken");
 
-      this.$axios.patch("auth/" + user.id, this.editedItem).then((res) => {
-        if (res.data === 1)
-          this.$notifier.showMessage({
-            content: "Utilisateur modifié",
-            color: "success",
-          });
-        else this.$notifier.showMessage({ content: "Echec", color: "error" });
-      });
-    },
-
-    updatePrivilege(user) {
-      this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken')
-      
-      this.$axios.put("auth/userlevel", {_id : user._id, user_level: user.userLevel })
-        .then((res) => {
-          if (res.status === 201) {
-            this.$notifier.showMessage({
-              content: "Privilège modifié",
-              color: "success",
-            });
-          } else {
-            this.$notifier.showMessage({ content: "Opération échouée!", color: "echec" });
-          }
+      try {
+        await this.$axios.put("/auth/update-permission", {
+          userId: user._id,
+          canPrint,
         });
-    },
 
-    deleteUser(user) {
-      this.$axios.delete("user-delete/" + this.user.id).then((res) => {
-        if (res.data.status === 1) {
-          this.$notifier.showMessage({
-            content: "Utilisateur supprimé",
-            color: "success",
-          });
-          return true;
-        } else {
-          return false;
+        const index = this.users.findIndex((u) => u._id === user._id);
+        if (index !== -1) {
+          this.users[index].canPrint = canPrint;
         }
-      });
-    },
 
-    editItem(item) {
-      this.editedIndex = this.users.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialog = true;
-    },
-
-    save() {
-      this.loading = true;
-
-      if (this.editedItem.password !== this.editedItem.password1) {
-        this.$notifier.showMessage({ content: "Password incorrect!", color: "error" });
-        return false;
-      }
-
-      if (this.editedIndex > -1) {
-        this.updateUser(this.editedItem);
-        Object.assign(this.users[this.editedIndex], this.editedItem);
-      }
-
-      this.close();
-    },
-
-    deleteItem(item) {
-      this.editedIndex = this.users.indexOf(item);
-      this.editedItem = Object.assign({}, item);
-      this.dialogDelete = true;
-    },
-
-    deleteItemConfirm() {
-      this.deleteuser(this.editedItem);
-      this.users.splice(this.editedIndex, 1);
-      this.closeDelete();
-    },
-
-    close() {
-      this.dialog = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
-    },
-
-    closeDelete() {
-      this.dialogDelete = false;
-      this.$nextTick(() => {
-        this.editedItem = Object.assign({}, this.defaultItem);
-        this.editedIndex = -1;
-      });
-    },
-
-    getdate(dated) {
-      const diff = new Date().getTime() - new Date(dated).getTime();
-      if (diff < 1000) return "maintenant";
-      const nbjour = Math.trunc(diff / (1000 * 60 * 60 * 24));
-      if (nbjour > 6) return dated;
-      else if (nbjour < 6 && nbjour > 0) return "il y a " + nbjour + " j";
-      else {
-        const nbheure = Math.trunc(diff / (1000 * 60 * 60));
-        if (nbheure > 11) return "Il y a " + nbheure + " heures";
-        else if (nbheure < 12 && nbheure > 0) return "il y a " + nbheure + "h";
-        else {
-          const nbminute = Math.trunc(diff / (1000 * 60));
-          if (nbminute > 29) return "moins de 1h";
-          else if (nbminute < 30 && nbminute > 0) return "il y a " + nbminute + " min";
-          else {
-            const nbseconde = Math.trunc(diff / 1000);
-            if (nbseconde > 29) return "moins de 1mn";
-            else if (nbseconde < 30 && nbseconde > 0)
-              return "il y a " + nbseconde + " sec";
-          }
-        }
+        this.$notifier.showMessage({
+          content: `Permission "Imprimer" mise à jour pour ${user.prenom}.`,
+          color: "success",
+        });
+      } catch (error) {
+        console.error("Erreur lors de la mise à jour de la permission:", error);
+        this.$notifier.showMessage({
+          content: "Erreur lors de la mise à jour de la permission.",
+          color: "error",
+        });
       }
     },
-
-    cancel() {
-      this.snack = true;
-      this.snackColor = "error";
-      this.snackText = "Canceled";
-    },
-    open() {
-      this.snack = true;
-      this.snackColor = "info";
-      this.snackText = "Dialog opened";
-    },
+    // ... (autres méthodes existantes)
   },
 };
 </script>

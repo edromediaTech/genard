@@ -20,21 +20,21 @@
         </v-card>
       </v-col>
 
-      <!-- Ventes ce mois -->
-      <v-col cols="12" md="3">
-        <v-card class="pa-4">
-          <v-icon color="blue" large>mdi-calendar-month</v-icon>
-          <h5>Ventes Ce Mois</h5>
-          <p class="headline">{{ formatCurrency(monthlySales) }}</p>
-        </v-card>
-      </v-col>
-
       <!-- Clients aujourd'hui -->
       <v-col cols="12" md="3">
         <v-card class="pa-4">
           <v-icon color="purple" large>mdi-account-group</v-icon>
           <h5>Clients Aujourd'hui</h5>
           <p class="headline">{{ todayCustomers }}</p>
+        </v-card>
+      </v-col>
+
+      <!-- Ventes ce mois -->
+      <v-col cols="12" md="3">
+        <v-card class="pa-4">
+          <v-icon color="blue" large>mdi-calendar-month</v-icon>
+          <h5>Ventes Ce Mois</h5>
+          <p class="headline">{{ formatCurrency(monthlySales) }}</p>
         </v-card>
       </v-col>
     </v-row>
@@ -158,65 +158,99 @@ export default {
       }).format(value);
     },
     async fetchDashboardData() {
-      try {
-        // Récupérer les commandes
-        const ordersResponse = await this.$axios.get("/commandes");
-        const orders = ordersResponse.data;
+  try {
+    // Récupérer les commandes
+    const ordersResponse = await this.$axios.get("/commandes");
+    const orders = ordersResponse.data;
 
-        // Récupérer les produits
-        const productsResponse = await this.$axios.get("/produits");
-        const products = productsResponse.data;
+    // Récupérer les produits
+    const productsResponse = await this.$axios.get("/produits");
+    const products = productsResponse.data;
 
-        // Calculer les statistiques principales
-        this.totalSales = orders.reduce((sum, order) => sum + order.total, 0);
-        this.completedOrders = orders.filter(order => order.statut === "Terminée").length;
-        this.ongoingOrders = orders.filter(order => order.statut === "En cours").length;
-        this.canceledOrders = orders.filter(order => order.statut === "Annulée").length;
+    // Obtenir la date d'aujourd'hui au format 'fr-CA' (YYYY-MM-DD)
+    const today = new Date().toLocaleDateString('fr-CA');
 
-        // Calculer le nombre de clients aujourd'hui
-        const today = new Date().toISOString().split("T")[0];
-        this.todayCustomers = orders.filter(order => order.date.split("T")[0] === today).length;
+    // Filtrer les commandes d'aujourd'hui
+    const todayOrders = orders
+      .filter(order => {
+        const orderDate = new Date(order.date).toLocaleDateString('fr-CA');
+        return orderDate === today;
+      })
+      .map(order => {
+        // Si le total est égal à 0, le recalculer en fonction des articles
+        if (order.total === 0) {
+          order.total = order.articles.reduce((sum, article) => {
+            return sum + (article.produit.prix * article.quantite);
+          }, 0);
+        }
 
-        // Calculer les ventes par jour
-        this.dailySales = orders
-          .filter(order => order.date.split("T")[0] === today)
-          .reduce((sum, order) => sum + order.total, 0);
-
-        // Calculer les ventes par mois
-        const currentMonth = new Date().toISOString().slice(0, 7); // Format YYYY-MM
-        this.monthlySales = orders
-          .filter(order => order.date.slice(0, 7) === currentMonth)
-          .reduce((sum, order) => sum + order.total, 0);
-
-        // Récupérer les articles à faible stock
-        this.lowStockItems = products.filter(product => product.quantite <= product.critique);
-
-        // Récupérer les commandes récentes (5 dernières commandes)
-        this.recentOrders = orders.slice(-5).map(order => ({
+        // Retourner la commande avec les champs formatés
+        return {
           ...order,
-          date: new Date(order.date).toLocaleDateString("fr-FR"),
-        }));
+          date: new Date(order.date).toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: '2-digit',
+          }),
+        };
+      });
 
-        // Calculer les ventes par catégorie
-        const categories = {};
-        orders.forEach(order => {
-          const category = order.produit.categorie; // Supposons que la catégorie est dans order.produit.categorie
-          if (!categories[category]) {
-            categories[category] = 0;
-          }
-          categories[category] += order.total; // Ajouter le total de la commande à la catégorie
-        });
+    // Calculer les statistiques principales
+    this.totalSales = orders.reduce((sum, order) => {
+      const montant = order.total === 0 ? order.articles.reduce((sum, article) => sum + (article.produit.prix * article.quantite), 0) : order.total;
+      return sum + montant;
+    }, 0);
 
-        // Mettre à jour les données du graphique des ventes par catégorie
-        this.pieChartOptions.labels = Object.keys(categories);
-        this.pieChartSeries = Object.values(categories);
+    this.completedOrders = orders.filter(order => order.statut === "Terminée").length;
+    this.ongoingOrders = orders.filter(order => order.statut === "En cours").length;
+    this.canceledOrders = orders.filter(order => order.statut === "Annulée").length;
 
-        // Exemple de données pour les ventes hebdomadaires (à adapter selon vos besoins)
-        this.barChartSeries[0].data = [120, 200, 150, 300, 400, 250, 320]; // Exemple de données
-      } catch (error) {
-        console.error("Erreur lors de la récupération des données du dashboard :", error);
+    // Calculer le montant total des ventes aujourd'hui
+    this.dailySales = todayOrders.reduce((sum, order) => {
+      const montant = order.total === 0 ? order.articles.reduce((sum, article) => sum + (article.produit.prix * article.quantite), 0) : order.total;
+      return sum + montant;
+    }, 0);
+
+    // Calculer le nombre de clients uniques ayant commandé aujourd'hui
+    const uniqueClients = new Set(todayOrders.map(order => order._id)); // Utilisez clientId pour identifier les clients
+    this.todayCustomers = uniqueClients.size;
+
+    // Calculer les ventes par mois
+    const currentMonth = new Date().toISOString().slice(0, 7); // Format YYYY-MM
+    this.monthlySales = orders
+      .filter(order => order.date.slice(0, 7) === currentMonth)
+      .reduce((sum, order) => {
+        const montant = order.total === 0 ? order.articles.reduce((sum, article) => sum + (article.produit.prix * article.quantite), 0) : order.total;
+        return sum + montant;
+      }, 0);
+
+    // Récupérer les articles à faible stock
+    this.lowStockItems = products.filter(product => product.quantite <= product.critique);
+
+    // Récupérer toutes les commandes d'aujourd'hui
+    this.recentOrders = todayOrders;
+
+    // Calculer les ventes par catégorie
+    const categories = {};
+    orders.forEach(order => {
+      const category = order.produit.categorie; // Supposons que la catégorie est dans order.produit.categorie
+      if (!categories[category]) {
+        categories[category] = 0;
       }
-    },
+      const montant = order.total === 0 ? order.articles.reduce((sum, article) => sum + (article.produit.prix * article.quantite), 0) : order.total;
+      categories[category] += montant;
+    });
+
+    // Mettre à jour les données du graphique des ventes par catégorie
+    this.pieChartOptions.labels = Object.keys(categories);
+    this.pieChartSeries = Object.values(categories);
+
+    // Exemple de données pour les ventes hebdomadaires (à adapter selon vos besoins)
+    this.barChartSeries[0].data = [120, 200, 150, 300, 400, 250, 320]; // Exemple de données
+  } catch (error) {
+    console.error("Erreur lors de la récupération des données du dashboard :", error);
+  }
+},
   },
 };
 </script>
