@@ -191,13 +191,11 @@ import { mapGetters, mapActions } from "vuex";
 import { role } from "../role";
 import ExportPDF from "@/components/produitPrinter.vue"; // Importez le composant ExportPDF
 
-
-
 export default {
   components: {
     ExportPDF, // Enregistrez le composant
   },
-  middleware: "superviseur",
+  middleware: "serveur",
   data() {
     return {
       search:'',
@@ -225,7 +223,7 @@ export default {
         { text: "Défectueux", value: "defectue" },
         { text: "Critiques", value: "critique" },
         { text: "Alertes", value: "alerte" },
-        { text: "Actions", align: "end", value: "actions" },
+        { text: "", align: "end", value: "actions" },
       ],
       produits: [],
       categoriesOptions: ["Plat", "Boisson", "Dessert", "Jus naturel", "Jus emboité", "Boisson Alcoolisé", "Apéritif", "Patisserie"],

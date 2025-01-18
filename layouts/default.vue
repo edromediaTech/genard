@@ -211,6 +211,12 @@ export default {
           title: "Gestion des Commandes",
           to: "/commande",
         });
+        
+        items.push({
+          icon: "mdi-package-variant",
+          title: "Produits",
+          to: "/produit",
+        });
        
       }
 
