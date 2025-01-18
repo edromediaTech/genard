@@ -109,7 +109,7 @@
           <v-list dense>
             <v-list-item>
               <v-list-item-content>
-                <v-list-item-title><strong>Client:</strong> {{ formatDate(selectedCommande.createdAt) }}</v-list-item-title>
+                <v-list-item-title><strong>Date:</strong> {{ formatDate(selectedCommande.createdAt) }}</v-list-item-title>
                 <v-list-item-title><strong>Client:</strong> {{ selectedCommande.client }}</v-list-item-title>
                 <v-list-item-title><strong>Serveur:</strong> {{ selectedCommande.serveur }}</v-list-item-title>
               </v-list-item-content>
