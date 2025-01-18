@@ -45,7 +45,7 @@
           <v-btn icon small title="Details de la Commande" @click="viewDetails(item)">
             <v-icon>mdi-eye</v-icon>
           </v-btn>
-          <v-btn icon small color="error" @click="deleteArticle(item._id)">
+          <v-btn v-if="isAdmin" icon small color="error" @click="deleteArticle(item._id)">
             <v-icon>mdi-delete</v-icon>
           </v-btn>
        
@@ -213,7 +213,7 @@
 <script>
 
 import { mapGetters, mapActions } from "vuex";
-
+import { role } from "../role";
 export default {
   middleware: "serveur",
   data() {
@@ -290,6 +290,9 @@ export default {
   },
   computed: {
     ...mapGetters("auth", ["user"]),
+    isAdmin() {
+      return this.user && parseInt(this.user.user_level) === role.supadmin;
+    },
     // Propriété calculée pour le total de la commande
     totalCommande() {
       if (!this.selectedCommande.articles) return 0;

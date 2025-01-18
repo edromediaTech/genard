@@ -17,9 +17,9 @@
           <v-btn icon small title="Details de la Commande" @click="viewDetails(item)">
             <v-icon>mdi-eye</v-icon>
           </v-btn>
-          <v-btn icon small color="error" @click="deleteArticle(item._id)">
+          <!-- <v-btn icon small color="error" @click="deleteArticle(item._id)">
             <v-icon>mdi-delete</v-icon>
-          </v-btn>
+          </v-btn> -->
         </template>
         <template #[`item.createdAt`]="{ item }">
           {{ formatDate(item.createdAt) }}
@@ -307,7 +307,7 @@ export default {
         const { data } = await this.$axios.get('/commandes');
         const userId = this.user.userId;
         const today = new Date().toLocaleDateString('fr-CA');
-        console.log(data);
+   
 
         this.commandes = data
           .filter(commande => {
