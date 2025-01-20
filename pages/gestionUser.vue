@@ -153,7 +153,7 @@ import { mapGetters } from "vuex";
 import { role } from "~/role";
 
 export default {
-  middleware: "admin",
+  middleware: "supadmin",
   data() {
     return {
       dialog: false,

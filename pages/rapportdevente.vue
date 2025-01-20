@@ -53,17 +53,14 @@
                     indeterminate                    
                     /> 
                     <v-card class="mb-4">
-      <v-card-title>
-        Total des ventes : {{ totalVentes }} HTG
-      </v-card-title>  <!-- Bouton pour créer une commande -->
-     
-     
-    </v-card>
-           
+                    <v-card-title  v-if="salesReport.length > 0">
+                      Total des ventes : {{ totalVentes }} HTG
+                    </v-card-title>  <!-- Bouton pour créer une commande -->                  
+                  </v-card>           
               <v-spacer />
       
     <!-- Bouton et composant pour exporter en PDF -->
-    <v-btn
+         <v-btn
               v-if="salesReport.length > 0"
              
               class="mx-2 mt-2"
@@ -127,7 +124,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in salesReport" :key="item.id">
+          <tr v-for="item in salesReport" :key="item._id">
             <td>{{ item.nom }}</td>
             <td>{{ item.quantite }}</td>
             <td>{{ formatCurrency(item.prix) }}</td>
@@ -142,7 +139,6 @@
 <script>
 
 import ventePrinter from '~/components/ventePrinter.vue';
-
 export default {
   components: { ventePrinter },
   middleware:"superviseur",
@@ -176,9 +172,10 @@ export default {
     },
   },
   mounted() {
-    const today = new Date();
-    this.filters.dateDebut = this.formatDate(today);
-    this.filters.dateFin = this.formatDate(today);
+    const today = new Date().toLocaleDateString('fr-CA');   
+    this.filters.dateDebut =today
+    this.filters.dateFin =today
+    console.log(today,   this.filters.dateDebut)
   },
   methods: {
     validateDates() {
@@ -196,7 +193,7 @@ export default {
       // Vérifier si les dates sont valides
       const dateDebut = new Date(this.filters.dateDebut);
       const dateFin = new Date(this.filters.dateFin);
-      const today = new Date(); // Date du jour
+      const today = new Date().toLocaleDateString('fr-CA');; // Date du jour
 
       if (isNaN(dateDebut.getTime())) {
         this.dateDebutErrors.push("La date de début est invalide.");
@@ -234,7 +231,7 @@ export default {
         const response = await this.$axios.get(
           `commandes/produits?dateDebut=${this.filters.dateDebut}&dateFin=${this.filters.dateFin}`
         );
-        
+       
         this.salesReport = response.data;
       } catch (error) {
         console.error("Erreur lors de la récupération du rapport :", error);

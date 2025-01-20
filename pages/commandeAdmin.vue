@@ -215,7 +215,7 @@
 import { mapGetters, mapActions } from "vuex";
 import { role } from "../role";
 export default {
-  middleware: "serveur",
+  middleware: "admin",
   data() {
     return {
       loading : false,

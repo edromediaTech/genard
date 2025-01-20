@@ -3,6 +3,10 @@
     <v-btn color="primary" class="mb-4" @click="openAddModal">Créer une Commande</v-btn>
     <v-card>
       <v-card-title>Liste des Commandes</v-card-title>
+      <v-card class="mb-4">
+    
+     
+    </v-card>
       <v-data-table
         :headers="headers"
         :items="commandes"
@@ -13,6 +17,9 @@
          :loading="loading"
        loading-text="Chargement en cours..."
       >
+      <template #top>
+       
+      </template>
         <template #[`item.actions`]="{ item }">
           <v-btn icon small title="Details de la Commande" @click="viewDetails(item)">
             <v-icon>mdi-eye</v-icon>
@@ -37,7 +44,7 @@
               <v-combobox
                 v-model="selectedTableId"
                 :items="tablesOptions"
-                label="Client"
+                label="Entrer un Client"
                 outlined
                 dense
               ></v-combobox>
@@ -189,6 +196,7 @@ export default {
   data() {
     return {
       loading : false,
+      totalventes : 0,
       selectedTableId: null, // ID de la table sélectionnée
       tablesOptions: ['Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5', 'Table 6', 'Table 7'], // Options des tables
       statutOptions: ['En attente', 'En préparation', 'Servie', 'Terminée'],
@@ -258,6 +266,8 @@ export default {
   },
   computed: {
     ...mapGetters("auth", ["user"]),
+    
+   
     // Propriété calculée pour le total de la commande
     totalCommande() {
       if (!this.selectedCommande.articles) return 0;
@@ -272,9 +282,29 @@ export default {
   async mounted() {
     await this.fetchCommandes();
     await this.fetchProduits();
+   
   },
   methods: {
     ...mapActions("auth", ["sendLoginRequest"]),
+   
+    totalVentes() {
+    const userId = this.user.userId;
+    const today = new Date().toLocaleDateString('fr-CA');
+
+     this.totalventes = this.commandes
+      .filter(commande => {
+        const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
+        return (
+          commande.serveur._id === userId && // Si serveur est une chaîne (ID)
+          commandeDate === today
+        );
+      })
+      
+      .reduce((sum, commande) => sum + commande.total, 0);
+    
+      return this.totalventes
+  },
+
     onProductChange(selectedValue) {
       const selectedProduct = this.produitsOptions.find(
         (produit) => produit.value === selectedValue

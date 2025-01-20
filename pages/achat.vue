@@ -221,6 +221,7 @@
 import AchatPrinter from "~/components/achatPrinter.vue";
   export default {
     components:{AchatPrinter},
+    middleware:'supadmin',
     data() {
       return {
         search:'',

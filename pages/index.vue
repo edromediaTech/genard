@@ -111,15 +111,22 @@ export default {
               if (this.user.user_level === role.utilisateur) {
                 this.$router.push({ path: "/inspire" });
               }
-              if (this.user.user_level === role.admin) {
-                this.$router.push({ path: "/inspire" });
+              else if (this.user.user_level === role.superviseur) {
+                this.$router.push({ path: "/admin" });
               }
-              if (this.user.user_level === role.serveur) {
+             
+              else if (parseInt(this.user.user_level) === role.admin) {
+                this.$router.push({ path: "/admin" });
+              }
+              else if (this.user.user_level === role.supadmin) {
+                this.$router.push({ path: "/admin" });
+              }
+              else  if (this.user.user_level === role.serveur) {
                 this.$router.push({ path: "/commande" });
               } else {
                 this.$router.push({ path: "/inspire" });
               }
-            }, 7000);
+            }, 3000);
           } else {
             this.$router.push({ path: "/inspire" });
           }

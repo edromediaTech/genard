@@ -215,7 +215,7 @@ export default {
         items.push({
           icon: "mdi-package-variant",
           title: "Produits",
-          to: "/produit",
+          to: "/produits",
         });
        
       }
@@ -365,10 +365,10 @@ export default {
         "Bearer " + localStorage.getItem("authToken");
     }
    // Écouter l'événement 'login' émis par le backend
-   this.$socket.on('login', (user) => {
-      this.nouveauUser = user;
-      this.showNotification(user)
-    });
+  //  this.$socket.on('login', (user) => {
+  //     this.nouveauUser = user;
+  //     this.showNotification(user)
+  //   });
     this.privileges = Object.keys(role);
 
    
