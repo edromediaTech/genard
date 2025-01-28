@@ -444,6 +444,8 @@ export default {
           content: "Article ajouté avec succès.",
           color: "success",
         });
+        this.selectedTableId = null
+        this.commande.statut = null
         this.closeAddModal();
       } catch (error) {
         console.error('Erreur lors de l’ajout de l’article :', error);
@@ -650,8 +652,9 @@ export default {
         </html>
       `;
 
-      const newWindow = window.open("", "_blank", "width=600,height=600");
+      const newWindow = window.open("", "_blank", "width=600, height=600");      
       newWindow.document.write(printableContent);
+      // newWindow.document.write();
       newWindow.document.close();
 
       setTimeout(() => {
@@ -659,6 +662,49 @@ export default {
         newWindow.close();
       }, 1000);
     },
+
+
+    printInvoice1() {
+  // Calculer le total de la commande
+  const total = this.selectedCommande.articles.reduce(
+    (sum, article) => sum + article.produit.prix * article.quantite,
+    0
+  );
+
+  // Préparer les données de la facture à envoyer au backend
+  const invoiceData = {
+    client: this.selectedCommande.client,
+    articles: this.selectedCommande.articles.map((article) => ({
+      name: article.produit.nom,
+      quantity: article.quantite,
+      price: article.produit.prix,
+    })),
+    total,
+  };
+
+  // Envoyer les données au backend pour impression
+  fetch('http://localhost:3000/print', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(invoiceData), // Envoyer les données au backend
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'impression');
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log(data.message); // Afficher un message de succès
+      alert('Facture imprimée avec succès !');
+    })
+    .catch((error) => {
+      console.error('Erreur :', error);
+      alert('Erreur lors de l\'impression. Veuillez réessayer.');
+    });
+}
   },
 };
 </script>

@@ -155,13 +155,13 @@
                   :float-layout="true"
                   :enable-download="true"
                   :preview-modal="false"
-                  :paginate-elements-by-height="1300"
+                  :paginate-elements-by-height="1000"
                   filename="Produits"
                   :pdf-quality="2"
                   :manual-pagination="false"
                   pdf-format="letter"
-                  pdf-orientation="landscape"
-                  pdf-content-width="1000px"
+                  pdf-orientation="portrait"
+                  pdf-content-width="800px"
                 >
                   <template slot="pdf-content">
                     <ExportPDF

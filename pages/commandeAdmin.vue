@@ -138,7 +138,7 @@
           <v-list dense>
             <v-list-item>
               <v-list-item-content>
-                <v-list-item-title><strong>Client:</strong> {{ formatDate(selectedCommande.createdAt) }}</v-list-item-title>
+                <v-list-item-title><strong>Date :</strong> {{ formatDate(selectedCommande.createdAt) }}</v-list-item-title>
                 <v-list-item-title><strong>Client:</strong> {{ selectedCommande.client }}</v-list-item-title>
                 <v-list-item-title><strong>Serveur:</strong> {{ selectedCommande.serveur }}</v-list-item-title>
               </v-list-item-content>
@@ -465,6 +465,8 @@ export default {
           content: "Article ajouté avec succès.",
           color: "success",
         });
+        this.selectedTableId = null
+        this.commande.statut = null
         this.closeAddModal();
       } catch (error) {
         console.error('Erreur lors de l’ajout de l’article :', error);
