@@ -218,11 +218,22 @@ export default {
     // Calculer les ventes par mois
     const currentMonth = new Date().toISOString().slice(0, 7); // Format YYYY-MM
     this.monthlySales = orders
-      .filter(order => order.date.slice(0, 7) === currentMonth)
-      .reduce((sum, order) => {
-        const montant = order.total === 0 ? order.articles.reduce((sum, article) => sum + (article.produit.prix * article.quantite), 0) : order.total;
-        return sum + montant;
-      }, 0);
+  .filter(order => {
+    const orderMonth = new Date(order.date).toISOString().slice(0, 7);
+    return orderMonth === currentMonth;
+  })
+  .reduce((sum, order) => {
+    const montant = order.total === 0 
+      ? order.articles.reduce((sum, article) => sum + (article.produit.prix * article.quantite), 0) 
+      : order.total;
+    return sum + montant;
+  }, 0);
+    // this.monthlySales = orders
+    //   .filter(order => order.date.slice(0, 7) === currentMonth)
+    //   .reduce((sum, order) => {
+    //     const montant = order.total === 0 ? order.articles.reduce((sum, article) => sum + (article.produit.prix * article.quantite), 0) : order.total;
+    //     return sum + montant;
+    //   }, 0);
 
     // Récupérer les articles à faible stock
     this.lowStockItems = products.filter(product => product.quantite <= product.critique);
