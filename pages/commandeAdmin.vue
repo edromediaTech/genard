@@ -583,24 +583,24 @@ export default {
 
       
     const invoiceContent = `
-        <div style="text-align: center; font-family: monospace, sans-serif; font-size: 16px; margin: 0; padding: 0;">
-            <h5>Bénédictions de l'Éternel</h5>             
-              <p>               
-                Tél: +509 3779-6764 / +509 3596-7838<br />        
+        <div style="text-align: center; font-family: monospace, sans-serif; font-size: 14px; margin: 0; padding: 0;">
+            <h5 style="text-align: center; margin: 0;">Bénédictions de l'Éternel</h5>             
+              <p style="text-align: center; margin: 0;">               
+                +509 3779-6764 / +509 3596-7838<br />        
               </p>
             <hr>
-            <h3>FACTURE</h3>
+            <h5 style="text-align: center; margin: 0;">FACTURE</h5>
             <p>Client: ${this.selectedCommande.client}</p>
             <hr>
             
             <!-- Tableau des articles -->
-            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                 <thead>
                     <tr>
-                        <th style="border: 1px solid #000; padding: 5px; text-align: left;">Produit</th>
-                        <th style="border: 1px solid #000; padding: 5px; text-align: center;">Qté</th>
-                        <th style="border: 1px solid #000; padding: 5px; text-align: right;">Prix (HTG)</th>
-                        <th style="border: 1px solid #000; padding: 5px; text-align: right;">Total (HTG)</th>
+                       <th style="border: 1px solid #000; padding: 3px; text-align: center;">Qté</th>
+                        <th style="border: 1px solid #000; padding: 3px; text-align: left;">Article</th>                       
+                        <th style="border: 1px solid #000; padding: 3px; text-align: right;">PU (HTG)</th>
+                        <th style="border: 1px solid #000; padding: 3px; text-align: right;">Total (HTG)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -608,10 +608,10 @@ export default {
                         const totalArticle = (article.produit.prix * article.quantite).toFixed(2);
                         return `
                             <tr>
-                                <td style="border: 1px solid #000; padding: 5px;">${article.produit.nom}</td>
-                                <td style="border: 1px solid #000; padding: 5px; text-align: center;">${article.quantite}</td>
-                                <td style="border: 1px solid #000; padding: 5px; text-align: right;">${article.produit.prix.toFixed(2)}</td>
-                                <td style="border: 1px solid #000; padding: 5px; text-align: right;">${totalArticle}</td>
+                               <td style="border: 1px solid #000; padding: 3px; text-align: center;">${article.quantite}</td>
+                                <td style="border: 1px solid #000; padding: 3px;">${article.produit.nom}</td>                               
+                                <td style="border: 1px solid #000; padding: 3px; text-align: right;">${article.produit.prix.toFixed(2)}</td>
+                                <td style="border: 1px solid #000; padding: 3px; text-align: right;">${totalArticle}</td>
                             </tr>
                         `;
                     }).join('')}
@@ -728,11 +728,11 @@ export default {
         <body>
           <div class="container">
             <div class="header">
-              <h5>Bénédictions de l'Éternel</h5>             
-              <p>               
+              <h5 style="text-align: center; margin: 0;">Bénédictions de l'Éternel</h5>             
+              <p style="text-align: center; margin: 0;">               
                 Tél: +509 3779-6764 / +509 3596-7838<br />        
               </p>
-              <hr style="border: 1px dashed black; margin: 10px 0;" />
+              <hr style="border: 1px dashed black; margin: 5px 0;" />
             </div>        
             <h5 style="text-align: center; margin: 0;">FACTURE</h5>
             <p style="font-size: 12px;"><strong>Client:</strong> ${this.selectedCommande.client}</p>
