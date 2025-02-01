@@ -575,6 +575,106 @@ export default {
     },
 
     printInvoice() {
+  const total = this.selectedCommande.articles.reduce(
+        (sum, article) => sum + article.produit.prix * article.quantite,
+        0
+      );
+
+      
+    const invoiceContent = `
+        <div style="text-align: center; font-family: Arial, sans-serif; font-size: 16px; margin: 0; padding: 0;">
+            <h5>Bénédictions de l'Éternel</h5>             
+              <p>               
+                Tél: +509 3779-6764 / +509 3596-7838<br />        
+              </p>
+            <hr>
+            <h3>FACTURE</h3>
+            <p>Client: ${this.selectedCommande.client}</p>
+            <hr>
+            
+            <!-- Tableau des articles -->
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                <thead>
+                    <tr>
+                        <th style="border: 1px solid #000; padding: 5px; text-align: left;">Produit</th>
+                        <th style="border: 1px solid #000; padding: 5px; text-align: center;">Qté</th>
+                        <th style="border: 1px solid #000; padding: 5px; text-align: right;">Prix (HTG)</th>
+                        <th style="border: 1px solid #000; padding: 5px; text-align: right;">Total (HTG)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${this.selectedCommande.articles.map(article => {
+                        const totalArticle = (article.produit.prix * article.quantite).toFixed(2);
+                        return `
+                            <tr>
+                                <td style="border: 1px solid #000; padding: 5px;">${article.produit.nom}</td>
+                                <td style="border: 1px solid #000; padding: 5px; text-align: center;">${article.quantite}</td>
+                                <td style="border: 1px solid #000; padding: 5px; text-align: right;">${article.produit.prix.toFixed(2)}</td>
+                                <td style="border: 1px solid #000; padding: 5px; text-align: right;">${totalArticle}</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
+            </table>
+            
+            <hr>
+            <p><strong>Total : </strong> ${total.toFixed(2)} HTG</p>
+            <hr>
+            <p>Merci pour votre confiance !</p>
+        </div>
+    `;
+
+    const printWindow = window.open('', '', 'width=800,height=600');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <style>
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        width: 100%;
+                        font-family: Arial, sans-serif;
+                    }
+                    @page {
+                        size: auto;   /* Ajuste la taille de la page en fonction du contenu */
+                        margin: 0mm;   /* Retirer les marges inutiles */
+                    }
+                    /* Fixer la taille du contenu à la largeur de la page pour éviter les marges */
+                    .invoice {
+                        width: 100%;
+                        max-width: 800px;
+                        margin: 0 auto;
+                        page-break-before: auto;
+                    }
+                    /* S'assurer que les éléments du tableau sont bien alignés et ne gaspillent pas d'espace */
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                    th, td {
+                        padding: 5px;
+                        border: 1px solid #000;
+                    }
+                    p{
+                    font-size:14px
+                    }
+                    h2, h3, p {
+                        margin: 0;
+                        padding: 5px;
+                    }
+                </style>
+            </head>
+            <body>
+                ${invoiceContent}
+            </body>
+        </html>
+    `);
+    printWindow.document.close();
+    printWindow.print();
+},
+
+
+    printInvoiceok() {
       const total = this.selectedCommande.articles.reduce(
         (sum, article) => sum + article.produit.prix * article.quantite,
         0
@@ -592,7 +692,7 @@ export default {
               padding: 0;
             }
             .container {
-              font-family: 'Courier New', monospace;
+              font-family: 'monospace', Courier New;
               width: 100mm;
               padding: 5mm;
               box-sizing: border-box;
