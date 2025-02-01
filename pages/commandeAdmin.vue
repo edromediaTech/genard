@@ -582,7 +582,7 @@ export default {
 
       
     const invoiceContent = `
-        <div style="text-align: center; font-family: Arial, sans-serif; font-size: 16px; margin: 0; padding: 0;">
+        <div style="text-align: center; font-family: monospace, sans-serif; font-size: 16px; margin: 0; padding: 0;">
             <h5>Bénédictions de l'Éternel</h5>             
               <p>               
                 Tél: +509 3779-6764 / +509 3596-7838<br />        
@@ -633,7 +633,7 @@ export default {
                         margin: 0;
                         padding: 0;
                         width: 100%;
-                        font-family: Arial, sans-serif;
+                        font-family: monospace, sans-serif;
                     }
                     @page {
                         size: auto;   /* Ajuste la taille de la page en fonction du contenu */
