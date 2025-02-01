@@ -221,7 +221,7 @@ export default {
   .filter(order => {
     const orderMonth = new Date(order.date).toISOString().slice(0, 7);
     return orderMonth === currentMonth;
-  })
+  }) 
   .reduce((sum, order) => {
     const montant = order.total === 0 
       ? order.articles.reduce((sum, article) => sum + (article.produit.prix * article.quantite), 0) 

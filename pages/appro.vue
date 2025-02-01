@@ -10,18 +10,17 @@
       :search="search"    
       class="elevation-1"
        :loading="loading"
-       loading-text="Chargement en cours..."
-      
+       loading-text="Chargement en cours..."      
     >
     <template #top>
       <v-row class="mx-4 my-4">
-               <v-progress-circular
-                    v-show="visible"
-                    :size="50"
-                    :width="3"
-                    color="info"
-                    indeterminate                    
-                    /> 
+          <v-progress-circular
+              v-show="visible"
+              :size="50"
+              :width="3"
+              color="info"
+              indeterminate                    
+              /> 
             <v-col cols="12"
                 sm="6"        
                 md="3">
@@ -33,16 +32,13 @@
                   single-line
                   hide-details
                ></v-text-field>
-             </v-col>             
-
+             </v-col>    
               <v-spacer />
       
           <!-- Bouton et composant pour exporter en PDF -->
-    <v-btn
-              v-if="produits.length > 0"
-             
-              class="mx-2 mt-4 "
-              
+            <v-btn
+              v-if="produits.length > 0"             
+              class="mx-2 mt-4 "              
               small
               color="success"
               @click="generateReport"
@@ -65,8 +61,7 @@
                 >
                   <template slot="pdf-content">
                     <appro-printer
-                      :produits="produits"
-                     
+                      :produits="produits"                     
                     />
                   </template>
                 </vue-html2pdf>
@@ -180,13 +175,12 @@
 
 <script>
 import { mapGetters, mapActions } from "vuex";
-
 import { role } from "../role";
-
 export default {
   middleware: "superviseur",
   data() {
     return {
+      
       search:'',
       loading:false,
       valid: false,

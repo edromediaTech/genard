@@ -218,7 +218,7 @@
   <script>
   import { mapGetters, mapActions } from "vuex";
   import { role } from "../role";
-import AchatPrinter from "~/components/achatPrinter.vue";
+  import AchatPrinter from "~/components/achatPrinter.vue";
   export default {
     components:{AchatPrinter},
     middleware:'supadmin',

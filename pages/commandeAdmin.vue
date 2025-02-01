@@ -560,6 +560,7 @@ export default {
     },
 
     async confirmDelete() {
+      
       this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken');
       try {
         await this.$axios.delete(`/commandes/${this.currentDeleteId}`);
