@@ -292,12 +292,7 @@ export default {
           title: "Clients Hotel",
           to: "/clientHotel",
         });
-        items.push({
-          icon: "mdi-package-variant",
-          title: "Rooms",
-          to: "/room",
-        });
-
+       
       }
         if (this.user && parseInt(this.user.user_level) === role.supadmin) {       
           items.push({

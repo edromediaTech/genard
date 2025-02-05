@@ -1,12 +1,12 @@
 <template>
     <v-container>
-      <h1 class="mb-5">Réservation de Chambre</h1>
+      <h1 class="mb-5 text-center">Réservation de Chambre</h1>
   
       <!-- Étape 1 : Choix des dates et sélection de la chambre -->
       <div v-if="step === 1">
-        <h2>Étape 1 : Sélection des Dates et Chambre</h2>
-        <v-row>
-          <v-col cols="6">
+        <h4 class="mb-4 text-center">Étape 1 : Sélection des Dates et Chambre</h4>
+        <v-row class="mb-4">
+          <v-col cols="12" md="4" sm="6">
             <v-menu
               v-model="checkInMenu"
               :close-on-content-click="false"
@@ -27,7 +27,7 @@
               <v-date-picker v-model="checkInDate" @input="checkInMenu = false"></v-date-picker>
             </v-menu>
           </v-col>
-          <v-col cols="6">
+          <v-col cols="12" md="4" sm="6">
             <v-menu
               v-model="checkOutMenu"
               :close-on-content-click="false"
@@ -48,8 +48,12 @@
               <v-date-picker v-model="checkOutDate" @input="checkOutMenu = false"></v-date-picker>
             </v-menu>
           </v-col>
+          <v-col cols="12" md="4" sm="6">
+            <v-btn :disabled="checkInDate === null || checkOutDate === null" color="primary" @click="fetchAvailableRooms">
+              <v-icon left>mdi-magnify</v-icon>Rechercher
+            </v-btn>
+          </v-col>
         </v-row>
-        <v-btn color="primary" @click="fetchAvailableRooms">Rechercher des chambres disponibles</v-btn>
   
         <!-- Tableau graphique des chambres par étage -->
         <v-expansion-panels v-if="availableRooms.length > 0" class="mt-5">
@@ -57,16 +61,16 @@
             <v-expansion-panel-header>Étage {{ floor.etage }}</v-expansion-panel-header>
             <v-expansion-panel-content>
               <v-row>
-                <v-col v-for="room in floor.rooms" :key="room._id" cols="4">
-                  <v-card elevation="5" class="pa-4" style="border-radius: 10px;">
+                <v-col v-for="room in floor.rooms" :key="room._id" cols="12" md="4" sm="6">
+                  <v-card color="secondary lighten-4" elevation="5" class="pa-4" style="border-radius: 10px;">
                     <v-card-title class="text-h6">{{ room.roomNumber }} - {{ room.type }}</v-card-title>
                     <v-card-subtitle>Étage {{ room.etage }}</v-card-subtitle>
                     <v-card-text>
-                      <p><strong>Prix :</strong> {{ room.price }} € / nuit</p>
+                      <p><strong>Prix :</strong> {{ room.price }} $ USD / nuit</p>
                       <v-checkbox v-model="selectedRoom" :value="room._id" label="Sélectionner cette chambre"></v-checkbox>
                     </v-card-text>
                     <v-card-actions>
-                      <v-btn small color="info" @click="openRoomInfo(room)">Infos</v-btn>
+                      <v-btn small color="primary" @click="openRoomInfo(room)">Infos</v-btn>
                     </v-card-actions>
                   </v-card>
                 </v-col>
@@ -74,12 +78,12 @@
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
-        <v-btn v-if="selectedRoom" color="success" @click="goToStep2">Suivant</v-btn>
+        <v-btn v-if="selectedRoom" color="success" class="mt-4" @click="goToStep2">Suivant</v-btn>
       </div>
   
       <!-- Étape 2 : Saisie des informations du client et des occupants -->
       <div v-if="step === 2">
-        <h2>Étape 2 : Informations du Client et Occupants</h2>
+        <h4 class="mb-4 text-center">Étape 2 : Informations du Client et Occupants</h4>
         <v-form ref="bookingForm" v-model="formValid">
           <v-autocomplete
             v-model="selectedClientUser"
@@ -98,37 +102,37 @@
               </v-list-item>
             </template>
           </v-autocomplete>
-          <v-btn small color="primary" @click="openAddClientDialog">Ajouter un nouveau client</v-btn>
+          <v-btn small color="primary" class="mb-4" @click="openAddClientDialog">Ajouter un nouveau client</v-btn>
           <v-text-field v-model="clientUser.name" label="Nom du client" required></v-text-field>
           <v-text-field v-model="clientUser.email" label="Email du client" required></v-text-field>
           <v-text-field v-model="clientUser.phoneNumber" label="Numéro de téléphone" required></v-text-field>
-          <h3>Occupants supplémentaires</h3>
+          <h3 class="mb-4">Occupants supplémentaires</h3>
           <v-row v-for="(occupant, index) in occupants" :key="index">
-            <v-col cols="4">
+            <v-col cols="12" md="4">
               <v-text-field v-model="occupant.name" label="Nom de l'occupant"></v-text-field>
             </v-col>
-            <v-col cols="4">
+            <v-col cols="12" md="4">
               <v-text-field v-model="occupant.age" label="Âge" type="number"></v-text-field>
             </v-col>
-            <v-col cols="3">
+            <v-col cols="12" md="3">
               <v-select v-model="occupant.gender" :items="['male', 'female', 'other']" label="Sexe"></v-select>
             </v-col>
-            <v-col cols="1">
+            <v-col cols="12" md="1">
               <v-btn icon color="error" @click="removeOccupant(index)">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </v-col>
           </v-row>
-          <v-btn @click="addOccupant">Ajouter un occupant</v-btn>
+          <v-btn class="mb-4" @click="addOccupant">Ajouter un occupant</v-btn>
         </v-form>
-        <v-btn color="warning" @click="goBackToStep1">Précédent</v-btn>
+        <v-btn color="warning" class="mr-2" @click="goBackToStep1">Précédent</v-btn>
         <v-btn color="success" @click="goToStep3">Suivant</v-btn>
       </div>
   
       <!-- Étape 3 : Impression de la feuille de réservation -->
-      <div v-if="step === 3">
-        <h2>Étape 3 : Récapitulatif et Impression</h2>
-        <v-card>
+      <div v-if="step === 3" class="printable-content">
+        <h2 class="text-center">Étape 3 : Récapitulatif et Impression</h2>
+        <v-card class="mb-4">
           <v-card-title>Résumé de la Réservation</v-card-title>
           <v-card-text>
             <p><strong>Chambre :</strong> {{ selectedRoomDetails.roomNumber }} - {{ selectedRoomDetails.type }}</p>
@@ -157,7 +161,7 @@
             <p><strong>Numéro :</strong> {{ selectedRoomDetails.roomNumber }}</p>
             <p><strong>Type :</strong> {{ selectedRoomDetails.type }}</p>
             <p><strong>Étage :</strong> {{ selectedRoomDetails.etage }}</p>
-            <p><strong>Prix par nuit :</strong> {{ selectedRoomDetails.price }} €</p>
+            <p><strong>Prix par nuit :</strong> {{ selectedRoomDetails.price }} $ USD</p>
             <p><strong>Disponible :</strong> {{ selectedRoomDetails.isAvailable ? 'Oui' : 'Non' }}</p>
           </v-card-text>
           <v-card-actions>
@@ -215,7 +219,6 @@
   </template>
   
   <script>
-  
   export default {
     data() {
       return {
@@ -343,7 +346,6 @@
             checkOutDate: this.checkOutDate,
             occupants: this.occupants
           };
-          console.log(this.clientUser, bookingData)
           const response = await this.$axios.post('/bookings', bookingData);
           console.log(response)
           alert('Réservation confirmée avec succès !');
@@ -352,6 +354,7 @@
           console.error('Erreur lors de la confirmation de la réservation', error);
         }
       },
+     
       resetForm() {
         this.step = 1;
         this.checkInDate = null;
@@ -402,11 +405,11 @@
   };
   </script>
   
-  <style scoped>
+  <!-- <style scoped>
   .v-card {
     transition: transform 0.3s ease;
   }
   .v-card:hover {
     transform: scale(1.05);
   }
-  </style>
+  </style> -->
