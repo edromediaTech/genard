@@ -575,23 +575,13 @@ export default {
       this.dialogConfirm = false;
     },
 
-   printInvoice() {
-  // Calculer le total de la commande
+  
+printInvoice() {
   const total = this.selectedCommande.articles.reduce(
     (sum, article) => sum + article.produit.prix * article.quantite,
     0
-  );
+  );  
 
-  // Formater la date de la commande
-  const commandeDate = new Date(this.selectedCommande.date).toLocaleDateString('fr-FR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-
-  // Créer le contenu imprimable sans tableau
   const printableContent = `
     <html>
     <head>
@@ -617,41 +607,24 @@ export default {
           margin: 0;
           font-size: 10px;
         }
-        .invoice-details {
+        table {
+          width: 100%;
+          font-size: 10px;
           margin-top: 10px;
-          font-size: 12px;
-          text-align: center; /* Centrer les détails de la commande */
+          border: none; /* Supprime les bordures du tableau */
         }
-        .invoice-details p {
-          margin: 5px 0;
+        table th, table td {
+          text-align: left;
+          border: none; /* Supprime les bordures des cellules */
+          padding: 5px; /* Ajoute un peu d'espace pour la lisibilité */
+        }
+        table th:first-child, table td:first-child {
+          text-align: left;
         }
         .footer {
           text-align: center;
           font-size: 10px;
           margin-top: 10px;
-        }
-        .item {
-          display: flex;
-          justify-content: space-between;
-          margin: 5px 0;
-          font-size: 12px;
-          text-align: center; /* Centrer les éléments de chaque ligne */
-        }
-        .item-details {
-          display: flex;
-          justify-content: space-between;
-          width: 100%;
-        }
-        .item-details span {
-          flex: 1; /* Répartir l'espace équitablement */
-          text-align: center; /* Centrer le texte dans chaque colonne */
-        }
-        .total {
-          font-weight: bold;
-          margin-top: 10px;
-          border-top: 1px dashed black;
-          padding-top: 5px;
-          text-align: center; /* Centrer le total */
         }
       </style>
     </head>
@@ -665,42 +638,36 @@ export default {
           <hr style="border: 1px dashed black; margin: 10px 0;" />
         </div>        
         <h5 style="text-align: center; margin: 0;">FACTURE</h5>
-        
-        <!-- Détails de la commande -->
-        <div class="invoice-details">
-          <p><strong>Client:</strong> ${this.selectedCommande.client}</p>
-          <p><strong>Date:</strong> ${commandeDate}</p>
-        </div>
-
-        <!-- Entête des articles -->
-        <div class="item" style="font-weight: bold;">
-          <span>Produit</span>
-          <span>Qté</span>
-          <span>PU</span>
-          <span>Total</span>
-        </div>
-
-        <!-- Liste des articles -->
-        ${this.selectedCommande.articles
-          .map(
-            (article) => `
-            <div class="item">
-              <div class="item-details">
-                <span>${article.produit.nom}</span>
-                <span>${article.quantite}</span>
-                <span>${article.produit.prix.toFixed(2)} HTG</span>
-                <span>${(article.produit.prix * article.quantite).toFixed(2)} HTG</span>
-              </div>
-            </div>`
-          )
-          .join("")}
-
-        <!-- Total -->
-        <div class="total">
-          <span>Total:</span>
-          <span>${total.toFixed(2)} HTG</span>
-        </div>
-
+        <p style="font-size: 12px;"><strong>Client:</strong> ${this.selectedCommande.client}</p>
+        <p style="font-size: 12px;"><strong>Client:</strong> ${this.selectedCommande.date}</p>
+       
+        <table>
+          <thead>
+            <tr>
+              <th>Produit</th>
+              <th>Qté</th>
+              <th>PU</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${this.selectedCommande.articles
+              .map(
+                (article) => `
+                <tr>
+                  <td>${article.produit.nom}</td>
+                  <td>${article.quantite}</td>
+                  <td>${article.produit.prix.toFixed(2)}</td>
+                  <td>${(article.produit.prix * article.quantite).toFixed(2)}</td>
+                </tr>`
+              )
+              .join("")}
+            <tr>
+              <td colspan="3" style="text-align: right; font-weight: bold;">Total</td>
+              <td style="font-weight: bold;">${total.toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
         <br>
         <div class="footer">
           <i>Une hospitalité gracieuse au cœur de la ville</i>
@@ -712,17 +679,16 @@ export default {
     </html>
   `;
 
-  // Ouvrir une nouvelle fenêtre et écrire le contenu
   const newWindow = window.open("", "_blank", "width=600, height=600");      
   newWindow.document.write(printableContent);
   newWindow.document.close();
 
-  // Imprimer la facture après un court délai
   setTimeout(() => {
     newWindow.print();
     newWindow.close();
   }, 1000);
 },
+
 
 
     printInvoiceok() {
