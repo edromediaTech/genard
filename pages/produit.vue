@@ -226,7 +226,7 @@ export default {
         { text: "", align: "end", value: "actions" },
       ],
       produits: [],
-      categoriesOptions: ["Plat", "Boisson", "Dessert", "Jus naturel", "Jus emboité", "Boisson Alcoolisé", "Apéritif", "Patisserie"],
+      categoriesOptions: ["Plat", "Boisson", "Dessert", "Jus naturel", "Jus emboité", "Boisson Alcoolisé", "Apéritif", "Patisserie", "Mix"],
     };
   },
   computed: {

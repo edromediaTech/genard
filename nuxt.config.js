@@ -94,8 +94,8 @@ export default {
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
  
    axios: {
-      // baseURL : 'http://192.168.0.103:3000/api/',
-      //  baseURL : 'http://192.168.1.40:3000/api/',
+      // baseURL : 'http://192.168.0.109:3000/api/',
+      //  baseURL : 'http://192.168.1.45:3000/api/',
       // baseURL : 'http://172.20.10.3:3000/api/',
         baseURL : 'https://backbenediction.onrender.com/api/',
       // //credentials: false,

@@ -3,8 +3,7 @@
     <v-btn color="primary" class="mb-4" @click="openAddModal">Créer une Commande</v-btn>
     <v-card>
       <v-card-title>Liste des Commandes</v-card-title>
-      <v-card class="mb-4">
-    
+      <v-card class="mb-4">   
      
     </v-card>
       <v-data-table
@@ -24,6 +23,17 @@
           <v-btn icon small title="Details de la Commande" @click="viewDetails(item)">
             <v-icon>mdi-eye</v-icon>
           </v-btn>
+          
+              <!-- Bouton pour modifier le statut -->
+              <v-btn
+                v-if="item.statutReg !== 'Complet'"
+                icon
+                small
+                color="primary"
+                @click="openEditStatutModal(item)"
+              >
+                <v-icon>mdi-pencil</v-icon>
+              </v-btn>
           <!-- <v-btn icon small color="error" @click="deleteArticle(item._id)">
             <v-icon>mdi-delete</v-icon>
           </v-btn> -->
@@ -31,6 +41,9 @@
         <template #[`item.createdAt`]="{ item }">
           {{ formatDate(item.createdAt) }}
         </template>
+        <template #[`item.code`]="{ item }">
+        {{ getLastThreeDigits(item.code) }}
+      </template>
       </v-data-table>
     </v-card>
 
@@ -43,22 +56,26 @@
             <v-col cols="12" md="6" sm="6">
               <v-combobox
                 v-model="selectedTableId"
-                :items="tablesOptions"
-                label="Entrer un Client"
+                :items="clients"
+                label="Choisir un Client"
+                item-text="nom"
+                item-value="nom"
                 outlined
                 dense
               ></v-combobox>
             </v-col>
             <!-- Statut -->
-            <v-col cols="12" sm="6">
-              <v-select
-                v-model="commande.statut"
-                :items="statutOptions"
-                label="Statut"
+             
+            <!-- <v-col cols="12" sm="6" md="4">
+              <v-combobox
+                v-model="commande.statutReg"
+                :items="statutReg"
+                label="Statut Règlement"
                 required
+                dense
                 outlined
-              ></v-select>
-            </v-col>
+              ></v-combobox>
+            </v-col> -->
           </v-row>
           <v-row v-for="(article, index) in commande.articles" :key="index" class="mb-3">
             <v-col cols="12" md="6" sm="6">
@@ -128,7 +145,7 @@
               :items="selectedCommande.articles"
               dense
                :loading="loading"
-       loading-text="Chargement en cours..."
+               loading-text="Chargement en cours..."
             ></v-data-table>
           </v-list>
         </v-card-text>
@@ -173,6 +190,41 @@
       </v-card>
     </v-dialog>
 
+    <!-- Modal pour modifier le statut -->
+    <v-dialog v-model="editStatutModal" max-width="500px">
+  <v-card>
+    <v-card-title>Modifier le statut de règlement</v-card-title>
+    <v-card-text>
+      <!-- Sélecteur de statut -->
+     
+      <!-- Champ pour saisir le montant payé -->
+      <v-text-field
+        v-model="montantPaye"
+        label="Montant payé"
+        type="number"
+        outlined
+        :rules="[rules.positive]"
+        @input="calculateMontantRestant"        
+      ></v-text-field>
+
+      <!-- Affichage du montant restant -->
+      <v-alert v-if="montantRestant !== null" :type="montantRestant >= 0 ? 'info' : 'error'">
+        Montant restant : {{ montantRestant }} HTG
+      </v-alert>
+
+      <!-- Affichage de la monnaie si le montant payé est supérieur au total -->
+      <v-alert v-if="monnaie > 0" type="success">
+        Monnaie à rendre : {{ monnaie }} HTG
+      </v-alert>
+    </v-card-text>
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn color="primary" @click="updateStatut">Enregistrer</v-btn>
+      <v-btn text @click="closeEditStatutModal">Annuler</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+
     <v-dialog v-model="dialogConfirm" max-width="400">
       <v-card>
         <v-card-title class="headline">Confirmation</v-card-title>
@@ -200,31 +252,47 @@ export default {
       selectedTableId: null, // ID de la table sélectionnée
       tablesOptions: ['Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5', 'Table 6', 'Table 7'], // Options des tables
       statutOptions: ['En attente', 'En préparation', 'Servie', 'Terminée'],
+      statutReg: ['Non paiement', 'Partiel', 'Complet'],
       dialogConfirm: false,  // État du dialogue de confirmation
       currentDeleteId: null,
       selectedProductDetails: null,
+      editStatutModal: false, // Contrôle l'ouverture du modal
+    editedStatut: '', // Statut sélectionné dans le modal
+    selectedCommandeId: null, // ID de la commande sélectionnée
+   
+    selectedCommandeTotal: 0, // Total de la commande sélectionnée
+    montantPaye: 0, // Montant payé par le client
+    montantRestant: null, // Montant restant à payer
+    monnaie: 0, // Monnaie à rendre si le montant payé est supérieur au total
+    rules: {
+      positive: value => value >= 0 || 'Le montant doit être positif',
+    },
       articles: [], // Articles récupérés
       commande: {
         client: null,
         serveur: '',
-        statut: null,
+        statut: 'En attente',
         articles: [{ produit: null, quantite: 1 }], // Initialiser un article avec produit et quantité par défaut
         total: 0,
+        reglement: 0, // Montant payé jusqu'à présent
+       statutReg: 'Non paiement',
       },
       produitsOptions: [], // Produits disponibles
       commandes: [], // Liste des commandes
       headers: [
+        { text: "Code", value: "code" },
         { text: "Client", value: "client" },
         { text: "Serveur", value: "serveur" },
         { text: "Statut", value: "statut" },
         { text: "Total (HTG)", value: "total" },
+        { text: "Reglement (HTG)", value: "reglement" },
         { text: "Date", value: "createdAt" },
         { text: "Actions", value: "actions", sortable: false },
       ],
       productHeaders: [
         { text: "Produit", value: "produit.nom" },
         { text: "Quantité", value: "quantite" },
-        { text: "Prix Unitaire (HTG)", value: "produit.prix" },
+        { text: "Prix Unitaire (HTG)", value: "produit.prix"},
       ],
       newCommande: {
         client: "",
@@ -246,6 +314,7 @@ export default {
       addCommandeModal: false, // Contrôle du modal pour ajouter la commande
       detailsModal: false, // Contrôle du modal pour afficher les détails de la commande
       addProductModal: false, // Contrôle du modal pour ajouter un produit à la commande
+      clients:[],
       selectedCommande: {
         id: "",
         client: "",
@@ -267,8 +336,7 @@ export default {
   computed: {
     ...mapGetters("auth", ["user"]),
     
-   
-    // Propriété calculée pour le total de la commande
+       // Propriété calculée pour le total de la commande
     totalCommande() {
       if (!this.selectedCommande.articles) return 0;
       return this.selectedCommande.articles.reduce((sum, article) => {
@@ -282,10 +350,27 @@ export default {
   async mounted() {
     await this.fetchCommandes();
     await this.fetchProduits();
-   
+   await this.fetchClients()
   },
   methods: {
     ...mapActions("auth", ["sendLoginRequest"]),
+
+    getLastThreeDigits(code) {
+        if (code && code.length >= 3) {
+          return code.slice(-3); // Extrait les 3 derniers caractères
+        }
+        return code; // Retourne le code complet si sa longueur est inférieure à 3
+      },
+
+      async fetchClients() {
+        try {
+          const response = await this.$axios.get('/clients');
+          console.log(response)
+          this.clients = response.data;
+        } catch (error) {
+          console.error('Erreur lors de la récupération des utilisateurs', error);
+        }
+      },
    
     totalVentes() {
     const userId = this.user.userId;
@@ -335,6 +420,7 @@ export default {
     async fetchCommandes() {
       try {
         const { data } = await this.$axios.get('/commandes');
+        console.log(data)
         const userId = this.user.userId;
         const today = new Date().toLocaleDateString('fr-CA');
    
@@ -357,8 +443,11 @@ export default {
               serveur: commande.serveur.prenom,
               client: commande.client,
               statut: commande.statut,
+              code: commande.code,
               total: commande.total, // Utiliser le total calculé ou existant
               createdAt: commande.createdAt,
+              reglement : commande.reglement,
+              statutReg : commande.statutReg,
               date: new Date(commande.date).toLocaleDateString('fr-FR', {
                 day: '2-digit',
                 month: '2-digit',
@@ -413,6 +502,8 @@ export default {
       this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken');
       this.commande.client = this.selectedTableId;
       this.commande.serveur = this.user.userId;
+      this.commande.total = this.selectedProductDetails.prix
+      console.log("total",this.commande.total)
 
       if (this.commande.client === null || this.commande.statut === null) {
         this.$notifier.showMessage({ content: "Il y a un champ vide", color: "error", });
@@ -533,6 +624,131 @@ export default {
       }
     },
 
+     // Ouvrir le modal pour modifier le statut
+  openEditStatutModal(item) {
+    this.selectedCommandeId = item._id; // Stocker l'ID de la commande
+    this.selectedCommandeTotal = item.total; // Stocker le total de la commande
+    this.editedStatut = item.statutReg; // Pré-remplir le statut actuel
+    this.montantPaye = item.reglement || 0; // Pré-remplir le montant payé
+    this.calculateMontantRestant(); // Calculer le montant restant
+    this.editStatutModal = true; // Ouvrir le modal
+  },
+
+  // Fermer le modal
+  closeEditStatutModal() {
+    this.editStatutModal = false;
+    this.selectedCommandeId = null;
+    this.editedStatut = '';
+    this.montantPaye = 0;
+    this.montantRestant = null;
+    this.monnaie = 0;
+  },
+
+  // Calculer le montant restant et la monnaie
+  calculateMontantRestant() {
+    if (this.montantPaye !== null && this.selectedCommandeTotal !== null) {
+      this.montantRestant = this.selectedCommandeTotal - this.montantPaye;
+      this.monnaie = this.montantPaye > this.selectedCommandeTotal ? this.montantPaye - this.selectedCommandeTotal : 0;
+    }
+    this.onStatutChange()
+  },
+
+  // Mettre à jour le statut et le montant payé
+  
+
+  // Gérer le changement de statut
+  onStatutChange() {
+    if (this.commande.reglement=== 'Complet') {
+      this.montantPaye = this.selectedCommandeTotal; // Si le statut est "Complet", le montant payé est égal au total
+      this.calculateMontantRestant();
+    }
+  },
+
+    // Ouvrir le modal pour modifier le statut
+  
+
+  // Mettre à jour le statut
+  // async updateStatut() {
+  //   if (!this.selectedCommandeId || !this.commande.reglement) return;
+  //   console.log(this.selectedCommandeId, this.commande.reglement)
+  //   try {
+  //     const response = await this.$axios.put('commandes/paiement', {commandeId : this.selectedCommandeId,
+  //      montant:this.commande.reglement,
+  //     });
+  //       console.log(response)
+  //     // Rafraîchir la liste des commandes
+  //     await this.fetchCommandes();
+
+  //     // Fermer le modal
+  //     this.closeEditStatutModal();
+
+  //     // Afficher un message de succès
+  //     this.$notifier.showMessage({
+  //       content: 'Statut mis à jour avec succès !',
+  //       color: 'success',
+  //     });
+  //   } catch (error) {
+  //     console.error('Erreur lors de la mise à jour du statut :', error);
+  //     this.$notifier.showMessage({
+  //       content: 'Erreur lors de la mise à jour du statut.',
+  //       color: 'error',
+  //     });
+  //   }
+  // },
+
+  async updateStatut() {
+  if (!this.selectedCommandeId || !this.montantPaye) {
+    this.$notifier.showMessage({
+      content: 'Veuillez sélectionner une commande et un montant valide.',
+      color: 'error',
+    });
+    return;
+  }
+
+  // Vérifier que le montant est un nombre valide
+  if (isNaN(this.montantPaye)) {
+    this.$notifier.showMessage({
+      content: 'Le montant doit être un nombre valide.',
+      color: 'error',
+    });
+    return;
+  }
+  this.commande.reglement = this.montantPaye
+  // Convertir le montant en nombre
+  // const montant = Number(this.commande.reglement);
+
+  console.log('Données envoyées :', {
+    commandeId: this.selectedCommandeId,
+    montant : this.commande.reglement ,
+  });
+
+  try {
+    const response = await this.$axios.post('commandes/paiement', {
+      commandeId: this.selectedCommandeId,
+      montant : this.commande.reglement,
+    });
+    console.log('Réponse du serveur :', response.data);
+ 
+    // Rafraîchir la liste des commandes
+    await this.fetchCommandes();
+
+    // Fermer le modal
+    this.closeEditStatutModal();
+
+    // Afficher un message de succès
+    this.$notifier.showMessage({
+      content: 'Statut mis à jour avec succès !',
+      color: 'success',
+    });
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour du statut :', error);
+    this.$notifier.showMessage({
+      content: 'Erreur lors de la mise à jour du statut.',
+      color: 'error',
+    });
+  }
+},
+
     deleteArticle(id) {
       this.currentDeleteId = id;
       this.dialogConfirm = true;
@@ -553,7 +769,157 @@ export default {
       this.dialogConfirm = false;
     },
 
-    printInvoice() {
+printInvoice() {
+  // Calculer le total de la commande
+  const total = this.selectedCommande.articles.reduce(
+    (sum, article) => sum + article.produit.prix * article.quantite,
+    0
+  );
+
+  // Formater la date de la commande
+  const commandeDate = new Date(this.selectedCommande.date).toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  // Créer le contenu imprimable sans tableau
+  const printableContent = `
+    <html>
+    <head>
+      <style>
+        @page {
+          margin: 10mm;
+        }
+        body {
+          margin: 0;
+          padding: 0;
+        }
+        .container {
+          font-family: 'Courier New', monospace;
+          width: 100mm;
+          padding: 5mm;
+          box-sizing: border-box;
+        }
+        .header {
+          text-align: center;
+          margin-bottom: 10px;
+        }
+        .header h2, .header p {
+          margin: 0;
+          font-size: 10px;
+        }
+        .invoice-details {
+          margin-top: 10px;
+          font-size: 12px;
+          text-align: center; /* Centrer les détails de la commande */
+        }
+        .invoice-details p {
+          margin: 5px 0;
+        }
+        .footer {
+          text-align: center;
+          font-size: 10px;
+          margin-top: 10px;
+        }
+        .item {
+          display: flex;
+          justify-content: space-between;
+          margin: 5px 0;
+          font-size: 12px;
+          text-align: center; /* Centrer les éléments de chaque ligne */
+        }
+        .item-details {
+          display: flex;
+          justify-content: space-between;
+          width: 100%;
+        }
+        .item-details span {
+          flex: 1; /* Répartir l'espace équitablement */
+          text-align: center; /* Centrer le texte dans chaque colonne */
+        }
+        .total {
+          font-weight: bold;
+          margin-top: 10px;
+          border-top: 1px dashed black;
+          padding-top: 5px;
+          text-align: center; /* Centrer le total */
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h5>Bénédictions de l'Éternel</h5>             
+          <p>               
+            Tél: +509 3779-6764 / +509 3596-7838<br />        
+          </p>
+          <hr style="border: 1px dashed black; margin: 10px 0;" />
+        </div>        
+        <h5 style="text-align: center; margin: 0;">FACTURE</h5>
+        
+        <!-- Détails de la commande -->
+        <div class="invoice-details">
+          <p><strong>Client:</strong> ${this.selectedCommande.client}</p>
+          <p><strong>Date:</strong> ${commandeDate}</p>
+        </div>
+
+        <!-- Entête des articles -->
+        <div class="item" style="font-weight: bold;">
+          <span>Produit</span>
+          <span>Qté</span>
+          <span>PU</span>
+          <span>Total</span>
+        </div>
+
+        <!-- Liste des articles -->
+        ${this.selectedCommande.articles
+          .map(
+            (article) => `
+            <div class="item">
+              <div class="item-details">
+                <span>${article.produit.nom}</span>
+                <span>${article.quantite}</span>
+                <span>${article.produit.prix.toFixed(2)} HTG</span>
+                <span>${(article.produit.prix * article.quantite).toFixed(2)} HTG</span>
+              </div>
+            </div>`
+          )
+          .join("")}
+
+        <!-- Total -->
+        <div class="total">
+          <span>Total:</span>
+          <span>${total.toFixed(2)} HTG</span>
+        </div>
+
+        <br>
+        <div class="footer">
+          <i>Une hospitalité gracieuse au cœur de la ville</i>
+          <hr style="border: 1px dashed black; margin: 10px 0;" />
+          Merci pour votre confiance !
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  // Ouvrir une nouvelle fenêtre et écrire le contenu
+  const newWindow = window.open("", "_blank", "width=600, height=600");      
+  newWindow.document.write(printableContent);
+  newWindow.document.close();
+
+  // Imprimer la facture après un court délai
+  setTimeout(() => {
+    newWindow.print();
+    newWindow.close();
+  }, 1000);
+},
+
+
+printInvoiceOld() {
       const total = this.selectedCommande.articles.reduce(
         (sum, article) => sum + article.produit.prix * article.quantite,
         0

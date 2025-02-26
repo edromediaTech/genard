@@ -213,6 +213,11 @@ export default {
         });
         
         items.push({
+          icon: "mdi-account",
+          title: "Clients",
+          to: "/clientResto",
+        });
+        items.push({
           icon: "mdi-package-variant",
           title: "Produits",
           to: "/produits",
@@ -306,6 +311,11 @@ export default {
           icon: "mdi-food",
           title: "Gestion des Commandes",
           to: "/commandeAdmin",
+        });       
+        items.push({
+          icon: "mdi-food",
+          title: "Gestion des Comptes",
+          to: "/gestionCompte",
         });       
        
         items.push({

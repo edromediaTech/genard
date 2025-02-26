@@ -1,69 +1,28 @@
 <template>
     <v-container>
-      <h1 class="mb-5">Gestion des Utilisateurs Clients</h1>
+      <h1 class="mb-5">Gestion Clients Resto</h1>
   
       <!-- Formulaire pour ajouter ou modifier un utilisateur -->
       <v-dialog v-model="dialog" max-width="600px">
         <template #activator="{ on, attrs }">
           <v-btn color="primary" dark v-bind="attrs" v-on="on" @click="openDialog(null)">
-            Ajouter un utilisateur
+            Ajouter un client
           </v-btn>
         </template>
         <v-card>
           <v-card-title>
-            <span class="headline">{{ editedIndex === null ? 'Ajouter' : 'Modifier' }} un utilisateur</span>
+            <span class="headline">{{ editedIndex === null ? 'Ajouter' : 'Modifier' }} un client</span>
           </v-card-title>
           <v-card-text>
             <v-form ref="form" v-model="valid">
                 <v-row>
             <v-col cols="12"   sm="6"  md="12">
-              <v-text-field v-model="editedUser.name" label="Nom complet" required></v-text-field>
+              <v-text-field v-model="editedUser.nom" label="Nom complet" required></v-text-field>
             </v-col>
             <v-col cols="12"   sm="6"  md="6">
-              <v-text-field v-model="editedUser.email" label="Email" required></v-text-field>
-            </v-col>
-            <v-col cols="12"   sm="6"  md="6">
-              <v-text-field v-model="editedUser08.password" label="Mot de passe" type="password" required></v-text-field>
-            </v-col>
-            <v-col cols="12"   sm="6"  md="6">
-              <v-select v-model="editedUser.gender" :items="['male', 'female', 'other']" label="Sexe" required></v-select>
-              </v-col>
-              <v-col cols="12"   sm="6"  md="6">
-              <v-text-field v-model="editedUser.nationalId" label="ID national" required></v-text-field>
-              </v-col>
-              <v-col cols="12"   sm="6"  md="6">
-              <v-text-field v-model="editedUser.phoneNumber" label="Numéro de téléphone" required></v-text-field>
-              </v-col>
-              <v-col cols="12"   sm="6"  md="6">
-              <v-menu
-                v-model="dateMenu"
-                :close-on-content-click="false"
-                transition="scale-transition"
-                offset-y
-                min-width="auto"
-              >
-                <template #activator="{ on, attrs }">
-                  <v-text-field
-                    v-model="editedUser.dateOfBirth"
-                    label="Date de naissance"
-                    prepend-icon="mdi-calendar"
-                    readonly
-                    v-bind="attrs"
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker v-model="editedUser.dateOfBirth" @input="dateMenu = false"></v-date-picker>
-              </v-menu>
-              </v-col>
-              <v-col cols="12"   sm="6"  md="4">
-              <v-text-field v-model="editedUser.address.city" label="Ville" required></v-text-field> 
-              </v-col>
-              <v-col cols="12"   sm="6"  md="4">            
-              <v-select v-model="editedUser.address.country" :items="countries" label="Pays" required></v-select>
-              </v-col>
-              <v-col cols="12"   sm="6"  md="4">
-              <v-text-field v-model="editedUser.discount" label="Réduction (%)" type="number" min="0" max="100"></v-text-field>
-              </v-col>
+              <v-text-field v-model="editedUser.telephone" label="Numéro de téléphone" required></v-text-field>
+              </v-col>           
+             
             </v-row>
             </v-form>
           </v-card-text>
@@ -95,13 +54,9 @@
         users: [],
         editedIndex: null,
         editedUser: {
-          name: '',
-          email: '',
-          password: '',
-          gender: '',
-          nationalId: '',
-          phoneNumber: '',
-          dateOfBirth: null,
+          nom: '',
+          telephone: '',
+          
           address: {
             street: '',
             city: '',
@@ -113,10 +68,8 @@
         },
         dateMenu: false,
         headers: [
-          { text: 'Nom', value: 'name' },
-          { text: 'Email', value: 'email' },
-          { text: 'Téléphone', value: 'phoneNumber' },
-          { text: 'Réduction (%)', value: 'discount' },
+          { text: 'Nom', value: 'nom' },
+          { text: 'Email', value: 'telephone' },        
           { text: 'Actions', value: 'actions', sortable: false }
         ],
         countries: [
@@ -149,8 +102,9 @@
     methods: {
       async fetchUsers() {
         try {
-          const response = await this.$axios.get('/clientUsers');
-          this.users = response.data.users;
+          const response = await this.$axios.get('/clients');
+          console.log(response)
+          this.users = response.data;
         } catch (error) {
           console.error('Erreur lors de la récupération des utilisateurs', error);
         }
@@ -162,20 +116,9 @@
         } else {
           this.editedIndex = null;
           this.editedUser = {
-            name: '',
-            email: '',
-            password: '',
-            gender: '',
-            nationalId: '',
-            phoneNumber: '',
-            dateOfBirth: null,
-            address: {
-              street: '',
-              city: '',
-              state: '',
-              postalCode: '',
-              country: ''
-            },
+            nom: '',
+            telephone: '',
+          
             discount: 0
           };
         }
@@ -189,14 +132,14 @@
         try {
           if (this.editedIndex === null) {
             // Créer un nouvel utilisateur
-            const response = await this.$axios.post('/clientUsers', this.editedUser);
-            this.users.push(response.data.user);
+            const response = await this.$axios.post('clients', this.editedUser);
+            this.users.push(response.data);
           } else {
             // Mettre à jour un utilisateur existant
-            const response = await this.$axios.put('/clientUsers/'+this.editedIndex, this.editedUser);
+            const response = await this.$axios.put('clients/'+this.editedIndex, this.editedUser);
             const index = this.users.findIndex(user => user._id === this.editedIndex);
             if (index !== -1) {
-              this.users.splice(index, 1, response.data.user);
+              this.users.splice(index, 1, response.data);
             }
           }
           this.closeDialog();
@@ -205,9 +148,9 @@
         }
       },
       async deleteUser(id) {
-        if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) {
           try {
-            await this.$axios.delete('/clientUsers/'+id);
+            await this.$axios.delete('/clients/'+id);
             this.users = this.users.filter(user => user._id !== id);
           } catch (error) {
             console.error('Erreur lors de la suppression de l\'utilisateur', error);

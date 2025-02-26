@@ -10,7 +10,7 @@
         item-value="id"
         dense
         :search="search"
-        item-key="_id"
+        item-key="_id"         
         class="elevation-1"
          :loading="loading"
        loading-text="Chargement en cours..."
@@ -575,103 +575,153 @@ export default {
       this.dialogConfirm = false;
     },
 
-    printInvoice() {
+   printInvoice() {
+  // Calculer le total de la commande
   const total = this.selectedCommande.articles.reduce(
-        (sum, article) => sum + article.produit.prix * article.quantite,
-        0
-      );
+    (sum, article) => sum + article.produit.prix * article.quantite,
+    0
+  );
 
-      
-    const invoiceContent = `
-        <div style="text-align: center; font-family: monospace, sans-serif; font-size: 14px; margin: 0; padding: 0;">
-            <h5 style="text-align: center; margin: 0;">Bénédictions de l'Éternel</h5>             
-              <p style="text-align: center; margin: 0;">               
-                +509 3779-6764 / +509 3596-7838<br />        
-              </p>
-            <hr>
-            <h5 style="text-align: center; margin: 0;">FACTURE</h5>
-            <p>Client: ${this.selectedCommande.client}</p>
-            <hr>
-            
-            <!-- Tableau des articles -->
-            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                <thead>
-                    <tr>
-                       <th style="border: 1px solid #000; padding: 3px; text-align: center;">Qté</th>
-                        <th style="border: 1px solid #000; padding: 3px; text-align: left;">Article</th>                       
-                        <th style="border: 1px solid #000; padding: 3px; text-align: right;">PU (HTG)</th>
-                        <th style="border: 1px solid #000; padding: 3px; text-align: right;">Total (HTG)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${this.selectedCommande.articles.map(article => {
-                        const totalArticle = (article.produit.prix * article.quantite).toFixed(2);
-                        return `
-                            <tr>
-                               <td style="border: 1px solid #000; padding: 3px; text-align: center;">${article.quantite}</td>
-                                <td style="border: 1px solid #000; padding: 3px;">${article.produit.nom}</td>                               
-                                <td style="border: 1px solid #000; padding: 3px; text-align: right;">${article.produit.prix.toFixed(2)}</td>
-                                <td style="border: 1px solid #000; padding: 3px; text-align: right;">${totalArticle}</td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-            
-            <hr>
-            <p><strong>Total : </strong> ${total.toFixed(2)} HTG</p>
-            <hr>
-            <p>Merci pour votre confiance !</p>
+  // Formater la date de la commande
+  const commandeDate = new Date(this.selectedCommande.date).toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  // Créer le contenu imprimable sans tableau
+  const printableContent = `
+    <html>
+    <head>
+      <style>
+        @page {
+          margin: 10mm;
+        }
+        body {
+          margin: 0;
+          padding: 0;
+        }
+        .container {
+          font-family: 'Courier New', monospace;
+          width: 100mm;
+          padding: 5mm;
+          box-sizing: border-box;
+        }
+        .header {
+          text-align: center;
+          margin-bottom: 10px;
+        }
+        .header h2, .header p {
+          margin: 0;
+          font-size: 10px;
+        }
+        .invoice-details {
+          margin-top: 10px;
+          font-size: 12px;
+          text-align: center; /* Centrer les détails de la commande */
+        }
+        .invoice-details p {
+          margin: 5px 0;
+        }
+        .footer {
+          text-align: center;
+          font-size: 10px;
+          margin-top: 10px;
+        }
+        .item {
+          display: flex;
+          justify-content: space-between;
+          margin: 5px 0;
+          font-size: 12px;
+          text-align: center; /* Centrer les éléments de chaque ligne */
+        }
+        .item-details {
+          display: flex;
+          justify-content: space-between;
+          width: 100%;
+        }
+        .item-details span {
+          flex: 1; /* Répartir l'espace équitablement */
+          text-align: center; /* Centrer le texte dans chaque colonne */
+        }
+        .total {
+          font-weight: bold;
+          margin-top: 10px;
+          border-top: 1px dashed black;
+          padding-top: 5px;
+          text-align: center; /* Centrer le total */
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h5>Bénédictions de l'Éternel</h5>             
+          <p>               
+            Tél: +509 3779-6764 / +509 3596-7838<br />        
+          </p>
+          <hr style="border: 1px dashed black; margin: 10px 0;" />
+        </div>        
+        <h5 style="text-align: center; margin: 0;">FACTURE</h5>
+        
+        <!-- Détails de la commande -->
+        <div class="invoice-details">
+          <p><strong>Client:</strong> ${this.selectedCommande.client}</p>
+          <p><strong>Date:</strong> ${commandeDate}</p>
         </div>
-    `;
 
-    const printWindow = window.open('', '', 'width=800,height=600');
-    printWindow.document.write(`
-        <html>
-            <head>
-                <style>
-                    body {
-                        margin: 0;
-                        padding: 0;
-                        width: 100%;
-                        font-family: monospace, sans-serif;
-                    }
-                    @page {
-                        size: auto;   /* Ajuste la taille de la page en fonction du contenu */
-                        margin: 0mm;   /* Retirer les marges inutiles */
-                    }
-                    /* Fixer la taille du contenu à la largeur de la page pour éviter les marges */
-                    .invoice {
-                        width: 100%;
-                        max-width: 800px;
-                        margin: 0 auto;
-                        page-break-before: auto;
-                    }
-                    /* S'assurer que les éléments du tableau sont bien alignés et ne gaspillent pas d'espace */
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                    }
-                    th, td {
-                        padding: 5px;
-                        border: 1px solid #000;
-                    }
-                    p{
-                    font-size:14px
-                    }
-                    h2, h3, p {
-                        margin: 0;
-                        padding: 5px;
-                    }
-                </style>
-            </head>
-            <body>
-                ${invoiceContent}
-            </body>
-        </html>
-    `);
-    printWindow.document.close();
-    printWindow.print();
+        <!-- Entête des articles -->
+        <div class="item" style="font-weight: bold;">
+          <span>Produit</span>
+          <span>Qté</span>
+          <span>PU</span>
+          <span>Total</span>
+        </div>
+
+        <!-- Liste des articles -->
+        ${this.selectedCommande.articles
+          .map(
+            (article) => `
+            <div class="item">
+              <div class="item-details">
+                <span>${article.produit.nom}</span>
+                <span>${article.quantite}</span>
+                <span>${article.produit.prix.toFixed(2)} HTG</span>
+                <span>${(article.produit.prix * article.quantite).toFixed(2)} HTG</span>
+              </div>
+            </div>`
+          )
+          .join("")}
+
+        <!-- Total -->
+        <div class="total">
+          <span>Total:</span>
+          <span>${total.toFixed(2)} HTG</span>
+        </div>
+
+        <br>
+        <div class="footer">
+          <i>Une hospitalité gracieuse au cœur de la ville</i>
+          <hr style="border: 1px dashed black; margin: 10px 0;" />
+          Merci pour votre confiance !
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  // Ouvrir une nouvelle fenêtre et écrire le contenu
+  const newWindow = window.open("", "_blank", "width=600, height=600");      
+  newWindow.document.write(printableContent);
+  newWindow.document.close();
+
+  // Imprimer la facture après un court délai
+  setTimeout(() => {
+    newWindow.print();
+    newWindow.close();
+  }, 1000);
 },
 
 
