@@ -35,8 +35,9 @@
         <v-spacer></v-spacer>
      <!-- Bouton pour basculer entre les commandes du jour et toutes les commandes -->
      <v-btn color="success"  class="mx-4"  fab x-small @click="openAddModal"><v-icon >mdi-plus</v-icon></v-btn>
-     <v-btn color="blue" class="mb-4 mx-4 mr-4 pr-4" @click="toggleShowAllCommands"><v-icon left>mdi-food</v-icon>
-      <h6>{{ showAllCommands ? "Commandes du jour" : "Toutes les commandes" }}</h6>
+     <v-btn color="blue" class="mb-4 mx-4 mr-4 pr-4" @click="fetchCommandes"><v-icon left>mdi-food</v-icon> Commande du jour</v-btn>
+     <v-btn color="pink" class="mb-4 mx-4 mr-4 pr-4" @click="fetchAllCommandes"><v-icon left>mdi-food</v-icon> All
+    
     </v-btn>
   
   </v-row>
@@ -48,11 +49,24 @@
           <v-btn v-if="isAdmin" icon small color="error" @click="deleteArticle(item._id)">
             <v-icon>mdi-delete</v-icon>
           </v-btn>
+            <!-- Bouton pour modifier le statut -->
+              <v-btn
+                v-if="item.statutReg !== 'Complet'"
+                icon
+                small
+                color="primary"
+                @click="openEditStatutModal(item)"
+              >
+                <v-icon>mdi-pencil</v-icon>
+              </v-btn>
        
         </template>
         <template #[`item.createdAt`]="{ item }">
           {{ formatDate(item.createdAt) }}
         </template>
+         <template #[`item.code`]="{ item }">
+        {{ getLastThreeDigits(item.code) }}
+      </template>
       </v-data-table>
     </v-card>
 
@@ -62,25 +76,18 @@
         <v-card-title>Ajouter un article</v-card-title>
         <v-card-text>
           <v-row>
-            <v-col cols="12" md="6" sm="6">
+             <v-col cols="12" md="6" sm="6">
               <v-combobox
                 v-model="selectedTableId"
-                :items="tablesOptions"
-                label="Client"
+                :items="clients"
+                label="Choisir un Client"
+                item-text="nom"
+                item-value="nom"
                 outlined
                 dense
               ></v-combobox>
             </v-col>
-            <!-- Statut -->
-            <v-col cols="12" sm="6">
-              <v-select
-                v-model="commande.statut"
-                :items="statutOptions"
-                label="Statut"
-                required
-                outlined
-              ></v-select>
-            </v-col>
+           
           </v-row>
           <v-row v-for="(article, index) in commande.articles" :key="index" class="mb-3">
             <v-col cols="12" md="6" sm="6">
@@ -195,6 +202,42 @@
       </v-card>
     </v-dialog>
 
+     <!-- Modal pour modifier le statut -->
+    <v-dialog v-model="editStatutModal" max-width="500px">
+  <v-card>
+    <v-card-title>Modifier le statut de règlement</v-card-title>
+    <v-card-text>
+      <!-- Sélecteur de statut -->
+     
+      <!-- Champ pour saisir le montant payé -->
+      <v-text-field
+        v-model="montantPaye"
+        label="Montant payé"
+        type="number"
+        outlined
+        :rules="[rules.positive]"
+        @input="calculateMontantRestant"        
+      ></v-text-field>
+
+      <!-- Affichage du montant restant -->
+      <v-alert v-if="montantRestant !== null" :type="montantRestant >= 0 ? 'info' : 'error'">
+        Montant restant : {{ montantRestant }} HTG
+      </v-alert>
+
+      <!-- Affichage de la monnaie si le montant payé est supérieur au total -->
+      <v-alert v-if="monnaie > 0" type="success">
+        Monnaie à rendre : {{ monnaie }} HTG
+      </v-alert>
+    </v-card-text>
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn color="primary" @click="updateStatut">Enregistrer</v-btn>
+      <v-btn text @click="closeEditStatutModal">Annuler</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+
+
     <v-dialog v-model="dialogConfirm" max-width="400">
       <v-card>
         <v-card-title class="headline">Confirmation</v-card-title>
@@ -221,29 +264,37 @@ export default {
       loading : false,
       search:'',
       showAllCommands: false,
+       editStatutModal: false,
       selectedTableId: null, // ID de la table sélectionnée
       tablesOptions: ['Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5', 'Table 6', 'Table 7'], // Options des tables
       statutOptions: ['En attente', 'En préparation', 'Servie', 'Terminée'],
       dialogConfirm: false,  // État du dialogue de confirmation
       currentDeleteId: null,
       selectedProductDetails: null,
+       rules: {
+      positive: value => value >= 0 || 'Le montant doit être positif',
+    },
       articles: [], // Articles récupérés
+      clients:[],
       commande: {
         client: null,
         serveur: '',
-        statut: null,
+         statut: 'En attente',
         articles: [{ produit: null, quantite: 1 }], // Initialiser un article avec produit et quantité par défaut
-        total: 0,
+        total: 0,         
+        reglement: 0, // Montant payé jusqu'à présent
+       statutReg: 'Non paiement',
       },
       produitsOptions: [], // Produits disponibles
       commandes: [], // Liste des commandes
       headers: [
+        { text: "Code", value: "code" },
         { text: "Client", value: "client" },
         { text: "Serveur", value: "serveur" },
         { text: "Statut", value: "statut" },
         { text: "Total (HTG)", value: "total" },
       { text: "Reglement (HTG)", value: "reglement" },
-        { text: "Date", value: "createdAt" },
+        { text: "Date", value: "date" },
         { text: "Actions", value: "actions", sortable: false },
       ],
       productHeaders: [
@@ -281,6 +332,9 @@ export default {
       addModal: false, // État du modal pour ajouter un article
       detailModal: false, // État du modal pour afficher les détails
       selectedOrder: {}, // Commande sélectionnée pour afficher les détails
+        montantPaye: 0, // Montant payé par le client
+    montantRestant: null, // Montant restant à payer
+    monnaie: 0,
       commandeId: '', // ID de la commande actuelle
       errors: {
         client: "",
@@ -308,6 +362,7 @@ export default {
   async mounted() {
     await this.fetchCommandes();
     await this.fetchProduits();
+    await this.fetchClients()
   },
   methods: {
     ...mapActions("auth", ["sendLoginRequest"]),
@@ -322,6 +377,23 @@ export default {
       this.showAllCommands = !this.showAllCommands;
     },
     
+     getLastThreeDigits(code) {
+        if (code && code.length >= 3) {
+          return code.slice(-3); // Extrait les 3 derniers caractères
+        }
+        return code; // Retourne le code complet si sa longueur est inférieure à 3
+      },
+
+      async fetchClients() {
+        try {
+          const response = await this.$axios.get('/clients');
+          console.log(response)
+          this.clients = response.data;
+        } catch (error) {
+          console.error('Erreur lors de la récupération des utilisateurs', error);
+        }
+      },
+
     // Récupérer les produits disponibles
     async fetchProduits() {
       try {
@@ -335,6 +407,100 @@ export default {
         console.error('Erreur lors de la récupération des produits:', error);
       }
     },
+
+ openEditStatutModal(item) {
+    this.selectedCommandeId = item._id; // Stocker l'ID de la commande
+    this.selectedCommandeTotal = item.total; // Stocker le total de la commande
+    this.editedStatut = item.statutReg; // Pré-remplir le statut actuel
+    this.montantPaye = item.reglement || 0; // Pré-remplir le montant payé
+    this.calculateMontantRestant(); // Calculer le montant restant
+    this.editStatutModal = true; // Ouvrir le modal
+  },
+
+   // Fermer le modal
+  closeEditStatutModal() {
+    this.editStatutModal = false;
+    this.selectedCommandeId = null;
+    this.editedStatut = '';
+    this.montantPaye = 0;
+    this.montantRestant = null;
+    this.monnaie = 0;
+  },
+
+  // Calculer le montant restant et la monnaie
+  calculateMontantRestant() {
+    if (this.montantPaye !== null && this.selectedCommandeTotal !== null) {
+      this.montantRestant = this.selectedCommandeTotal - this.montantPaye;
+      this.monnaie = this.montantPaye > this.selectedCommandeTotal ? this.montantPaye - this.selectedCommandeTotal : 0;
+    }
+    this.onStatutChange()
+  },
+
+  // Mettre à jour le statut et le montant payé
+  
+
+  // Gérer le changement de statut
+  onStatutChange() {
+    if (this.commande.reglement=== 'Complet') {
+      this.montantPaye = this.selectedCommandeTotal; // Si le statut est "Complet", le montant payé est égal au total
+      this.calculateMontantRestant();
+    }
+  },
+
+
+async updateStatut() {
+  if (!this.selectedCommandeId || !this.montantPaye) {
+    this.$notifier.showMessage({
+      content: 'Veuillez sélectionner une commande et un montant valide.',
+      color: 'error',
+    });
+    return;
+  }
+
+  // Vérifier que le montant est un nombre valide
+  if (isNaN(this.montantPaye)) {
+    this.$notifier.showMessage({
+      content: 'Le montant doit être un nombre valide.',
+      color: 'error',
+    });
+    return;
+  }
+  this.commande.reglement = this.montantPaye
+  // Convertir le montant en nombre
+  // const montant = Number(this.commande.reglement);
+
+  console.log('Données envoyées :', {
+    commandeId: this.selectedCommandeId,
+    montant : this.commande.reglement ,
+  });
+
+  try {
+    const response = await this.$axios.post('commandes/paiement', {
+      commandeId: this.selectedCommandeId,
+      montant : this.commande.reglement,
+    });
+    console.log('Réponse du serveur :', response.data);
+ 
+    // Rafraîchir la liste des commandes
+    await this.fetchCommandes();
+
+    // Fermer le modal
+    this.closeEditStatutModal();
+
+    // Afficher un message de succès
+    this.$notifier.showMessage({
+      content: 'Statut mis à jour avec succès !',
+      color: 'success',
+    });
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour du statut :', error);
+    this.$notifier.showMessage({
+      content: 'Erreur lors de la mise à jour du statut.',
+      color: 'error',
+    });
+  }
+},
+
 
     
     formatDate(dateString) {
@@ -362,6 +528,54 @@ export default {
             return  commandeDate === today;
           // }
         })
+        .map(commande => {
+          // Si le total est égal à 0, le recalculer en fonction des articles
+          if (commande.total === 0) {
+            commande.total = commande.articles.reduce((sum, article) => {
+              return sum + (article.produit.prix * article.quantite);
+            }, 0);
+          }
+
+          return {
+            ...commande,
+            serveur: commande.serveur.prenom,
+            client: commande.client,
+            statut: commande.statut,
+            total: commande.total, // Utiliser le total calculé ou existant
+            createdAt: commande.createdAt,
+            date: new Date(commande.date).toLocaleDateString('fr-FR', {
+              day: '2-digit',
+              month: '2-digit',
+              year: '2-digit',
+            }),
+          };
+        });
+
+    } catch (error) {
+      console.error('Erreur lors du chargement des commandes :', error);
+    }
+    this.loading = false
+  },
+  async fetchAllCommandes() {
+    this.loading = true
+    try {
+      const { data } = await this.$axios.get('/commandes');
+      
+     // const userId = this.user.userId;
+
+      // Filtrer les commandes en fonction de showAllCommandes
+      this.commandes = data
+       // .filter(commande => {
+         // if (this.showAllCommandes) {
+            // Afficher toutes les commandes pour l'utilisateur
+         //   return commande.serveur._id === userId;
+          // } else {
+            // Afficher uniquement les commandes du jour pour l'utilisateur
+           // const today = new Date().toLocaleDateString('fr-CA');
+           // const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
+           // return  commandeDate === today;
+          // }
+       // })
         .map(commande => {
           // Si le total est égal à 0, le recalculer en fonction des articles
           if (commande.total === 0) {
@@ -435,7 +649,8 @@ export default {
       this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken');
       this.commande.client = this.selectedTableId;
       this.commande.serveur = this.user.userId;
-
+      this.commande.total = this.selectedProductDetails.prix
+     
       if (this.commande.client === null || this.commande.statut === null) {
         this.$notifier.showMessage({ content: "Il y a un champ vide", color: "error", });
         return false;

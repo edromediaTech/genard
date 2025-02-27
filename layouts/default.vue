@@ -231,6 +231,11 @@ export default {
           title: "Tableau de bord",
           to: "/admin",
         });
+          items.push({
+          icon: "mdi-cash",
+          title: "Gestion des Comptes",
+          to: "/gestionCompte",
+        });
         items.push({
           icon: "mdi-file",
           title: "Rapport de Ventes",
@@ -266,7 +271,13 @@ export default {
           icon: "mdi-food",
           title: "Gestion des Commandes",
           to: "/commandeAdmin",
-        });       
+        });  
+        
+          items.push({
+          icon: "mdi-cash",
+          title: "Gestion des Comptes",
+          to: "/gestionCompte",
+        });
        
         items.push({
           icon: "mdi-basket",
@@ -313,7 +324,7 @@ export default {
           to: "/commandeAdmin",
         });       
         items.push({
-          icon: "mdi-food",
+          icon: "mdi-cash",
           title: "Gestion des Comptes",
           to: "/gestionCompte",
         });       

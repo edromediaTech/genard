@@ -258,8 +258,7 @@ export default {
       selectedProductDetails: null,
       editStatutModal: false, // Contrôle l'ouverture du modal
     editedStatut: '', // Statut sélectionné dans le modal
-    selectedCommandeId: null, // ID de la commande sélectionnée
-   
+    selectedCommandeId: null, // ID de la commande sélectionnée   
     selectedCommandeTotal: 0, // Total de la commande sélectionnée
     montantPaye: 0, // Montant payé par le client
     montantRestant: null, // Montant restant à payer
@@ -365,7 +364,7 @@ export default {
       async fetchClients() {
         try {
           const response = await this.$axios.get('/clients');
-          console.log(response)
+          
           this.clients = response.data;
         } catch (error) {
           console.error('Erreur lors de la récupération des utilisateurs', error);
@@ -420,7 +419,7 @@ export default {
     async fetchCommandes() {
       try {
         const { data } = await this.$axios.get('/commandes');
-        console.log(data)
+        
         const userId = this.user.userId;
         const today = new Date().toLocaleDateString('fr-CA');
    
@@ -503,8 +502,7 @@ export default {
       this.commande.client = this.selectedTableId;
       this.commande.serveur = this.user.userId;
       this.commande.total = this.selectedProductDetails.prix
-      console.log("total",this.commande.total)
-
+     
       if (this.commande.client === null || this.commande.statut === null) {
         this.$notifier.showMessage({ content: "Il y a un champ vide", color: "error", });
         return false;
@@ -717,18 +715,13 @@ export default {
   // Convertir le montant en nombre
   // const montant = Number(this.commande.reglement);
 
-  console.log('Données envoyées :', {
-    commandeId: this.selectedCommandeId,
-    montant : this.commande.reglement ,
-  });
 
   try {
-    const response = await this.$axios.post('commandes/paiement', {
+     await this.$axios.post('commandes/paiement', {
       commandeId: this.selectedCommandeId,
       montant : this.commande.reglement,
     });
-    console.log('Réponse du serveur :', response.data);
- 
+   
     // Rafraîchir la liste des commandes
     await this.fetchCommandes();
 
@@ -1028,7 +1021,7 @@ printInvoice() {
       return response.json();
     })
     .then((data) => {
-      console.log(data.message); // Afficher un message de succès
+      // Afficher un message de succès
       alert('Facture imprimée avec succès !');
     })
     .catch((error) => {

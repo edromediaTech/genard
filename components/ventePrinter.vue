@@ -10,14 +10,14 @@
       </div>      
       
     </div>
-    <center ><h5 class="ecole">Rapport de Vente</h5></center>
-    <h5 style="text-align:right; padding-right:20%"  >Date : {{new Date() | moment(" Do/MM/YYYY")}}</h5>
+    <center ><h5 class="ecole">{{texte}}</h5></center>
+    <!-- <h5 style="text-align:right; padding-right:20%"  >Date : {{new Date() | moment(" Do/MM/YYYY")}}</h5> -->
        <v-simple-table id="pdf-container" class="theme--light no-dark-theme">
                 <thead>
                   <tr>
                     <th>Produit</th>
                     <th>Qté</th>
-                <th>Prix (HTG)</th>             
+                <th>Prix (HTG)</th>            
                
                 <th>Total</th>                                   
                   </tr>
@@ -45,6 +45,8 @@
   export default {
     props : {salesreport: { type: Array, default: () => []} ,
      totalventes:{ type:Number, default: 0},
+     texte:{type:String, default:''},
+     
     
     },
       data (){

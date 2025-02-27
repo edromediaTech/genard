@@ -3,23 +3,23 @@
     <v-card class="pa-5">
       <v-card-title>Gestion des Comptes Bancaires</v-card-title>
 
-      <v-btn color="primary" @click="dialog = true">Ajouter un compte</v-btn>
+      <v-btn  v-if="isAdmin" color="primary" @click="dialog = true" >Ajouter un compte</v-btn>
 
       <v-data-table :headers="headers" :items="accounts" class="mt-5" :loading="loading" loading-text="Chargement en cours...">
         <template #[`item.actions`]="{ item }">
-          <v-btn v-if="isAdmin" icon color="blue" @click="editAccount(item)">
+          <v-btn v-if="isAdmin" icon color="blue" title="Modifier" @click="editAccount(item)">
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
-          <v-btn v-if="isAdmin" icon color="red" @click="deleteAccount(item._id)">
+          <v-btn v-if="isAdmin" icon color="red" title="Supprimer" @click="deleteAccount(item._id)">
             <v-icon>mdi-delete</v-icon>
           </v-btn>
-          <v-btn v-if="isAdmin" icon color="green" @click="openTransactionDialog(item, 'deposit')">
+          <v-btn v-if="isAdmin" icon color="green" title="Depot" @click="openTransactionDialog(item, 'deposit')">
             <v-icon>mdi-plus</v-icon>
           </v-btn>
-          <v-btn v-if="isAdmin" icon color="orange" @click="openTransactionDialog(item, 'withdraw')">
+          <v-btn v-if="isAdmin" icon color="orange" title="Retrait" @click="openTransactionDialog(item, 'withdraw')">
             <v-icon>mdi-minus</v-icon>
           </v-btn>
-          <v-btn icon color="blue" @click="openTransactionModal(item)">
+          <v-btn icon color="pink" title="Details transaction" @click="openTransactionModal(item)">
             <v-icon>mdi-eye</v-icon>
           </v-btn>
         </template>
@@ -49,11 +49,12 @@
           <v-card-title>{{ transactionType === 'deposit' ? 'Dépôt' : 'Retrait' }}</v-card-title>
           <v-card-text>
             <v-text-field v-model.number="transaction.amount" label="Montant" type="number" min="1"></v-text-field>
-            <v-text-field v-model="transaction.auteur" label="Auteur"></v-text-field>
+            <v-combobox v-model="transaction.auteur" label="Auteur" :items="['Guerlin', 'Guy', 'Ronel']"></v-combobox>
             <v-text-field v-model="transaction.description" label="Description"></v-text-field>
+            <v-text-field v-model="transaction.date" label="Date transaction" type="date"></v-text-field>
           </v-card-text>
           <v-card-actions>
-            <v-btn :disabled="transaction.amount===0 || transaction.description === ''" color="green" @click="processTransaction">Confirmer</v-btn>
+            <v-btn :disabled="transaction.amount===0 || transaction.description === '' || transaction.auteur ===''  || transaction.date === null" color="green" @click="processTransaction">Confirmer</v-btn>
             <v-btn color="red" @click="transactionDialog = false">Annuler</v-btn>
           </v-card-actions>
         </v-card>
@@ -109,7 +110,7 @@ export default {
       isEditing: false,
       transactionType: '',
       selectedAccount: null,
-      transaction: { amount: 0, description: '', auteur: '' },
+      transaction: { amount: 0, description: '', auteur: '' , date:null},
       form: { accountName: '', accountNumber: '', balance: 0, devise: '', bank: '' },
       devises: ['Gourde', 'Dollar'],
       banks:['BNC', 'Unibank', 'Sogebank', 'Capital Bank'],
@@ -148,7 +149,7 @@ export default {
       this.loading = true;
       const { data } = await this.$axios.get('finance/accounts');
       this.accounts = data;
-      console.log(data)
+      
       this.loading = false;
     },
 

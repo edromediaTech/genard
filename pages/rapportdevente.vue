@@ -89,6 +89,7 @@
                     <vente-printer
                       :salesreport="salesReport"
                       :totalventes ="totalVentes"
+                     :texte="texte"
                     />
                   </template>
                 </vue-html2pdf>
@@ -145,6 +146,7 @@ export default {
   data() {
     return {
       visible:false,
+      texte:'',
       filters: {
         dateDebut: "",
         dateFin: "",
@@ -174,9 +176,9 @@ export default {
   mounted() {
     const today = new Date().toLocaleDateString('fr-CA');   
     this.filters.dateDebut =today
-    this.filters.dateFin =today
-    console.log(today,   this.filters.dateDebut)
+    this.filters.dateFin =today    
   },
+
   methods: {
     validateDates() {
       this.dateDebutErrors = [];
@@ -227,6 +229,7 @@ export default {
     },
     async fetchReport() {
       this.loading = true;
+    
       try {
         const response = await this.$axios.get(
           `commandes/produits?dateDebut=${this.filters.dateDebut}&dateFin=${this.filters.dateFin}`
@@ -278,9 +281,17 @@ export default {
         })
         .save();
     },
+
+    setTexte(){
+      if(this.filters.dateDebut === this.filters.dateFin)
+      this.texte = 'Rapport '+  this.formatDate(this.filters.dateFin)
+      else
+      this.texte = 'Rapport allant du '+  this.formatDate(this.filters.dateDebut) +' au ' + this.formatDate(this.filters.dateFin)
+    },
    
     generateReport() {      
       this.$refs.html2Pdf.generatePdf();
+      this.setTexte()
     },
 
   }

@@ -346,8 +346,8 @@
             checkOutDate: this.checkOutDate,
             occupants: this.occupants
           };
-          const response = await this.$axios.post('/bookings', bookingData);
-          console.log(response)
+           await this.$axios.post('/bookings', bookingData);
+          
           alert('Réservation confirmée avec succès !');
           this.resetForm();
         } catch (error) {

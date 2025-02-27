@@ -79,6 +79,9 @@
           <v-icon>mdi-delete</v-icon>
         </v-btn>
       </template>
+      <template #[`item.date`]="{ item }">
+          {{ formatDate(item.date) }}
+        </template>
     </v-data-table>
   </v-container>
 </template>
@@ -151,6 +154,13 @@ export default {
   },
   methods: {
     ...mapActions("auth", ["sendLoginRequest"]),
+     formatDate(date) {
+      const d = new Date(date);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    },
     openModal() {
       this.modalOpen = true;
     },
@@ -202,8 +212,8 @@ export default {
       this.loading = true;
       this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken');
       try {
-        const response = await this.$axios.post('achats', this.form);
-        console.log('Transaction enregistrée :', response.data);
+         await this.$axios.post('achats', this.form);
+       
         await this.fetchTransactions();
         this.closeModal();
         this.$notifier.showMessage({
@@ -222,8 +232,8 @@ export default {
     async updateTransaction() {
       this.loading = true;
       try {
-        const response = await this.$axios.put(`achats/${this.form._id}`, this.form);
-        console.log('Transaction mise à jour :', response.data);
+        await this.$axios.put(`achats/${this.form._id}`, this.form);
+        
         await this.fetchTransactions();
         this.closeModal();
         this.$notifier.showMessage({
