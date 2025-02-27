@@ -242,6 +242,7 @@ export default {
         { text: "Serveur", value: "serveur" },
         { text: "Statut", value: "statut" },
         { text: "Total (HTG)", value: "total" },
+      { text: "Reglement (HTG)", value: "reglement" },
         { text: "Date", value: "createdAt" },
         { text: "Actions", value: "actions", sortable: false },
       ],
@@ -577,117 +578,116 @@ export default {
 
   
 printInvoice() {
-  const total = this.selectedCommande.articles.reduce(
-    (sum, article) => sum + article.produit.prix * article.quantite,
-    0
-  );  
+      const total = this.selectedCommande.articles.reduce(
+        (sum, article) => sum + article.produit.prix * article.quantite,
+        0
+      );
 
-  const printableContent = `
-    <html>
-    <head>
-      <style>
-        @page {
-          margin: 10mm;
-        }
-        body {
-          margin: 0;
-          padding: 0;
-        }
-        .container {
-          font-family: 'Courier New', monospace;
-          width: 100mm;
-          padding: 5mm;
-          box-sizing: border-box;
-        }
-        .header {
-          text-align: center;
-          margin-bottom: 10px;
-        }
-        .header h2, .header p {
-          margin: 0;
-          font-size: 10px;
-        }
-        table {
-          width: 100%;
-          font-size: 10px;
-          margin-top: 10px;
-          border: none; /* Supprime les bordures du tableau */
-        }
-        table th, table td {
-          text-align: left;
-          border: none; /* Supprime les bordures des cellules */
-          padding: 5px; /* Ajoute un peu d'espace pour la lisibilité */
-        }
-        table th:first-child, table td:first-child {
-          text-align: left;
-        }
-        .footer {
-          text-align: center;
-          font-size: 10px;
-          margin-top: 10px;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h5>Bénédictions de l'Éternel</h5>             
-          <p>               
-            Tél: +509 3779-6764 / +509 3596-7838<br />        
-          </p>
-          <hr style="border: 1px dashed black; margin: 10px 0;" />
-        </div>        
-        <h5 style="text-align: center; margin: 0;">FACTURE</h5>
-        <p style="font-size: 12px;"><strong>Client:</strong> ${this.selectedCommande.client}</p>
-        <p style="font-size: 12px;"><strong>Client:</strong> ${this.selectedCommande.date}</p>
-       
-        <table>
-          <thead>
-            <tr>
-              <th>Produit</th>
-              <th>Qté</th>
-              <th>PU</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${this.selectedCommande.articles
-              .map(
-                (article) => `
+      const printableContent = `
+        <html>
+        <head>
+          <style>
+            @page {
+              margin: 10mm;
+            }
+            body {
+              margin: 0;
+              padding: 0;
+            }
+            .container {
+              font-family: 'Courier New', monospace;
+              width: 100mm;
+              padding: 5mm;
+              box-sizing: border-box;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 10px;
+            }
+            .header h2, .header p {
+              margin: 0;
+              font-size: 10px;
+            }
+            table {
+              width: 100%;
+              font-size: 10px;
+              border-collapse: collapse;
+              margin-top: 10px;
+                 border: none;
+            }
+            table th, table td {
+              text-align: right;
+                 border: none;
+            }
+            table th:first-child, table td:first-child {
+              text-align: left;
+            }
+            .footer {
+              text-align: center;
+              font-size: 10px;
+              margin-top: 10px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h5>Bénédictions de l'Éternel</h5>             
+              <p>               
+                Tél: +509 3779-6764 / +509 3596-7838<br />        
+              </p>
+              <hr style="border: 1px dashed black; margin: 10px 0;" />
+            </div>        
+            <h5 style="text-align: center; margin: 0;">FACTURE</h5>
+            <p style="font-size: 12px;"><strong>Client:</strong> ${this.selectedCommande.client}</p>
+            <table>
+              <thead>
                 <tr>
-                  <td>${article.produit.nom}</td>
-                  <td>${article.quantite}</td>
-                  <td>${article.produit.prix.toFixed(2)}</td>
-                  <td>${(article.produit.prix * article.quantite).toFixed(2)}</td>
-                </tr>`
-              )
-              .join("")}
-            <tr>
-              <td colspan="3" style="text-align: right; font-weight: bold;">Total</td>
-              <td style="font-weight: bold;">${total.toFixed(2)}</td>
-            </tr>
-          </tbody>
-        </table>
-        <br>
-        <div class="footer">
-          <i>Une hospitalité gracieuse au cœur de la ville</i>
-          <hr style="border: 1px dashed black; margin: 10px 0;" />
-          Merci pour votre confiance !
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
+                  <th>Produit</th>
+                  <th>Qté</th>
+                  <th>PU</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${this.selectedCommande.articles
+                  .map(
+                    (article) => `
+                    <tr>
+                      <td>${article.produit.nom}</td>
+                      <td>${article.quantite}</td>
+                      <td>${article.produit.prix.toFixed(2)}</td>
+                      <td>${(article.produit.prix * article.quantite).toFixed(2)}</td>
+                    </tr>`
+                  )
+                  .join("")}
+                <tr>
+                  <td colspan="3" style="text-align: right; font-weight: bold;">Total</td>
+                  <td style="font-weight: bold;">${total.toFixed(2)}</td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+            <div class="footer">
+              <i>Une hospitalité gracieuse au cœur de la ville</i>
+              <hr style="border: 1px dashed black; margin: 10px 0;" />
+              Merci pour votre confiance !
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
 
-  const newWindow = window.open("", "_blank", "width=600, height=600");      
-  newWindow.document.write(printableContent);
-  newWindow.document.close();
+      const newWindow = window.open("", "_blank", "width=600, height=600");      
+      newWindow.document.write(printableContent);
+      // newWindow.document.write();
+      newWindow.document.close();
 
-  setTimeout(() => {
-    newWindow.print();
-    newWindow.close();
-  }, 1000);
-},
+      setTimeout(() => {
+        newWindow.print();
+        newWindow.close();
+      }, 1000);
+    },
 
 
 

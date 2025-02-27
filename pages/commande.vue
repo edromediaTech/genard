@@ -768,13 +768,12 @@ export default {
     cancelDelete() {
       this.dialogConfirm = false;
     },
-printInvoice() {
+
+printInvoicepiti() {
   const total = this.selectedCommande.articles.reduce(
     (sum, article) => sum + article.produit.prix * article.quantite,
     0
-  );
-
-  
+  );  
 
   const printableContent = `
     <html>
@@ -885,7 +884,7 @@ printInvoice() {
 
 
 
-printInvoiceOld() {
+printInvoice() {
       const total = this.selectedCommande.articles.reduce(
         (sum, article) => sum + article.produit.prix * article.quantite,
         0
