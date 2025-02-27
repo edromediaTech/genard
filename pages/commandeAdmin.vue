@@ -578,118 +578,104 @@ export default {
 
   
 printInvoice() {
-      const total = this.selectedCommande.articles.reduce(
+  const total = this.selectedCommande.articles.reduce(
         (sum, article) => sum + article.produit.prix * article.quantite,
         0
       );
 
-      const printableContent = `
-        <html>
-        <head>
-          <style>
-            @page {
-              margin: 10mm;
-            }
-            body {
-              margin: 0;
-              padding: 0;
-            }
-            .container {
-              font-family: 'Courier New', monospace;
-              width: 100mm;
-              padding: 5mm;
-              box-sizing: border-box;
-            }
-            .header {
-              text-align: center;
-              margin-bottom: 10px;
-            }
-            .header h2, .header p {
-              margin: 0;
-              font-size: 10px;
-            }
-            table {
-              width: 100%;
-              font-size: 10px;
-              border-collapse: collapse;
-              margin-top: 10px;
-                 border: none;
-            }
-            table th, table td {
-              text-align: right;
-                 border: none;
-            }
-            table th:first-child, table td:first-child {
-              text-align: left;
-            }
-            .footer {
-              text-align: center;
-              font-size: 10px;
-              margin-top: 10px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h5>Bénédictions de l'Éternel</h5>             
-              <p>               
-                Tél: +509 3779-6764 / +509 3596-7838<br />        
+      
+    const invoiceContent = `
+        <div style="text-align: center; font-family: monospace, sans-serif; font-size: 14px; margin: 0; padding: 0;">
+            <h5 style="text-align: center; margin: 0;">Bénédictions de l'Éternel</h5>             
+              <p style="text-align: center; margin: 0;">               
+                +509 3779-6764 / +509 3596-7838<br />        
               </p>
-              <hr style="border: 1px dashed black; margin: 10px 0;" />
-            </div>        
+            <hr>
             <h5 style="text-align: center; margin: 0;">FACTURE</h5>
-            <p style="font-size: 12px;"><strong>Client:</strong> ${this.selectedCommande.client}</p>
-            <table>
-              <thead>
-                <tr>
-                  <th>Produit</th>
-                  <th>Qté</th>
-                  <th>PU</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${this.selectedCommande.articles
-                  .map(
-                    (article) => `
+            <p>Client: ${this.selectedCommande.client}</p>
+            <p>Date: ${this.selectedCommande.date}</p>
+            <hr>
+            
+            <!-- Tableau des articles -->
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                <thead>
                     <tr>
-                      <td>${article.produit.nom}</td>
-                      <td>${article.quantite}</td>
-                      <td>${article.produit.prix.toFixed(2)}</td>
-                      <td>${(article.produit.prix * article.quantite).toFixed(2)}</td>
-                    </tr>`
-                  )
-                  .join("")}
-                <tr>
-                  <td colspan="3" style="text-align: right; font-weight: bold;">Total</td>
-                  <td style="font-weight: bold;">${total.toFixed(2)}</td>
-                </tr>
-              </tbody>
+                       <th style="border: 1px solid #000; padding: 3px; text-align: center;">Qté</th>
+                        <th style="border: 1px solid #000; padding: 3px; text-align: left;">Article</th>                       
+                        <th style="border: 1px solid #000; padding: 3px; text-align: right;">PU (HTG)</th>
+                        <th style="border: 1px solid #000; padding: 3px; text-align: right;">Total (HTG)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${this.selectedCommande.articles.map(article => {
+                        const totalArticle = (article.produit.prix * article.quantite).toFixed(2);
+                        return `
+                            <tr>
+                               <td style="border: 1px solid #000; padding: 3px; text-align: center;">${article.quantite}</td>
+                                <td style="border: 1px solid #000; padding: 3px;">${article.produit.nom}</td>                               
+                                <td style="border: 1px solid #000; padding: 3px; text-align: right;">${article.produit.prix.toFixed(2)}</td>
+                                <td style="border: 1px solid #000; padding: 3px; text-align: right;">${totalArticle}</td>
+                            </tr>
+                        `;
+                    }).join('')}
+                </tbody>
             </table>
-            <br>
-            <div class="footer">
-              <i>Une hospitalité gracieuse au cœur de la ville</i>
-              <hr style="border: 1px dashed black; margin: 10px 0;" />
-              Merci pour votre confiance !
-            </div>
-          </div>
-        </body>
+            
+            <hr>
+            <p><strong>Total : </strong> ${total.toFixed(2)} HTG</p>
+            <hr>
+            <p>Merci pour votre confiance !</p>
+        </div>
+    `;
+
+    const printWindow = window.open('', '', 'width=800,height=600');
+    printWindow.document.write(`
+        <html>
+            <head>
+                <style>
+                    body {
+                        margin: 0;
+                        padding: 0;
+                        width: 100%;
+                        font-family: monospace, sans-serif;
+                    }
+                    @page {
+                        size: auto;   /* Ajuste la taille de la page en fonction du contenu */
+                        margin: 0mm;   /* Retirer les marges inutiles */
+                    }
+                    /* Fixer la taille du contenu à la largeur de la page pour éviter les marges */
+                    .invoice {
+                        width: 100%;
+                        max-width: 800px;
+                        margin: 0 auto;
+                        page-break-before: auto;
+                    }
+                    /* S'assurer que les éléments du tableau sont bien alignés et ne gaspillent pas d'espace */
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                    th, td {
+                        padding: 5px;
+                        border: 1px solid #000;
+                    }
+                    p{
+                    font-size:14px
+                    }
+                    h2, h3, p {
+                        margin: 0;
+                        padding: 5px;
+                    }
+                </style>
+            </head>
+            <body>
+                ${invoiceContent}
+            </body>
         </html>
-      `;
-
-      const newWindow = window.open("", "_blank", "width=600, height=600");      
-      newWindow.document.write(printableContent);
-      // newWindow.document.write();
-      newWindow.document.close();
-
-      setTimeout(() => {
-        newWindow.print();
-        newWindow.close();
-      }, 1000);
-    },
-
-
+    `);
+    printWindow.document.close();
+    printWindow.print();
+},
 
     printInvoiceok() {
       const total = this.selectedCommande.articles.reduce(
