@@ -35,45 +35,114 @@
         </v-list-item>
 
         <!-- Sous-menu exemple -->
-        <!-- <v-list-group prepend-icon="mdi-folder" no-action>
-        <template #activator>
-          <v-list-item-content>
-            <v-list-item-title>Menu avec sous-menu</v-list-item-title>
-          </v-list-item-content>
-        </template> -->
+          <v-list-group
+          v-if="user && user.user_level > 5"
+          prepend-icon="mdi-food"
+          :value="false"
+          color="primary"
+        >
+          <template #activator>
+            <v-list-item-title class="text-uppercase font-weight-bold">
+              Bar / Resto
+            </v-list-item-title>
+          </template>
 
-        <!-- Éléments du sous-menu -->
-        <!-- <v-list-item v-for="(subItem, index) in subItems" :key="index" :to="subItem.to" router exact>
-          <v-list-item-action>
-            <v-icon>{{ subItem.icon }}</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>{{ subItem.title }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list-group> -->
-      </v-list>
-      <!-- <v-list dense nav>
-        <v-list-item>
-          <v-list-item-avatar class="align-self-center" color="white" contain>
-            <v-img src="images/logo.jpg" max-height="30" />
-          </v-list-item-avatar>
-          <span v-if="user && user.user_level === 2" class="ecole">{{ ecolename }}</span>
-          <span v-if="user && user.user_level === 3" class="ecole">{{ zonename }}</span>
-        </v-list-item>
-      </v-list>
+          <!-- Éléments du sous-menu -->
+          <v-list>
+            <v-list-item
+              v-for="(subItem, index) in subItemResto"
+              :key="index"
+              :to="subItem.to"
+              router
+              exact
+              class="submenu-item"
+            >
+              <!-- Icône et titre dans une disposition alignée -->
+              <v-list-item-icon>
+                <v-icon :color="subItem.color || 'primary'">
+                  {{ subItem.icon }}
+                </v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>{{ subItem.title }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-list-group>
 
-      <v-divider class="mb-2" />
-      <v-list dense nav>
-        <v-list-item v-for="(item, i) in items" :key="i" :to="item.to" router exact>
-          <v-list-item-action>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list> -->
+
+           <v-list-group
+          v-if="user && user.user_level > 5"
+          prepend-icon="mdi-town-hall"
+          :value="false"
+          color="primary"
+        >
+          <template #activator>
+            <v-list-item-title class="text-uppercase font-weight-bold">
+              Hotel
+            </v-list-item-title>
+          </template>
+
+          <!-- Éléments du sous-menu -->
+          <v-list>
+            <v-list-item
+              v-for="(subItem, index) in subItemHotel"
+              :key="index"
+              :to="subItem.to"
+              router
+              exact
+              class="submenu-item"
+            >
+              <!-- Icône et titre dans une disposition alignée -->
+              <v-list-item-icon>
+                <v-icon :color="subItem.color || 'primary'">
+                  {{ subItem.icon }}
+                </v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>{{ subItem.title }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-list-group>
+
+         <v-list-group
+          v-if="user && user.user_level > 5"
+          prepend-icon="mdi-cash"
+          :value="false"
+          color="primary"
+        >
+          <template #activator>
+            <v-list-item-title class="text-uppercase font-weight-bold">
+             Finance
+            </v-list-item-title>
+          </template>
+
+          <!-- Éléments du sous-menu -->
+          <v-list>
+            <v-list-item
+              v-for="(subItem, index) in subItemFinance"
+              :key="index"
+              :to="subItem.to"
+              router
+              exact
+              class="submenu-item"
+            >
+              <!-- Icône et titre dans une disposition alignée -->
+              <v-list-item-icon>
+                <v-icon :color="subItem.color || 'primary'">
+                  {{ subItem.icon }}
+                </v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>{{ subItem.title }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-list-group>
+
+      </v-list>
+      
     </v-navigation-drawer>
     <v-app-bar :clipped-left="clipped" fixed app color="#000000" dark dense>
       <v-app-bar-nav-icon v-if="user" color="#FFD700" @click.stop="drawer = !drawer" />
@@ -237,7 +306,7 @@ export default {
           to: "/gestionCompte",
         });
         items.push({
-          icon: "mdi-file",
+          icon: "mdi-clipboard-text",
           title: "Rapport de Ventes",
           to: "/rapportdevente",
         });
@@ -247,7 +316,7 @@ export default {
           to: "/produit",
         });
         items.push({
-          icon: "mdi-basket",
+          icon: "mdi-file",
           title: "Approvisionnement",
           to: "/appro",
         });      
@@ -267,47 +336,11 @@ export default {
         });    
 
       
-        items.push({
-          icon: "mdi-food",
-          title: "Gestion des Commandes",
-          to: "/commandeAdmin",
-        });  
         
-          items.push({
-          icon: "mdi-cash",
-          title: "Gestion des Comptes",
-          to: "/gestionCompte",
-        });
+        
+          
        
-        items.push({
-          icon: "mdi-basket",
-          title: "Achats",
-          to: "/achat",
-        });
-
-        items.push({
-          icon: "mdi-basket",
-          title: "Approvisionnement",
-          to: "/appro",
-        });
-        
-
-        items.push({
-          icon: "mdi-package-variant",
-          title: "Produits",
-          to: "/produit",
-        });
-
-        items.push({
-          icon: "mdi-package-variant",
-          title: "Bookings",
-          to: "/booking",
-        });
-        items.push({
-          icon: "mdi-package-variant",
-          title: "Clients Hotel",
-          to: "/clientHotel",
-        });
+       
        
       }
         if (this.user && parseInt(this.user.user_level) === role.supadmin) {       
@@ -315,25 +348,10 @@ export default {
           icon: "mdi-view-dashboard",
           title: "Tableau de bord",
           to: "/admin",
-        });    
-
-      
-        items.push({
-          icon: "mdi-food",
-          title: "Gestion des Commandes",
-          to: "/commandeAdmin",
-        });       
-        items.push({
-          icon: "mdi-cash",
-          title: "Gestion des Comptes",
-          to: "/gestionCompte",
-        });       
+        });        
+         
        
-        items.push({
-          icon: "mdi-basket",
-          title: "Achats",
-          to: "/achat",
-        });
+       
         items.push({
           icon: "mdi-account",
           title: "Gestion Utilisateur",
@@ -345,49 +363,97 @@ export default {
           title: "Inscription User",
           to: "/userInscription",
         });
-
-        items.push({
-          icon: "mdi-basket",
-          title: "Approvisionnement",
-          to: "/appro",
-        });
-
-        items.push({
-          icon: "mdi-file",
-          title: "Rapport de Ventes",
-          to: "/rapportdevente",
-        });
-
-        items.push({
-          icon: "mdi-basket",
-          title: "Stockage",
-          to: "/stock",
-        });
-
-        items.push({
-          icon: "mdi-package-variant",
-          title: "Produits",
-          to: "/produit",
-        });
        
-        items.push({
-          icon: "mdi-package-variant",
-          title: "Bookings",
-          to: "/booking",
-        });
-        items.push({
-          icon: "mdi-package-variant",
-          title: "Clients Hotel",
-          to: "/clientHotel",
-        });
-        items.push({
-          icon: "mdi-package-variant",
-          title: "Rooms",
-          to: "/room",
-        });
+        // items.push({
+        //   icon: "mdi-package-variant",
+        //   title: "Bookings",
+        //   to: "/booking",
+        // });
+        // items.push({
+        //   icon: "mdi-package-variant",
+        //   title: "Clients Hotel",
+        //   to: "/clientHotel",
+        // });
+        // items.push({
+        //   icon: "mdi-package-variant",
+        //   title: "Rooms",
+        //   to: "/room",
+        // });
        
       }
       return items;
+    },
+
+     subItemHotel() {
+      const subItem = [
+        {
+          icon: "mdi-account",
+          title: "Client Hotel",
+          to: "/clientHotel",
+        },
+        {
+          icon: "mdi-booking",
+          title: "Booking",
+          to: "/booking",
+        },
+        {
+          icon: "mdi-room",
+          title: "Rooms",
+          to: "/rooms",
+        },
+      ];
+      return subItem;
+    },
+     subItemFinance() {
+      const subItem = [
+        {
+          icon: "mdi-cash",
+          title: "Gestion Comptes",
+          to: "/gestionCompte",
+        },
+        {
+          icon: "mdi-money",
+          title: "Depenses",
+          to: "/ligneBudgetaire",
+        },
+        
+      ];
+      return subItem;
+    },
+     subItemResto() {
+      const subItem = [
+        {
+        icon: "mdi-food",
+          title: "Gestion des Commandes",
+          to: "/commandeAdmin",
+        },
+        {
+          icon: "mdi-clipboard-text",
+          title: "Rapport de Ventes",
+          to: "/rapportdevente",
+        },
+        {
+           icon: "mdi-package-variant",
+          title: "Produits",
+          to: "/produit",
+        },
+     {
+       icon: "mdi-basket",
+          title: "Achats",
+          to: "/achat",
+     },
+     {
+        icon: "mdi-file",
+          title: "Approvisionnement",
+          to: "/appro",
+     },
+     {
+        icon: "mdi-basket",
+          title: "Stockage",
+          to: "/stock",
+     }
+      ];
+      return subItem;
     },
 
     subItems() {

@@ -6,8 +6,8 @@
       <v-col cols="12" md="3">
         <v-card class="pa-4">
           <v-icon color="primary" large>mdi-cash-register</v-icon>
-          <h5>Total Ventes</h5>
-          <p class="headline">{{ formatCurrency(totalSales) }}</p>
+          <h5>Cash Aujourd'hui</h5>
+          <p class="headline">{{ formatCurrency(cashToday) }}</p>
         </v-card>
       </v-col>
 
@@ -102,6 +102,7 @@ export default {
     return {
       // Statistiques principales
       totalSales: 0,
+      cashToday: 0,
       dailySales: 0, // Total des ventes par jour
       monthlySales: 0, // Total des ventes par mois
       completedOrders: 0,
@@ -162,6 +163,7 @@ export default {
     // Récupérer les commandes
     const ordersResponse = await this.$axios.get("/commandes");
     const orders = ordersResponse.data;
+    console.log(orders)
 
     // Récupérer les produits
     const productsResponse = await this.$axios.get("/produits");
@@ -169,6 +171,13 @@ export default {
 
     // Obtenir la date d'aujourd'hui au format 'fr-CA' (YYYY-MM-DD)
     const today = new Date().toLocaleDateString('fr-CA');
+
+   this.cashToday = orders
+    .filter(commande => {
+      const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
+      return commandeDate === today;
+    })
+    .reduce((total, commande) => total + (commande.reglement || 0), 0);
 
     // Filtrer les commandes d'aujourd'hui
     const todayOrders = orders
