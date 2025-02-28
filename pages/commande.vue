@@ -25,7 +25,7 @@
           </v-btn>
           
               <!-- Bouton pour modifier le statut -->
-              <v-btn
+              <!-- <v-btn
                 v-if="item.statutReg !== 'Complet'"
                 icon
                 small
@@ -33,7 +33,7 @@
                 @click="openEditStatutModal(item)"
               >
                 <v-icon>mdi-pencil</v-icon>
-              </v-btn>
+              </v-btn> -->
           <!-- <v-btn icon small color="error" @click="deleteArticle(item._id)">
             <v-icon>mdi-delete</v-icon>
           </v-btn> -->
