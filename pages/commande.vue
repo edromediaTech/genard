@@ -416,49 +416,54 @@ export default {
       return date.toLocaleString('fr-FR', options).replace(',', '');
     },
 
-    async fetchCommandes() {
-      try {
-        const { data } = await this.$axios.get('/commandes');
+   async fetchCommandes() {
+  this.loading = true;
+  try {
+    const { data } = await this.$axios.get('/commandes');
+
+    const today = new Date().toLocaleDateString('fr-CA');
+
+    this.commandes = data
+      .filter(commande => {
+        const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
         
-        const userId = this.user.userId;
-        const today = new Date().toLocaleDateString('fr-CA');
-   
+        // Vérifier que la commande est de l'utilisateur connecté et a été passée aujourd'hui
+        return commande.serveur?._id === this.user.userId && commandeDate === today;
+      })
+      .map(commande => {
+        // Vérification si `commande.serveur` est null avant d'accéder à ses propriétés
+        const serveurNom = commande.serveur ? commande.serveur.prenom : 'Inconnu';
 
-        this.commandes = data
-          .filter(commande => {
-            const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
-            return commande.serveur._id === userId && commandeDate === today;
-          })
-          .map(commande => {
-            // Si le total est égal à 0, le recalculer en fonction des articles
-            if (commande.total === 0) {
-              commande.total = commande.articles.reduce((sum, article) => {
-                return sum + (article.produit.prix * article.quantite);
-              }, 0);
-            }
+        // Vérification si `commande.articles` est bien un tableau avant d'utiliser reduce()
+        const totalCalculé = Array.isArray(commande.articles)
+          ? commande.articles.reduce((sum, article) => {
+              return sum + ((article.produit?.prix || 0) * article.quantite);
+            }, 0)
+          : 0;
 
-            return {
-              ...commande,
-              serveur: commande.serveur.prenom,
-              client: commande.client,
-              statut: commande.statut,
-              code: commande.code,
-              total: commande.total, // Utiliser le total calculé ou existant
-              createdAt: commande.createdAt,
-              reglement : commande.reglement,
-              statutReg : commande.statutReg,
-              date: new Date(commande.date).toLocaleDateString('fr-FR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: '2-digit',
-              }),
-            };
-          });
+        return {
+          ...commande,
+          serveur: serveurNom,
+          client: commande.client,
+          statut: commande.statut,
+          total: commande.total || totalCalculé, // Utiliser le total existant ou recalculé
+          createdAt: commande.createdAt,
+          reglement: commande.reglement,
+          statutReg: commande.statutReg,
+          date: new Date(commande.date).toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: '2-digit',
+          }),
+        };
+      });
 
-      } catch (error) {
-        console.error('Erreur lors du chargement des commandes :', error);
-      }
-    },
+  } catch (error) {
+    console.error('Erreur lors du chargement des commandes :', error);
+  }
+  this.loading = false;
+},
+
 
     validateForm() {
       let isValid = true;
@@ -501,7 +506,10 @@ export default {
       this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken');
       this.commande.client = this.selectedTableId;
       this.commande.serveur = this.user.userId;
-      this.commande.total = this.selectedProductDetails.prix
+      // this.commande.total = this.selectedProductDetails.prix
+       this.commande.total = this.commande.articles.reduce((acc, article) => {
+    return acc + (this.selectedProductDetails.prix || 0) * article.quantite;
+  }, 0);
      
       if (this.commande.client === null || this.commande.statut === null) {
         this.$notifier.showMessage({ content: "Il y a un champ vide", color: "error", });

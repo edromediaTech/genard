@@ -252,7 +252,6 @@
     </v-dialog>
   </v-container>
 </template>
-
 <script>
 
 import { mapGetters, mapActions } from "vuex";
@@ -387,7 +386,7 @@ export default {
       async fetchClients() {
         try {
           const response = await this.$axios.get('/clients');
-          console.log(response)
+          
           this.clients = response.data;
         } catch (error) {
           console.error('Erreur lors de la récupération des utilisateurs', error);
@@ -468,18 +467,13 @@ async updateStatut() {
   this.commande.reglement = this.montantPaye
   // Convertir le montant en nombre
   // const montant = Number(this.commande.reglement);
-
-  console.log('Données envoyées :', {
-    commandeId: this.selectedCommandeId,
-    montant : this.commande.reglement ,
-  });
-
+  
   try {
-    const response = await this.$axios.post('commandes/paiement', {
+     await this.$axios.post('commandes/paiement', {
       commandeId: this.selectedCommandeId,
       montant : this.commande.reglement,
     });
-    console.log('Réponse du serveur :', response.data);
+ 
  
     // Rafraîchir la liste des commandes
     await this.fetchCommandes();
@@ -509,53 +503,101 @@ async updateStatut() {
       return date.toLocaleString('fr-FR', options).replace(',', '');
     },
 
-  async fetchCommandes() {
-    this.loading = true
-    try {
-      const { data } = await this.$axios.get('/commandes');
-     // const userId = this.user.userId;
+async fetchCommandes() {
+  this.loading = true;
+  try {
+    const { data } = await this.$axios.get('/commandes');
 
-      // Filtrer les commandes en fonction de showAllCommandes
-      this.commandes = data
-        .filter(commande => {
-         // if (this.showAllCommandes) {
-            // Afficher toutes les commandes pour l'utilisateur
-         //   return commande.serveur._id === userId;
-          // } else {
-            // Afficher uniquement les commandes du jour pour l'utilisateur
-            const today = new Date().toLocaleDateString('fr-CA');
-            const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
-            return  commandeDate === today;
-          // }
-        })
-        .map(commande => {
-          // Si le total est égal à 0, le recalculer en fonction des articles
-          if (commande.total === 0) {
-            commande.total = commande.articles.reduce((sum, article) => {
-              return sum + (article.produit.prix * article.quantite);
-            }, 0);
-          }
+    const today = new Date().toLocaleDateString('fr-CA');
 
-          return {
-            ...commande,
-            serveur: commande.serveur.prenom,
-            client: commande.client,
-            statut: commande.statut,
-            total: commande.total, // Utiliser le total calculé ou existant
-            createdAt: commande.createdAt,
-            date: new Date(commande.date).toLocaleDateString('fr-FR', {
-              day: '2-digit',
-              month: '2-digit',
-              year: '2-digit',
-            }),
-          };
-        });
+    this.commandes = data
+      .filter(commande => {
+        const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
+        return commandeDate === today;
+      })
+      .map(commande => {
+        // Vérification si `commande.serveur` est null avant d'accéder à ses propriétés
+        const serveurNom = commande.serveur ? commande.serveur.prenom : 'Inconnu';
 
-    } catch (error) {
-      console.error('Erreur lors du chargement des commandes :', error);
-    }
-    this.loading = false
-  },
+        // Vérification si `commande.articles` est bien un tableau avant d'utiliser reduce()
+        const totalCalculé = Array.isArray(commande.articles)
+          ? commande.articles.reduce((sum, article) => {
+              return sum + ((article.produit?.prix || 0) * article.quantite);
+            }, 0)
+          : 0;
+
+        return {
+          ...commande,
+          serveur: serveurNom,
+          client: commande.client,
+          statut: commande.statut,
+          total: commande.total || totalCalculé, // Utiliser le total existant ou recalculé
+          createdAt: commande.createdAt,
+          reglement: commande.reglement,
+          statutReg: commande.statutReg,
+          date: new Date(commande.date).toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: '2-digit',
+          }),
+        };
+      });
+
+  } catch (error) {
+    console.error('Erreur lors du chargement des commandes :', error);
+  }
+  this.loading = false;
+},
+
+  // async fetchCommandes() {
+  //   this.loading = true
+  //   try {
+  //     const { data } = await this.$axios.get('/commandes');
+  //    // const userId = this.user.userId;
+
+  //     // Filtrer les commandes en fonction de showAllCommandes
+  //     this.commandes = data
+  //       .filter(commande => {
+  //        // if (this.showAllCommandes) {
+  //           // Afficher toutes les commandes pour l'utilisateur
+  //        //   return commande.serveur._id === userId;
+  //         // } else {
+  //           // Afficher uniquement les commandes du jour pour l'utilisateur
+  //           const today = new Date().toLocaleDateString('fr-CA');
+  //           const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
+  //           return  commandeDate === today;
+  //         // }
+  //       })
+  //       .map(commande => {
+  //         // Si le total est égal à 0, le recalculer en fonction des articles
+  //         if (commande.total === 0) {
+  //           commande.total = commande.articles.reduce((sum, article) => {
+  //             return sum + (article.produit.prix * article.quantite);
+  //           }, 0);
+  //         }
+
+  //         return {
+  //           ...commande,
+  //           serveur: commande.serveur.prenom,
+  //           client: commande.client,
+  //           statut: commande.statut,
+  //           total: commande.total, // Utiliser le total calculé ou existant
+  //           createdAt: commande.createdAt,
+  //             reglement : commande.reglement,
+  //             statutReg : commande.statutReg,
+  //           date: new Date(commande.date).toLocaleDateString('fr-FR', {
+  //             day: '2-digit',
+  //             month: '2-digit',
+  //             year: '2-digit',
+  //           }),
+  //         };
+  //       });
+
+  //   } catch (error) {
+  //     console.error('Erreur lors du chargement des commandes :', error);
+  //   }
+  //   this.loading = false
+  // },
   async fetchAllCommandes() {
     this.loading = true
     try {
@@ -649,7 +691,10 @@ async updateStatut() {
       this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken');
       this.commande.client = this.selectedTableId;
       this.commande.serveur = this.user.userId;
-      this.commande.total = this.selectedProductDetails.prix
+     // this.commande.total = this.selectedProductDetails.prix
+    this.commande.total = this.commande.articles.reduce((acc, article) => {
+    return acc + (this.selectedProductDetails.prix || 0) * article.quantite;
+  }, 0);
      
       if (this.commande.client === null || this.commande.statut === null) {
         this.$notifier.showMessage({ content: "Il y a un champ vide", color: "error", });
