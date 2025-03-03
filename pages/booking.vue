@@ -266,8 +266,10 @@
     async created() {
       await this.fetchClientUsers();
     },
+
     methods: {
       async fetchAvailableRooms() {
+        this.visible = true
         try {
           const response = await this.$axios.get('/rooms', {
             params: { checkInDate: this.checkInDate, checkOutDate: this.checkOutDate }
@@ -286,7 +288,9 @@
         } catch (error) {
           console.error('Erreur lors de la récupération des chambres disponibles', error);
         }
+         this.visible = false
       },
+
       async fetchClientUsers() {
         try {
           const response = await this.$axios.get('/clientUsers');
@@ -295,10 +299,12 @@
           console.error('Erreur lors de la récupération des utilisateurs', error);
         }
       },
+
       openRoomInfo(room) {
         this.selectedRoomDetails = room;
         this.roomInfoDialog = true;
       },
+
       onClientUserChange(clientUserId) {
         if (clientUserId) {
           const selectedUser = this.clientUsers.find(user => user._id === clientUserId);
@@ -307,12 +313,15 @@
           this.clientUser = { name: '', email: '', phoneNumber: '' };
         }
       },
+
       addOccupant() {
         this.occupants.push({ name: '', age: null, gender: '' });
       },
+
       removeOccupant(index) {
         this.occupants.splice(index, 1);
       },
+      
       goToStep2() {
         if (!this.selectedRoom) {
           alert('Veuillez sélectionner une chambre.');

@@ -79,7 +79,7 @@
              <v-col cols="12" md="6" sm="6">
               <v-combobox
                 v-model="selectedTableId"
-                :items="clients"
+                :items="tablesOptions"
                 label="Choisir un Client"
                 item-text="nom"
                 item-value="nom"
@@ -495,13 +495,19 @@ async updateStatut() {
   }
 },
 
+  formatDate(isoDate) {
+    if (!isoDate) return '';
 
-    
-    formatDate(dateString) {
-      const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
-      const date = new Date(dateString);
-      return date.toLocaleString('fr-FR', options).replace(',', '');
-    },
+    const date = new Date(isoDate);
+    return date.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'America/Port-au-Prince' // Haïti (Fuseau UTC-5 ou UTC-4)
+    });
+  },
+
+  
 
 async fetchCommandes() {
   this.loading = true;
@@ -691,6 +697,7 @@ async fetchCommandes() {
       this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken');
       this.commande.client = this.selectedTableId;
       this.commande.serveur = this.user.userId;
+        this.commande.statut = "En attente";
      // this.commande.total = this.selectedProductDetails.prix
     this.commande.total = this.commande.articles.reduce((acc, article) => {
     return acc + (this.selectedProductDetails.prix || 0) * article.quantite;
@@ -717,7 +724,7 @@ async fetchCommandes() {
 
       try {
         const response = await this.$axios.post('commandes', this.commande);
-        this.fetchCommandes();
+       await this.fetchCommandes();
         this.articles.push({
           ...response.data,
           tableId: this.selectedTableId,
@@ -726,8 +733,8 @@ async fetchCommandes() {
           content: "Article ajouté avec succès.",
           color: "success",
         });
-        this.selectedTableId = null
-        this.commande.statut = null
+        this.commande.client = null
+       // this.commande.statut = null
         this.closeAddModal();
       } catch (error) {
         console.error('Erreur lors de l’ajout de l’article :', error);

@@ -334,13 +334,11 @@ export default {
           title: "Tableau de bord",
           to: "/admin",
         });    
-
-      
-        
-        
-          
-       
-       
+        items.push({
+          icon: "mdi-tools",
+          title: "Service",
+          to: "/service",
+        });  
        
       }
         if (this.user && parseInt(this.user.user_level) === role.supadmin) {       
@@ -350,7 +348,11 @@ export default {
           to: "/admin",
         });        
          
-       
+        items.push({
+          icon: "mdi-tools",
+          title: "Service",
+          to: "/service",
+        });
        
         items.push({
           icon: "mdi-account",
@@ -392,12 +394,12 @@ export default {
           to: "/clientHotel",
         },
         {
-          icon: "mdi-booking",
+          icon: "mdi-calendar-check",
           title: "Booking",
           to: "/booking",
         },
         {
-          icon: "mdi-room",
+          icon: "mdi-door",
           title: "Rooms",
           to: "/rooms",
         },
@@ -407,14 +409,19 @@ export default {
      subItemFinance() {
       const subItem = [
         {
-          icon: "mdi-cash",
+          icon: "mdi-bank",
           title: "Gestion Comptes",
           to: "/gestionCompte",
         },
         {
-          icon: "mdi-money",
-          title: "Depenses",
+          icon: "mdi-chart-bar",
+          title: "Ligne Budgetaire",
           to: "/ligneBudgetaire",
+        },
+        {
+          icon: "mdi-cash",
+          title: "Depenses",
+          to: "/gestionDepense",
         },
         
       ];
@@ -448,7 +455,7 @@ export default {
           to: "/appro",
      },
      {
-        icon: "mdi-basket",
+        icon: "mdi-package",
           title: "Stockage",
           to: "/stock",
      }

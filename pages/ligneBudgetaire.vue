@@ -81,6 +81,7 @@ export default {
       this.dialog = false;
     },
     async saveItem() {
+      this.loading = true
       try {
         if (this.editMode) {
           await this.$axios.put('finance/budget-lines/'+this.editedItem._id, this.editedItem);
@@ -92,6 +93,7 @@ export default {
       } catch (error) {
         console.error('Erreur lors de l\'enregistrement:', error);
       }
+      this.loading = false
     },
     async deleteItem(id) {
       try {
