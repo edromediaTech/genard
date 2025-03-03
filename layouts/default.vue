@@ -401,7 +401,7 @@ export default {
         {
           icon: "mdi-door",
           title: "Rooms",
-          to: "/rooms",
+          to: "/room",
         },
       ];
       return subItem;

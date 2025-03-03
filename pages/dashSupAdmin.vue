@@ -2,183 +2,237 @@
   <v-container>
     <!-- Statistiques principales -->
     <v-row>
-      <!-- Total des ventes -->
+      <!-- Restaurant -->
       <v-col cols="12" md="3">
-        <v-card class="pa-4 rounded-lg elevation-12">
+        <v-card class="pa-4">
           <v-icon color="primary" large>mdi-cash-register</v-icon>
-          <h5 class="font-weight-bold text-subtitle-1">Cash Aujourd'hui</h5>
-          <p class="headline font-weight-bold">{{ formatCurrency(cashToday) }}</p>
+          <h5>Cash Aujourd'hui (Restaurant)</h5>
+          <p class="headline">{{ formatCurrency(cashTodayRestaurant) }}</p>
         </v-card>
       </v-col>
 
-      <!-- Ventes aujourd'hui -->
       <v-col cols="12" md="3">
-        <v-card class="pa-4 rounded-lg elevation-12">
+        <v-card class="pa-4">
           <v-icon color="green" large>mdi-calendar-today</v-icon>
-          <h5 class="font-weight-bold text-subtitle-1">Ventes Aujourd'hui</h5>
-          <p class="headline font-weight-bold">{{ formatCurrency(dailySales) }}</p>
+          <h5>Ventes Aujourd'hui (Restaurant)</h5>
+          <p class="headline">{{ formatCurrency(dailySalesRestaurant) }}</p>
         </v-card>
       </v-col>
 
-      <!-- Clients aujourd'hui -->
       <v-col cols="12" md="3">
-        <v-card class="pa-4 rounded-lg elevation-12">
+        <v-card class="pa-4">
           <v-icon color="purple" large>mdi-account-group</v-icon>
-          <h5 class="font-weight-bold text-subtitle-1">Clients Aujourd'hui</h5>
-          <p class="headline font-weight-bold">{{ todayCustomers }}</p>
+          <h5>Clients Aujourd'hui (Restaurant)</h5>
+          <p class="headline">{{ todayCustomersRestaurant }}</p>
         </v-card>
       </v-col>
 
-      <!-- Ventes ce mois -->
       <v-col cols="12" md="3">
-        <v-card class="pa-4 rounded-lg elevation-12">
+        <v-card class="pa-4">
           <v-icon color="blue" large>mdi-calendar-month</v-icon>
-          <h5 class="font-weight-bold text-subtitle-1">Ventes Ce Mois</h5>
-          <p class="headline font-weight-bold">{{ formatCurrency(monthlySales) }}</p>
+          <h5>Ventes Ce Mois (Restaurant)</h5>
+          <p class="headline">{{ formatCurrency(monthlySalesRestaurant) }}</p>
         </v-card>
       </v-col>
     </v-row>
 
-    <!-- Section Hôtel -->
+    <!-- Hotel -->
     <v-row>
+      <v-col cols="12" md="3">
+        <v-card class="pa-4">
+          <v-icon color="orange" large>mdi-hotel</v-icon>
+          <h5>Revenus Hôtel Aujourd'hui</h5>
+          <p class="headline">{{ formatCurrency(dailySalesHotel) }}</p>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" md="3">
+        <v-card class="pa-4">
+          <v-icon color="teal" large>mdi-calendar-today</v-icon>
+          <h5>Clients Hôtel Aujourd'hui</h5>
+          <p class="headline">{{ todayCustomersHotel }}</p>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" md="3">
+        <v-card class="pa-4">
+          <v-icon color="purple" large>mdi-account-group</v-icon>
+          <h5>Réservations Ce Mois (Hôtel)</h5>
+          <p class="headline">{{ monthlyBookingsHotel }}</p>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" md="3">
+        <v-card class="pa-4">
+          <v-icon color="blue" large>mdi-calendar-month</v-icon>
+          <h5>Revenus Hôtel Ce Mois</h5>
+          <p class="headline">{{ formatCurrency(monthlySalesHotel) }}</p>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <!-- Services (Location d'espace, événements) -->
+    <v-row>
+      <v-col cols="12" md="3">
+        <v-card class="pa-4">
+          <v-icon color="red" large>mdi-cottage</v-icon>
+          <h5>Revenus Location d'Espace Aujourd'hui</h5>
+          <p class="headline">{{ formatCurrency(dailySalesSpace) }}</p>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" md="3">
+        <v-card class="pa-4">
+          <v-icon color="blue" large>mdi-calendar-today</v-icon>
+          <h5>Événements Aujourd'hui</h5>
+          <p class="headline">{{ todayEvents }}</p>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" md="3">
+        <v-card class="pa-4">
+          <v-icon color="green" large>mdi-calendar-month</v-icon>
+          <h5>Revenus Location d'Espace Ce Mois</h5>
+          <p class="headline">{{ formatCurrency(monthlySalesSpace) }}</p>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" md="3">
+        <v-card class="pa-4">
+          <v-icon color="amber" large>mdi-calendar-today</v-icon>
+          <h5>Événements Ce Mois</h5>
+          <p class="headline">{{ monthlyEvents }}</p>
+        </v-card>
+      </v-col>
+    </v-row>
+        <v-row>
       <v-col cols="12">
-        <v-card class="pa-4 rounded-lg elevation-12">
-          <v-card-title class="text-h6 font-weight-bold">Statistiques de l'Hôtel</v-card-title>
+        <v-card class="pa-4" color="grey-lighten-3">
+          <v-card-title class="headline">Bilan Financier</v-card-title>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <!-- Section Dépenses et Revenus -->
+    <v-row>
+      <v-col cols="12" md="4">
+        <v-card class="pa-4" outlined>
+          <v-card-title>
+            <v-icon color="green">mdi-currency-usd</v-icon>
+            Revenus
+          </v-card-title>
           <v-card-text>
-            <v-row>
-              <v-col cols="12" md="4">
-                <v-card class="elevation-8">
-                  <v-card-title>Taux d'Occupation</v-card-title>
-                  <v-card-text class="text-center">{{ hotelOccupancyRate }}%</v-card-text>
-                </v-card>
-              </v-col>
-              <v-col cols="12" md="4">
-                <v-card class="elevation-8">
-                  <v-card-title>Revenu par Chambre (RevPAR)</v-card-title>
-                  <v-card-text class="text-center">{{ formatCurrency(hotelRevPAR) }}</v-card-text>
-                </v-card>
-              </v-col>
-              <v-col cols="12" md="4">
-                <v-card class="elevation-8">
-                  <v-card-title>Durée Moyenne du Séjour</v-card-title>
-                  <v-card-text class="text-center">{{ hotelAverageStay }} nuits</v-card-text>
-                </v-card>
-              </v-col>
-            </v-row>
+            <p class="headline">{{ formatCurrency(totalRevenues) }}</p>
+            <v-progress-linear :value="revenueProgress" color="green" height="10"></v-progress-linear>
+          </v-card-text>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" md="4">
+        <v-card class="pa-4" outlined>
+          <v-card-title>
+            <v-icon color="red">mdi-currency-usd</v-icon>
+            Dépenses
+          </v-card-title>
+          <v-card-text>
+            <p class="headline">{{ formatCurrency(totalExpenses) }}</p>
+            <v-progress-linear :value="expenseProgress" color="red" height="10"></v-progress-linear>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
 
-    <!-- Section Dépenses -->
+    <!-- Section Bénéfice ou Perte -->
     <v-row>
-      <v-col cols="12">
-        <v-card class="pa-4 rounded-lg elevation-12">
-          <v-card-title class="text-h6 font-weight-bold">Dépenses</v-card-title>
+      <v-col cols="12" md="4">
+        <v-card class="pa-4" outlined>
+          <v-card-title>
+            <v-icon color="blue">mdi-trending-up</v-icon>
+            Bénéfice ou Perte
+          </v-card-title>
           <v-card-text>
-            <v-row>
-              <v-col cols="12" md="4">
-                <v-card class="elevation-8">
-                  <v-card-title>Dépenses Opérationnelles</v-card-title>
-                  <v-card-text class="text-center">{{ formatCurrency(operationalExpenses) }}</v-card-text>
-                </v-card>
-              </v-col>
-              <v-col cols="12" md="4">
-                <v-card class="elevation-8">
-                  <v-card-title>Dépenses Fixes</v-card-title>
-                  <v-card-text class="text-center">{{ formatCurrency(fixedExpenses) }}</v-card-text>
-                </v-card>
-              </v-col>
-              <v-col cols="12" md="4">
-                <v-card class="elevation-8">
-                  <v-card-title>Total des Dépenses</v-card-title>
-                  <v-card-text class="text-center">{{ formatCurrency(totalExpenses) }}</v-card-text>
-                </v-card>
-              </v-col>
-            </v-row>
+            <p class="headline" :style="isProfit ? 'color: green;' : 'color: red;'">
+              {{ formatCurrency(profitOrLoss) }}
+            </p>
+            <v-progress-linear
+              :value="isProfit ? 100 : 0"
+              :color="isProfit ? 'green' : 'red'"
+              height="10"
+            ></v-progress-linear>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
 
-    <!-- Section Revenus -->
+    <!-- Graphiques Financiers -->
     <v-row>
-      <v-col cols="12">
-        <v-card class="pa-4 rounded-lg elevation-12">
-          <v-card-title class="text-h6 font-weight-bold">Revenus</v-card-title>
+      <v-col cols="12" md="6">
+        <v-card class="pa-4">
+          <v-card-title>Graphique des Revenus vs Dépenses</v-card-title>
           <v-card-text>
-            <v-row>
-              <v-col cols="12" md="4">
-                <v-card class="elevation-8">
-                  <v-card-title>Revenus du Restaurant</v-card-title>
-                  <v-card-text class="text-center">{{ formatCurrency(restaurantRevenue) }}</v-card-text>
-                </v-card>
-              </v-col>
-              <v-col cols="12" md="4">
-                <v-card class="elevation-8">
-                  <v-card-title>Revenus de l'Hôtel</v-card-title>
-                  <v-card-text class="text-center">{{ formatCurrency(hotelRevenue) }}</v-card-text>
-                </v-card>
-              </v-col>
-              <v-col cols="12" md="4">
-                <v-card class="elevation-8">
-                  <v-card-title>Revenus Totaux</v-card-title>
-                  <v-card-text class="text-center">{{ formatCurrency(totalRevenue) }}</v-card-text>
-                </v-card>
-              </v-col>
-            </v-row>
+            <apexchart type="bar" :options="barChartOptions" :series="barChartSeries" />
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
 
-    <!-- Section Bénéfices/Perte -->
+    <!-- Graphiques -->
     <v-row>
-      <v-col cols="12">
-        <v-card class="pa-4 rounded-lg elevation-12">
-          <v-card-title class="text-h6 font-weight-bold">Bénéfices/Perte</v-card-title>
+      <!-- Graphiques pour Restaurant -->
+      <v-col cols="12" md="6">
+        <v-card class="pa-4">
+          <v-card-title>Ventes par Catégorie (Restaurant)</v-card-title>
           <v-card-text>
-            <v-row>
-              <v-col cols="12" md="6">
-                <v-card class="elevation-8">
-                  <v-card-title>Bénéfices</v-card-title>
-                  <v-card-text :class="profit >= 0 ? 'green--text' : 'red--text'">
-                    {{ formatCurrency(profit) }}
-                  </v-card-text>
-                </v-card>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-card class="elevation-8">
-                  <v-card-title>Tendance des Bénéfices</v-card-title>
-                  <ApexChart
-                    type="line"
-                    :options="profitChartOptions"
-                    :series="profitChartSeries"
-                  />
-                </v-card>
-              </v-col>
-            </v-row>
+            <apexchart type="pie" :options="pieChartOptionsRestaurant" :series="pieChartSeriesRestaurant" />
+          </v-card-text>
+        </v-card>
+      </v-col>
+
+      <!-- Graphiques pour l'Hôtel -->
+      <v-col cols="12" md="6">
+        <v-card class="pa-4">
+          <v-card-title>Ventes par Catégorie (Hôtel)</v-card-title>
+          <v-card-text>
+            <apexchart type="pie" :options="pieChartOptionsHotel" :series="pieChartSeriesHotel" />
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
 
-    <!-- Section Analyse Globale -->
+    <!-- Liste des stocks faibles (Restaurant) -->
     <v-row>
       <v-col cols="12">
-        <v-card class="pa-4 rounded-lg elevation-12">
-          <v-card-title class="text-h6 font-weight-bold">Analyse Globale</v-card-title>
+        <v-card class="pa-4">
+          <v-card-title>Articles à Faible Stock (Restaurant)</v-card-title>
           <v-card-text>
-            <v-alert v-if="profit < 0" type="error" border="left" dense>
-              L'entreprise est en perte ce mois-ci.
-            </v-alert>
-            <v-alert v-else type="success" border="left" dense>
-              L'entreprise est bénéficiaire ce mois-ci.
-            </v-alert>
+            <v-data-table
+              :headers="lowStockHeaders"
+              :items="lowStockItemsRestaurant"
+              dense
+              outlined
+            ></v-data-table>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
+
+    <!-- Commandes récentes -->
+    <v-row>
+      <v-col cols="12">
+        <v-card class="pa-4">
+          <v-card-title>Commandes Récentes (Restaurant)</v-card-title>
+          <v-card-text>
+            <v-data-table
+              :headers="recentOrdersHeaders"
+              :items="recentOrdersRestaurant"
+              dense
+              outlined
+            ></v-data-table>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+
   </v-container>
 </template>
 
@@ -187,62 +241,164 @@ export default {
   middleware: "superviseur",
   data() {
     return {
-      // Statistiques principales
-      totalSales: 0,
-      cashToday: 0,
-      dailySales: 0,
-      monthlySales: 0,
-      todayCustomers: 0,
-      // Statistiques de l'Hôtel
-      hotelOccupancyRate: 0,
-      hotelRevPAR: 0,
-      hotelAverageStay: 0,
-      // Dépenses
-      operationalExpenses: 0,
-      fixedExpenses: 0,
+      // Restaurant
+      cashTodayRestaurant: 0,
+      dailySalesRestaurant: 0,
+      monthlySalesRestaurant: 0,
+      todayCustomersRestaurant: 0,
+      pieChartOptionsRestaurant: {
+        labels: ["Plats Principaux", "Boissons", "Desserts"],
+      },
+      pieChartSeriesRestaurant: [50, 30, 20],
+      lowStockItemsRestaurant: [],
+      recentOrdersRestaurant: [],
+      
+      // Hôtel
+      dailySalesHotel: 0,
+      monthlySalesHotel: 0,
+      todayCustomersHotel: 0,
+      monthlyBookingsHotel: 0,
+      pieChartOptionsHotel: {
+        labels: ["Chambres", "Réservations", "Services"],
+      },
+      pieChartSeriesHotel: [60, 30, 10],
+      
+      // Services
+      dailySalesSpace: 0,
+      monthlySalesSpace: 0,
+      todayEvents: 0,
+      monthlyEvents: 0,
+      pieChartOptionsSpace: {
+        labels: ["Location de Salle", "Événements"],
+      },
+      pieChartSeriesSpace: [70, 30],
+      
+      // Commandes récentes
+      recentOrdersHeaders: [
+        { text: "Date", value: "date" },
+        { text: "Client", value: "client" },
+        { text: "Serveur", value: "serveur.prenom" },
+        { text: "Statut", value: "statut" },
+        { text: "Total", value: "total" },
+      ],
+      lowStockHeaders: [
+        { text: "Nom", value: "nom" },
+        { text: "Qté", value: "quantite" },
+      ],
+       // Revenus et Dépenses
+      totalRevenues: 0,
       totalExpenses: 0,
-      // Revenus
-      restaurantRevenue: 0,
-      hotelRevenue: 0,
-      totalRevenue: 0,
-      // Bénéfices
-      profit: 0,
-      profitChartOptions: {
+      revenueProgress: 0,
+      expenseProgress: 0,
+
+      // Bénéfice ou Perte
+      profitOrLoss: 0,
+      isProfit: true,
+
+      // Graphiques
+      barChartOptions: {
         chart: {
-          type: "line",
-          height: 350,
+          type: 'bar',
+          height: '300px'
         },
         xaxis: {
-          categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
+          categories: ['Revenus', 'Dépenses'],
         },
+        colors: ['#4CAF50', '#FF5722']
       },
-      profitChartSeries: [
+      barChartSeries: [
         {
-          name: "Profit",
-          data: [400, 700, 800, 1200, 1500, 1800, 2200],
+          name: 'Montant',
+          data: [0, 0], // Placeholder pour les revenus et les dépenses
         },
       ],
+      recentOrders: [],
     };
+  },
+  mounted() {
+    this.fetchDashboardData();
   },
   methods: {
     formatCurrency(value) {
-      return `$${value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;
+      return new Intl.NumberFormat("fr-FR", {
+        style: "currency",
+        currency: "HTG",
+      }).format(value);
+    },
+     async fetchFinancialData() {
+      try {
+        // Supposons que vous ayez une API pour récupérer ces données
+        const financialData = await this.$axios.get("/financial-data");
+
+        // Revenus et Dépenses
+        this.totalRevenues = financialData.revenues;
+        this.totalExpenses = financialData.expenses;
+
+        // Calcul du Bénéfice ou de la Perte
+        this.profitOrLoss = this.totalRevenues - this.totalExpenses;
+        this.isProfit = this.profitOrLoss >= 0;
+
+        // Progression des revenus et dépenses
+        this.revenueProgress = (this.totalRevenues / (this.totalRevenues + this.totalExpenses)) * 100;
+        this.expenseProgress = (this.totalExpenses / (this.totalRevenues + this.totalExpenses)) * 100;
+
+        // Mise à jour du graphique des revenus vs dépenses
+        this.barChartSeries[0].data = [this.totalRevenues, this.totalExpenses];
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données financières :", error);
+      }
+    },
+    async fetchDashboardData() {
+      try {
+        const ordersResponse = await this.$axios.get("/commandes");
+        const orders = ordersResponse.data;
+
+        const productsResponse = await this.$axios.get("/produits");
+        const products = productsResponse.data;
+
+        // Statistiques Restaurant
+        this.cashTodayRestaurant = this.calculateDailySales(orders, "restaurant");
+        this.dailySalesRestaurant = this.calculateDailySales(orders, "restaurant");
+        this.monthlySalesRestaurant = this.calculateMonthlySales(orders, "restaurant");
+
+        // Statistiques Hôtel
+        this.dailySalesHotel = this.calculateDailySales(orders, "hotel");
+        this.monthlySalesHotel = this.calculateMonthlySales(orders, "hotel");
+        this.monthlyBookingsHotel = this.calculateMonthlyBookings(orders);
+
+        // Statistiques Services
+        this.dailySalesSpace = this.calculateDailySales(orders, "space");
+        this.monthlySalesSpace = this.calculateMonthlySales(orders, "space");
+        this.monthlyEvents = this.calculateMonthlyEvents(orders);
+
+        // Articles à faible stock
+        this.lowStockItemsRestaurant = products.filter(product => product.quantite <= product.critique);
+        
+        // Récupérer les commandes récentes
+        this.recentOrdersRestaurant = orders.filter(order => order.statut === "Restaurant");
+      } catch (error) {
+        console.error("Erreur lors de la récupération des données du dashboard :", error);
+      }
+    },
+    calculateDailySales(orders, type) {
+      return orders
+        .filter(order => order.type === type && new Date(order.date).toLocaleDateString() === new Date().toLocaleDateString())
+        .reduce((total, order) => total + order.total, 0);
+    },
+    calculateMonthlySales(orders, type) {
+      return orders
+        .filter(order => order.type === type && new Date(order.date).getMonth() === new Date().getMonth())
+        .reduce((total, order) => total + order.total, 0);
+    },
+    calculateMonthlyBookings(orders) {
+      return orders.filter(order => order.type === "hotel" && new Date(order.date).getMonth() === new Date().getMonth()).length;
+    },
+    calculateMonthlyEvents(orders) {
+      return orders.filter(order => order.type === "event" && new Date(order.date).getMonth() === new Date().getMonth()).length;
     },
   },
 };
 </script>
 
 <style scoped>
-.pa-4 {
-  padding: 16px !important;
-}
-.rounded-lg {
-  border-radius: 12px !important;
-}
-.elevation-12 {
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
-}
-.text-subtitle-1 {
-  color: #333 !important;
-}
 </style>
