@@ -43,7 +43,7 @@
   </v-row>
       </template>
         <template #[`item.actions`]="{ item }">
-          <v-btn icon small title="Details de la Commande" @click="viewDetails(item)">
+          <v-btn icon small title="Details de la Vente" @click="viewDetails(item)">
             <v-icon>mdi-eye</v-icon>
           </v-btn>
           <v-btn v-if="isAdmin" icon small color="error" @click="deleteArticle(item._id)">
@@ -147,7 +147,7 @@
               <v-list-item-content>
                 <v-list-item-title><strong>Date :</strong> {{ formatDate(selectedCommande.createdAt) }}</v-list-item-title>
                 <v-list-item-title><strong>Client:</strong> {{ selectedCommande.client }}</v-list-item-title>
-                <v-list-item-title><strong>Serveur:</strong> {{ selectedCommande.serveur }}</v-list-item-title>
+                <v-list-item-title><strong>Vendeur:</strong> {{ selectedCommande.serveur }}</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
 
@@ -797,7 +797,7 @@ async fetchCommandes() {
           }
 
           this.$notifier.showMessage({
-            content: "Produit ajouté à la commande.",
+            content: "Produit ajouté à la vente.",
             color: "success",
           });
           this.addProductModal = false;
@@ -835,7 +835,7 @@ async fetchCommandes() {
         this.fetchCommandes();
         this.dialogConfirm = false;
       } catch (error) {
-        console.error('Erreur lors de la suppression de la commande:', error);
+        console.error('Erreur lors de la suppression de la vente:', error);
       }
     },
 

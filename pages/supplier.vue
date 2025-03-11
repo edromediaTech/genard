@@ -4,9 +4,9 @@
         <v-col cols="12">
           <v-card>
             <v-card-title>
-              Suppliers
+             Fournisseurs
               <v-spacer></v-spacer>
-              <v-btn color="primary" @click="openDialog(null)">Add Supplier</v-btn>
+              <v-btn color="primary" @click="openDialog(null)"><v-icon>mdi-plus</v-icon> Fournisseurs</v-btn>
             </v-card-title>
             <v-data-table
               :headers="headers"
@@ -25,31 +25,31 @@
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col cols="12">
-                  <v-text-field v-model="editedItem.name" label="Name"></v-text-field>
+                <v-col cols="12" md="6" sm="6">
+                  <v-text-field v-model="editedItem.name" label="Nom"></v-text-field>
                 </v-col>
-                <v-col cols="12">
+                <v-col cols="12" md="6" sm="6">
                   <v-text-field v-model="editedItem.contact" label="Contact"></v-text-field>
                 </v-col>
-                <v-col cols="12">
+                <v-col cols="12" md="6" sm="6">
                   <v-text-field v-model="editedItem.email" label="Email"></v-text-field>
                 </v-col>
-                <v-col cols="12">
+                <v-col cols="12" md="6" sm="6">
                   <v-text-field v-model="editedItem.phone" label="Phone"></v-text-field>
                 </v-col>
-                <v-col cols="12">
-                  <v-text-field v-model="editedItem.address" label="Address"></v-text-field>
+                <v-col cols="12" md="6" sm="6">
+                  <v-text-field v-model="editedItem.address" label="Adresse"></v-text-field>
                 </v-col>
-                <v-col cols="12">
-                  <v-text-field v-model="editedItem.totalDebt" label="Total Debt"></v-text-field>
+                <v-col cols="12" md="6" sm="6">
+                  <v-text-field v-model="editedItem.totalDebt" label="Total Dette"></v-text-field>
                 </v-col>
               </v-row>
             </v-container>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="blue darken-1" text @click="closeDialog">Cancel</v-btn>
-            <v-btn color="blue darken-1" text @click="saveSupplier">Save</v-btn>
+            <v-btn color="blue darken-1"  @click="closeDialog">Cancel</v-btn>
+            <v-btn color="primary"  @click="saveSupplier">Save</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>

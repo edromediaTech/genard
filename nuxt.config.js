@@ -96,7 +96,7 @@ export default {
        baseURL : 'http://192.168.0.113:3000/api/',
       //  baseURL : 'http://192.168.1.40:3000/api/',
       // baseURL : 'http://172.20.10.3:3000/api/',
-      //  baseURL : 'https://backbenediction.onrender.com/api/',
+      //  baseURL : 'https://genardback.onrender.com/api/',
       // //credentials: false,
       // proxy: true           
   },

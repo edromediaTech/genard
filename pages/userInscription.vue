@@ -60,7 +60,7 @@
               user.prenom === null ||
               user.tel === null            
             "
-            color="#FFD700"
+            color="#07ab38"
             type="button"
             @click="register"
           >

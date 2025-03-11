@@ -281,7 +281,7 @@ export default {
       headers: [
         { text: "Code", value: "code" },
         { text: "Client", value: "client" },
-        { text: "Serveur", value: "serveur" },
+        { text: "Vendeur", value: "serveur" },
         { text: "Statut", value: "statut" },
         { text: "Total (HTG)", value: "total" },
         { text: "Reglement (HTG)", value: "reglement" },
@@ -347,9 +347,10 @@ export default {
     },
   },
   async mounted() {
-    await this.fetchCommandes();
     await this.fetchProduits();
-   await this.fetchClients()
+    await this.fetchCommandes();
+    
+ //  await this.fetchClients()
   },
   methods: {
     ...mapActions("auth", ["sendLoginRequest"]),
@@ -619,7 +620,7 @@ export default {
           }
 
           this.$notifier.showMessage({
-            content: "Produit ajouté à la commande.",
+            content: "Produit ajouté à la vente.",
             color: "success",
           });
           this.addProductModal = false;
@@ -776,7 +777,7 @@ export default {
         this.fetchCommandes();
         this.dialogConfirm = false;
       } catch (error) {
-        console.error('Erreur lors de la suppression de la commande:', error);
+        console.error('Erreur lors de la suppression de la vente:', error);
       }
     },
 
