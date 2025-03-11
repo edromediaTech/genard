@@ -1,8 +1,8 @@
 <template>
   <v-container>
-    <v-btn color="primary" class="mb-4" @click="openAddModal">Créer une Commande</v-btn>
+    <v-btn color="primary" class="mb-4" @click="openAddModal">Créer une Vente</v-btn>
     <v-card>
-      <v-card-title>Liste des Commandes</v-card-title>
+      <v-card-title>Liste des Ventes</v-card-title>
       <v-card class="mb-4">   
      
     </v-card>
@@ -20,7 +20,7 @@
        
       </template>
         <template #[`item.actions`]="{ item }">
-          <v-btn icon small title="Details de la Commande" @click="viewDetails(item)">
+          <v-btn icon small title="Details de la Vente" @click="viewDetails(item)">
             <v-icon>mdi-eye</v-icon>
           </v-btn>
           
@@ -48,12 +48,12 @@
     </v-card>
 
     <!-- Modal pour ajouter un article -->
-    <v-dialog v-model="addModal" max-width="800px">
+    <v-dialog v-model="addModal" max-width="600px">
       <v-card>
         <v-card-title>Ajouter un article</v-card-title>
         <v-card-text>
           <v-row>
-            <v-col cols="12" md="6" sm="6">
+            <v-col cols="12" md="12" sm="6">
               <v-combobox
                 v-model="selectedTableId"
                 :items="tablesOptions"
@@ -135,7 +135,7 @@
               <v-list-item-content>
                 <v-list-item-title><strong>Date:</strong> {{ formatDate(selectedCommande.createdAt) }}</v-list-item-title>
                 <v-list-item-title><strong>Client:</strong> {{ selectedCommande.client }}</v-list-item-title>
-                <v-list-item-title><strong>Vendeur:</strong> {{ selectedCommande.serveur }}</v-list-item-title>
+                <v-list-item-title><strong>Serveur:</strong> {{ selectedCommande.serveur }}</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
 
@@ -250,7 +250,7 @@ export default {
       loading : false,
       totalventes : 0,
       selectedTableId: null, // ID de la table sélectionnée
-      tablesOptions: ['Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5', 'Table 6', 'Table 7'], // Options des tables
+      tablesOptions: ['Client 1', 'Client 2', 'Client 3', 'Client 4', 'Client 5'], // Options des tables
       statutOptions: ['En attente', 'En préparation', 'Servie', 'Terminée'],
       statutReg: ['Non paiement', 'Partiel', 'Complet'],
       dialogConfirm: false,  // État du dialogue de confirmation
@@ -281,7 +281,7 @@ export default {
       headers: [
         { text: "Code", value: "code" },
         { text: "Client", value: "client" },
-        { text: "Vendeur", value: "serveur" },
+        { text: "Serveur", value: "serveur" },
         { text: "Statut", value: "statut" },
         { text: "Total (HTG)", value: "total" },
         { text: "Reglement (HTG)", value: "reglement" },
@@ -783,105 +783,6 @@ export default {
     cancelDelete() {
       this.dialogConfirm = false;
     },
-    printInvoice() {
-  const total = this.selectedCommande.articles.reduce(
-        (sum, article) => sum + article.produit.prix * article.quantite,
-        0
-      );
-
-      
-    const invoiceContent = `
-        <div style="text-align: center; font-family: monospace, sans-serif; font-size: 14px; margin: 0; padding: 0;">
-            <h5 style="text-align: center; margin: 0;">Genard Market</h5>             
-              <p style="text-align: center; margin: 0;">               
-                Rue St-Charles, Carrenage, Fort-Liberté, Haiti<br />        
-              </p>
-            <hr>
-            <h5 style="text-align: center; margin: 0;">FACTURE</h5>
-            <p>Client: ${this.selectedCommande.client}</p>
-            <p>Date: ${this.selectedCommande.date}</p>
-            <hr>
-            
-            <!-- Tableau des articles -->
-            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                <thead>
-                    <tr>
-                       <th style="border: 1px solid #000; padding: 3px; text-align: center;">Qté</th>
-                        <th style="border: 1px solid #000; padding: 3px; text-align: left;">Article</th>                       
-                        <th style="border: 1px solid #000; padding: 3px; text-align: right;">PU (HTG)</th>
-                        <th style="border: 1px solid #000; padding: 3px; text-align: right;">Total (HTG)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${this.selectedCommande.articles.map(article => {
-                        const totalArticle = (article.produit.prix * article.quantite).toFixed(2);
-                        return `
-                            <tr>
-                               <td style="border: 1px solid #000; padding: 3px; text-align: center;">${article.quantite}</td>
-                                <td style="border: 1px solid #000; padding: 3px;">${article.produit.nom}</td>                               
-                                <td style="border: 1px solid #000; padding: 3px; text-align: right;">${article.produit.prix.toFixed(2)}</td>
-                                <td style="border: 1px solid #000; padding: 3px; text-align: right;">${totalArticle}</td>
-                            </tr>
-                        `;
-                    }).join('')}
-                </tbody>
-            </table>
-            
-            <hr>
-            <p><strong>Total : </strong> ${total.toFixed(2)} HTG</p>
-            <hr>
-            <p>Merci pour votre confiance !</p>
-        </div>
-    `;
-
-    const printWindow = window.open('', '', 'width=800,height=600');
-    printWindow.document.write(`
-        <html>
-            <head>
-                <style>
-                    body {
-                        margin: 0;
-                        padding: 0;
-                        width: 100%;
-                        font-family: monospace, sans-serif;
-                    }
-                    @page {
-                        size: auto;   /* Ajuste la taille de la page en fonction du contenu */
-                        margin: 0mm;   /* Retirer les marges inutiles */
-                    }
-                    /* Fixer la taille du contenu à la largeur de la page pour éviter les marges */
-                    .invoice {
-                        width: 100%;
-                        max-width: 800px;
-                        margin: 0 auto;
-                        page-break-before: auto;
-                    }
-                    /* S'assurer que les éléments du tableau sont bien alignés et ne gaspillent pas d'espace */
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                    }
-                    th, td {
-                        padding: 5px;
-                        border: 1px solid #000;
-                    }
-                    p{
-                    font-size:14px
-                    }
-                    h2, h3, p {
-                        margin: 0;
-                        padding: 5px;
-                    }
-                </style>
-            </head>
-            <body>
-                ${invoiceContent}
-            </body>
-        </html>
-    `);
-    printWindow.document.close();
-    printWindow.print();
-},
 
 printInvoicepiti() {
   const total = this.selectedCommande.articles.reduce(
@@ -998,7 +899,7 @@ printInvoicepiti() {
 
 
 
-printInvoice2() {
+printInvoice() {
       const total = this.selectedCommande.articles.reduce(
         (sum, article) => sum + article.produit.prix * article.quantite,
         0
@@ -1051,9 +952,9 @@ printInvoice2() {
         <body>
           <div class="container">
             <div class="header">
-              <h5>Bénédictions de l'Éternel</h5>             
+              <h5>Genard Market</h5>             
               <p>               
-                Tél: +509 3779-6764 / +509 3596-7838<br />        
+                Tél:  +509 3743-3479<br />        
               </p>
               <hr style="border: 1px dashed black; margin: 10px 0;" />
             </div>        

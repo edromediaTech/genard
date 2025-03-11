@@ -121,8 +121,8 @@ export default {
               else if (this.user.user_level === role.supadmin) {
                 this.$router.push({ path: "/admin" });
               }
-              else  if (this.user.user_level === role.serveur) {
-                this.$router.push({ path: "/commande" });
+              else  if (this.user.user_level === role.vendeur) {
+                this.$router.push({ path: "/vente" });
               } else {
                 this.$router.push({ path: "/inspire" });
               }
@@ -152,16 +152,16 @@ export default {
 
 <style scoped>
 .v-application {
-  background: url("/images/resto1.jpg") no-repeat;
+  background: url("/images/market1.jpg") no-repeat;
   background-size: cover;
   height: 100vh;
   background-color: rgb(0, 0, 0);
   /* background: linear-gradient(to bottom, #000, #333); */
 }
-.image {
-  background: url("/images/resto1.jpg") no-repeat;
+/* .image {
+  background: url("/images/market1.jpg") no-repeat;
   background-size: cover;
   height: 100vh;
   background-color: rgb(0, 0, 0);
-}
+} */
 </style>

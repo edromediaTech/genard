@@ -5,8 +5,8 @@ export  default function ip({redirect, res, req,next}){
     if (!localStorage.getItem('authToken')) {
       alert('Vous devez vous connecter')        
         next({ name: 'index' })
-    } else if (parseInt(userl) < role.serveur) {
-      alert('Vous devez êtes serveur')             
+    } else if (parseInt(userl) < role.vendeur) {
+      alert('Vous devez êtes vendeur')             
              next({ name: 'inspire' })
                 } else {
             // next()

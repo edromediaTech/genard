@@ -1,31 +1,56 @@
 <template>
   <v-container>
-    <v-btn color="primary" class="mb-4" @click="openAddModal">Créer une Commande</v-btn>
+  
     <v-card>
-      <v-card-title>Liste des Commandes</v-card-title>
-      <v-card class="mb-4">   
-     
-    </v-card>
+      <v-card-title>Liste des Ventes</v-card-title>
+       
       <v-data-table
         :headers="headers"
         :items="commandes"
         item-value="id"
         dense
-        item-key="_id"
+        :search="search"
+        item-key="_id"         
         class="elevation-1"
          :loading="loading"
        loading-text="Chargement en cours..."
       >
       <template #top>
+        <v-row>
+          <v-col cols="12"
+                sm="6"        
+                md="3">
+              <v-text-field
+                  v-if="commandes.length > 0"  
+                  v-model="search"
+                  class="ml-4 "
+                  append-icon="mdi-magnify"
+                  label="Search"
+                  single-line
+                  hide-details
+               ></v-text-field>
+             </v-col>             
+
        
+        <v-spacer></v-spacer>
+     <!-- Bouton pour basculer entre les commandes du jour et toutes les commandes -->
+     <v-btn color="success"  class="mx-4"  fab x-small @click="openAddModal"><v-icon >mdi-plus</v-icon></v-btn>
+     <v-btn color="blue" class="mb-4 mx-4 mr-4 pr-4" @click="fetchCommandes"><v-icon left>mdi-food</v-icon> Commande du jour</v-btn>
+     <v-btn color="pink" class="mb-4 mx-4 mr-4 pr-4" @click="fetchAllCommandes"><v-icon left>mdi-food</v-icon> All
+    
+    </v-btn>
+  
+  </v-row>
       </template>
         <template #[`item.actions`]="{ item }">
           <v-btn icon small title="Details de la Commande" @click="viewDetails(item)">
             <v-icon>mdi-eye</v-icon>
           </v-btn>
-          
-              <!-- Bouton pour modifier le statut -->
-              <!-- <v-btn
+          <v-btn v-if="isAdmin" icon small color="error" @click="deleteArticle(item._id)">
+            <v-icon>mdi-delete</v-icon>
+          </v-btn>
+            <!-- Bouton pour modifier le statut -->
+              <v-btn
                 v-if="item.statutReg !== 'Complet'"
                 icon
                 small
@@ -33,15 +58,13 @@
                 @click="openEditStatutModal(item)"
               >
                 <v-icon>mdi-pencil</v-icon>
-              </v-btn> -->
-          <!-- <v-btn icon small color="error" @click="deleteArticle(item._id)">
-            <v-icon>mdi-delete</v-icon>
-          </v-btn> -->
+              </v-btn>
+       
         </template>
         <template #[`item.createdAt`]="{ item }">
           {{ formatDate(item.createdAt) }}
         </template>
-        <template #[`item.code`]="{ item }">
+         <template #[`item.code`]="{ item }">
         {{ getLastThreeDigits(item.code) }}
       </template>
       </v-data-table>
@@ -53,7 +76,7 @@
         <v-card-title>Ajouter un article</v-card-title>
         <v-card-text>
           <v-row>
-            <v-col cols="12" md="6" sm="6">
+             <v-col cols="12" md="6" sm="6">
               <v-combobox
                 v-model="selectedTableId"
                 :items="tablesOptions"
@@ -64,18 +87,7 @@
                 dense
               ></v-combobox>
             </v-col>
-            <!-- Statut -->
-             
-            <!-- <v-col cols="12" sm="6" md="4">
-              <v-combobox
-                v-model="commande.statutReg"
-                :items="statutReg"
-                label="Statut Règlement"
-                required
-                dense
-                outlined
-              ></v-combobox>
-            </v-col> -->
+           
           </v-row>
           <v-row v-for="(article, index) in commande.articles" :key="index" class="mb-3">
             <v-col cols="12" md="6" sm="6">
@@ -112,13 +124,13 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="primary" @click="sendArticle">
-            <v-progress-circular
+            <!-- <v-progress-circular
                     v-if="loading"
                     :disabled="loading"
                     :size="30"
                     color="white"
                     indeterminate
-                  />                      
+                  />                       -->
             Ajouter</v-btn>
           <v-btn text @click="closeAddModal">Annuler</v-btn>
         </v-card-actions>
@@ -133,9 +145,9 @@
           <v-list dense>
             <v-list-item>
               <v-list-item-content>
-                <v-list-item-title><strong>Date:</strong> {{ formatDate(selectedCommande.createdAt) }}</v-list-item-title>
+                <v-list-item-title><strong>Date :</strong> {{ formatDate(selectedCommande.createdAt) }}</v-list-item-title>
                 <v-list-item-title><strong>Client:</strong> {{ selectedCommande.client }}</v-list-item-title>
-                <v-list-item-title><strong>Vendeur:</strong> {{ selectedCommande.serveur }}</v-list-item-title>
+                <v-list-item-title><strong>Serveur:</strong> {{ selectedCommande.serveur }}</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
 
@@ -145,7 +157,7 @@
               :items="selectedCommande.articles"
               dense
                :loading="loading"
-               loading-text="Chargement en cours..."
+       loading-text="Chargement en cours..."
             ></v-data-table>
           </v-list>
         </v-card-text>
@@ -190,7 +202,7 @@
       </v-card>
     </v-dialog>
 
-    <!-- Modal pour modifier le statut -->
+     <!-- Modal pour modifier le statut -->
     <v-dialog v-model="editStatutModal" max-width="500px">
   <v-card>
     <v-card-title>Modifier le statut de règlement</v-card-title>
@@ -225,6 +237,7 @@
   </v-card>
 </v-dialog>
 
+
     <v-dialog v-model="dialogConfirm" max-width="400">
       <v-card>
         <v-card-title class="headline">Confirmation</v-card-title>
@@ -239,40 +252,35 @@
     </v-dialog>
   </v-container>
 </template>
-
 <script>
-import { mapGetters, mapActions } from "vuex";
 
+import { mapGetters, mapActions } from "vuex";
+import { role } from "../role";
 export default {
-  middleware: "serveur",
+  middleware: "admin",
   data() {
     return {
       loading : false,
-      totalventes : 0,
+      search:'',
+      showAllCommands: false,
+       editStatutModal: false,
       selectedTableId: null, // ID de la table sélectionnée
       tablesOptions: ['Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5', 'Table 6', 'Table 7'], // Options des tables
       statutOptions: ['En attente', 'En préparation', 'Servie', 'Terminée'],
-      statutReg: ['Non paiement', 'Partiel', 'Complet'],
       dialogConfirm: false,  // État du dialogue de confirmation
       currentDeleteId: null,
       selectedProductDetails: null,
-      editStatutModal: false, // Contrôle l'ouverture du modal
-    editedStatut: '', // Statut sélectionné dans le modal
-    selectedCommandeId: null, // ID de la commande sélectionnée   
-    selectedCommandeTotal: 0, // Total de la commande sélectionnée
-    montantPaye: 0, // Montant payé par le client
-    montantRestant: null, // Montant restant à payer
-    monnaie: 0, // Monnaie à rendre si le montant payé est supérieur au total
-    rules: {
+       rules: {
       positive: value => value >= 0 || 'Le montant doit être positif',
     },
       articles: [], // Articles récupérés
+      clients:[],
       commande: {
         client: null,
         serveur: '',
-        statut: 'En attente',
+         statut: 'En attente',
         articles: [{ produit: null, quantite: 1 }], // Initialiser un article avec produit et quantité par défaut
-        total: 0,
+        total: 0,         
         reglement: 0, // Montant payé jusqu'à présent
        statutReg: 'Non paiement',
       },
@@ -281,17 +289,17 @@ export default {
       headers: [
         { text: "Code", value: "code" },
         { text: "Client", value: "client" },
-        { text: "Vendeur", value: "serveur" },
+        { text: "Serveur", value: "serveur" },
         { text: "Statut", value: "statut" },
         { text: "Total (HTG)", value: "total" },
-        { text: "Reglement (HTG)", value: "reglement" },
-        { text: "Date", value: "createdAt" },
+      { text: "Reglement (HTG)", value: "reglement" },
+        { text: "Date", value: "date" },
         { text: "Actions", value: "actions", sortable: false },
       ],
       productHeaders: [
         { text: "Produit", value: "produit.nom" },
         { text: "Quantité", value: "quantite" },
-        { text: "Prix Unitaire (HTG)", value: "produit.prix"},
+        { text: "Prix Unitaire (HTG)", value: "produit.prix" },
       ],
       newCommande: {
         client: "",
@@ -313,7 +321,6 @@ export default {
       addCommandeModal: false, // Contrôle du modal pour ajouter la commande
       detailsModal: false, // Contrôle du modal pour afficher les détails de la commande
       addProductModal: false, // Contrôle du modal pour ajouter un produit à la commande
-      clients:[],
       selectedCommande: {
         id: "",
         client: "",
@@ -324,6 +331,9 @@ export default {
       addModal: false, // État du modal pour ajouter un article
       detailModal: false, // État du modal pour afficher les détails
       selectedOrder: {}, // Commande sélectionnée pour afficher les détails
+        montantPaye: 0, // Montant payé par le client
+    montantRestant: null, // Montant restant à payer
+    monnaie: 0,
       commandeId: '', // ID de la commande actuelle
       errors: {
         client: "",
@@ -334,8 +344,10 @@ export default {
   },
   computed: {
     ...mapGetters("auth", ["user"]),
-    
-       // Propriété calculée pour le total de la commande
+    isAdmin() {
+      return this.user && parseInt(this.user.user_level) === role.supadmin;
+    },
+    // Propriété calculée pour le total de la commande
     totalCommande() {
       if (!this.selectedCommande.articles) return 0;
       return this.selectedCommande.articles.reduce((sum, article) => {
@@ -349,12 +361,22 @@ export default {
   async mounted() {
     await this.fetchCommandes();
     await this.fetchProduits();
-   await this.fetchClients()
+    await this.fetchClients()
   },
   methods: {
     ...mapActions("auth", ["sendLoginRequest"]),
+    onProductChange(selectedValue) {
+      const selectedProduct = this.produitsOptions.find(
+        (produit) => produit.value === selectedValue
+      );
+      this.selectedProductDetails = selectedProduct || null;
+    },
 
-    getLastThreeDigits(code) {
+    toggleShowAllCommands() {
+      this.showAllCommands = !this.showAllCommands;
+    },
+    
+     getLastThreeDigits(code) {
         if (code && code.length >= 3) {
           return code.slice(-3); // Extrait les 3 derniers caractères
         }
@@ -370,31 +392,6 @@ export default {
           console.error('Erreur lors de la récupération des utilisateurs', error);
         }
       },
-   
-    totalVentes() {
-    const userId = this.user.userId;
-    const today = new Date().toLocaleDateString('fr-CA');
-
-     this.totalventes = this.commandes
-      .filter(commande => {
-        const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
-        return (
-          commande.serveur._id === userId && // Si serveur est une chaîne (ID)
-          commandeDate === today
-        );
-      })
-      
-      .reduce((sum, commande) => sum + commande.total, 0);
-    
-      return this.totalventes
-  },
-
-    onProductChange(selectedValue) {
-      const selectedProduct = this.produitsOptions.find(
-        (produit) => produit.value === selectedValue
-      );
-      this.selectedProductDetails = selectedProduct || null;
-    },
 
     // Récupérer les produits disponibles
     async fetchProduits() {
@@ -409,7 +406,96 @@ export default {
         console.error('Erreur lors de la récupération des produits:', error);
       }
     },
-    formatDate(isoDate) {
+
+ openEditStatutModal(item) {
+    this.selectedCommandeId = item._id; // Stocker l'ID de la commande
+    this.selectedCommandeTotal = item.total; // Stocker le total de la commande
+    this.editedStatut = item.statutReg; // Pré-remplir le statut actuel
+    this.montantPaye = item.reglement || 0; // Pré-remplir le montant payé
+    this.calculateMontantRestant(); // Calculer le montant restant
+    this.editStatutModal = true; // Ouvrir le modal
+  },
+
+   // Fermer le modal
+  closeEditStatutModal() {
+    this.editStatutModal = false;
+    this.selectedCommandeId = null;
+    this.editedStatut = '';
+    this.montantPaye = 0;
+    this.montantRestant = null;
+    this.monnaie = 0;
+  },
+
+  // Calculer le montant restant et la monnaie
+  calculateMontantRestant() {
+    if (this.montantPaye !== null && this.selectedCommandeTotal !== null) {
+      this.montantRestant = this.selectedCommandeTotal - this.montantPaye;
+      this.monnaie = this.montantPaye > this.selectedCommandeTotal ? this.montantPaye - this.selectedCommandeTotal : 0;
+    }
+    this.onStatutChange()
+  },
+
+  // Mettre à jour le statut et le montant payé
+  
+
+  // Gérer le changement de statut
+  onStatutChange() {
+    if (this.commande.reglement=== 'Complet') {
+      this.montantPaye = this.selectedCommandeTotal; // Si le statut est "Complet", le montant payé est égal au total
+      this.calculateMontantRestant();
+    }
+  },
+
+
+async updateStatut() {
+  if (!this.selectedCommandeId || !this.montantPaye) {
+    this.$notifier.showMessage({
+      content: 'Veuillez sélectionner une commande et un montant valide.',
+      color: 'error',
+    });
+    return;
+  }
+
+  // Vérifier que le montant est un nombre valide
+  if (isNaN(this.montantPaye)) {
+    this.$notifier.showMessage({
+      content: 'Le montant doit être un nombre valide.',
+      color: 'error',
+    });
+    return;
+  }
+  this.commande.reglement = this.montantPaye
+  // Convertir le montant en nombre
+  // const montant = Number(this.commande.reglement);
+  
+  try {
+     await this.$axios.post('commandes/paiement', {
+      commandeId: this.selectedCommandeId,
+      montant : this.commande.reglement,
+    });
+ 
+ 
+    // Rafraîchir la liste des commandes
+    await this.fetchCommandes();
+
+    // Fermer le modal
+    this.closeEditStatutModal();
+
+    // Afficher un message de succès
+    this.$notifier.showMessage({
+      content: 'Statut mis à jour avec succès !',
+      color: 'success',
+    });
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour du statut :', error);
+    this.$notifier.showMessage({
+      content: 'Erreur lors de la mise à jour du statut.',
+      color: 'error',
+    });
+  }
+},
+
+  formatDate(isoDate) {
     if (!isoDate) return '';
 
     const date = new Date(isoDate);
@@ -421,13 +507,9 @@ export default {
     });
   },
 
-    // formatDate(dateString) {
-    //   const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
-    //   const date = new Date(dateString);
-    //   return date.toLocaleString('fr-FR', options).replace(',', '');
-    // },
+  
 
-   async fetchCommandes() {
+async fetchCommandes() {
   this.loading = true;
   try {
     const { data } = await this.$axios.get('/commandes');
@@ -437,9 +519,7 @@ export default {
     this.commandes = data
       .filter(commande => {
         const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
-        
-        // Vérifier que la commande est de l'utilisateur connecté et a été passée aujourd'hui
-        return commande.serveur?._id === this.user.userId && commandeDate === today;
+        return commandeDate === today;
       })
       .map(commande => {
         // Vérification si `commande.serveur` est null avant d'accéder à ses propriétés
@@ -474,6 +554,106 @@ export default {
   }
   this.loading = false;
 },
+
+  // async fetchCommandes() {
+  //   this.loading = true
+  //   try {
+  //     const { data } = await this.$axios.get('/commandes');
+  //    // const userId = this.user.userId;
+
+  //     // Filtrer les commandes en fonction de showAllCommandes
+  //     this.commandes = data
+  //       .filter(commande => {
+  //        // if (this.showAllCommandes) {
+  //           // Afficher toutes les commandes pour l'utilisateur
+  //        //   return commande.serveur._id === userId;
+  //         // } else {
+  //           // Afficher uniquement les commandes du jour pour l'utilisateur
+  //           const today = new Date().toLocaleDateString('fr-CA');
+  //           const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
+  //           return  commandeDate === today;
+  //         // }
+  //       })
+  //       .map(commande => {
+  //         // Si le total est égal à 0, le recalculer en fonction des articles
+  //         if (commande.total === 0) {
+  //           commande.total = commande.articles.reduce((sum, article) => {
+  //             return sum + (article.produit.prix * article.quantite);
+  //           }, 0);
+  //         }
+
+  //         return {
+  //           ...commande,
+  //           serveur: commande.serveur.prenom,
+  //           client: commande.client,
+  //           statut: commande.statut,
+  //           total: commande.total, // Utiliser le total calculé ou existant
+  //           createdAt: commande.createdAt,
+  //             reglement : commande.reglement,
+  //             statutReg : commande.statutReg,
+  //           date: new Date(commande.date).toLocaleDateString('fr-FR', {
+  //             day: '2-digit',
+  //             month: '2-digit',
+  //             year: '2-digit',
+  //           }),
+  //         };
+  //       });
+
+  //   } catch (error) {
+  //     console.error('Erreur lors du chargement des commandes :', error);
+  //   }
+  //   this.loading = false
+  // },
+  async fetchAllCommandes() {
+    this.loading = true
+    try {
+      const { data } = await this.$axios.get('/commandes');
+      
+     // const userId = this.user.userId;
+
+      // Filtrer les commandes en fonction de showAllCommandes
+      this.commandes = data
+       // .filter(commande => {
+         // if (this.showAllCommandes) {
+            // Afficher toutes les commandes pour l'utilisateur
+         //   return commande.serveur._id === userId;
+          // } else {
+            // Afficher uniquement les commandes du jour pour l'utilisateur
+           // const today = new Date().toLocaleDateString('fr-CA');
+           // const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
+           // return  commandeDate === today;
+          // }
+       // })
+        .map(commande => {
+          // Si le total est égal à 0, le recalculer en fonction des articles
+          if (commande.total === 0) {
+            commande.total = commande.articles.reduce((sum, article) => {
+              return sum + (article.produit.prix * article.quantite);
+            }, 0);
+          }
+
+          return {
+            ...commande,
+            serveur: commande.serveur.prenom,
+            client: commande.client,
+            statut: commande.statut,
+            total: commande.total, // Utiliser le total calculé ou existant
+            createdAt: commande.createdAt,
+            date: new Date(commande.date).toLocaleDateString('fr-FR', {
+              day: '2-digit',
+              month: '2-digit',
+              year: '2-digit',
+            }),
+          };
+        });
+
+    } catch (error) {
+      console.error('Erreur lors du chargement des commandes :', error);
+    }
+    this.loading = false
+  },
+
+  
 
 
     validateForm() {
@@ -517,15 +697,13 @@ export default {
       this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken');
       this.commande.client = this.selectedTableId;
       this.commande.serveur = this.user.userId;
-      this.commande.statut = "En attente";
-      
-      // this.commande.total = this.selectedProductDetails.prix
-       this.commande.total = this.commande.articles.reduce((acc, article) => {
+        this.commande.statut = "En attente";
+     // this.commande.total = this.selectedProductDetails.prix
+    this.commande.total = this.commande.articles.reduce((acc, article) => {
     return acc + (this.selectedProductDetails.prix || 0) * article.quantite;
   }, 0);
      
-     console.log(this.commande.client, this.commande.statut)
-      if (this.commande.client === null ) {
+      if (this.commande.client === null || this.commande.statut === null) {
         this.$notifier.showMessage({ content: "Il y a un champ vide", color: "error", });
         return false;
       }
@@ -555,8 +733,8 @@ export default {
           content: "Article ajouté avec succès.",
           color: "success",
         });
-         this.commande.client = null
-        // this.commande.statut = null
+        this.commande.client = null
+       // this.commande.statut = null
         this.closeAddModal();
       } catch (error) {
         console.error('Erreur lors de l’ajout de l’article :', error);
@@ -644,132 +822,13 @@ export default {
       }
     },
 
-     // Ouvrir le modal pour modifier le statut
-  openEditStatutModal(item) {
-    this.selectedCommandeId = item._id; // Stocker l'ID de la commande
-    this.selectedCommandeTotal = item.total; // Stocker le total de la commande
-    this.editedStatut = item.statutReg; // Pré-remplir le statut actuel
-    this.montantPaye = item.reglement || 0; // Pré-remplir le montant payé
-    this.calculateMontantRestant(); // Calculer le montant restant
-    this.editStatutModal = true; // Ouvrir le modal
-  },
-
-  // Fermer le modal
-  closeEditStatutModal() {
-    this.editStatutModal = false;
-    this.selectedCommandeId = null;
-    this.editedStatut = '';
-    this.montantPaye = 0;
-    this.montantRestant = null;
-    this.monnaie = 0;
-  },
-
-  // Calculer le montant restant et la monnaie
-  calculateMontantRestant() {
-    if (this.montantPaye !== null && this.selectedCommandeTotal !== null) {
-      this.montantRestant = this.selectedCommandeTotal - this.montantPaye;
-      this.monnaie = this.montantPaye > this.selectedCommandeTotal ? this.montantPaye - this.selectedCommandeTotal : 0;
-    }
-    this.onStatutChange()
-  },
-
-  // Mettre à jour le statut et le montant payé
-  
-
-  // Gérer le changement de statut
-  onStatutChange() {
-    if (this.commande.reglement=== 'Complet') {
-      this.montantPaye = this.selectedCommandeTotal; // Si le statut est "Complet", le montant payé est égal au total
-      this.calculateMontantRestant();
-    }
-  },
-
-    // Ouvrir le modal pour modifier le statut
-  
-
-  // Mettre à jour le statut
-  // async updateStatut() {
-  //   if (!this.selectedCommandeId || !this.commande.reglement) return;
-  //   console.log(this.selectedCommandeId, this.commande.reglement)
-  //   try {
-  //     const response = await this.$axios.put('commandes/paiement', {commandeId : this.selectedCommandeId,
-  //      montant:this.commande.reglement,
-  //     });
-  //       console.log(response)
-  //     // Rafraîchir la liste des commandes
-  //     await this.fetchCommandes();
-
-  //     // Fermer le modal
-  //     this.closeEditStatutModal();
-
-  //     // Afficher un message de succès
-  //     this.$notifier.showMessage({
-  //       content: 'Statut mis à jour avec succès !',
-  //       color: 'success',
-  //     });
-  //   } catch (error) {
-  //     console.error('Erreur lors de la mise à jour du statut :', error);
-  //     this.$notifier.showMessage({
-  //       content: 'Erreur lors de la mise à jour du statut.',
-  //       color: 'error',
-  //     });
-  //   }
-  // },
-
-  async updateStatut() {
-  if (!this.selectedCommandeId || !this.montantPaye) {
-    this.$notifier.showMessage({
-      content: 'Veuillez sélectionner une commande et un montant valide.',
-      color: 'error',
-    });
-    return;
-  }
-
-  // Vérifier que le montant est un nombre valide
-  if (isNaN(this.montantPaye)) {
-    this.$notifier.showMessage({
-      content: 'Le montant doit être un nombre valide.',
-      color: 'error',
-    });
-    return;
-  }
-  this.commande.reglement = this.montantPaye
-  // Convertir le montant en nombre
-  // const montant = Number(this.commande.reglement);
-
-
-  try {
-     await this.$axios.post('commandes/paiement', {
-      commandeId: this.selectedCommandeId,
-      montant : this.commande.reglement,
-    });
-   
-    // Rafraîchir la liste des commandes
-    await this.fetchCommandes();
-
-    // Fermer le modal
-    this.closeEditStatutModal();
-
-    // Afficher un message de succès
-    this.$notifier.showMessage({
-      content: 'Statut mis à jour avec succès !',
-      color: 'success',
-    });
-  } catch (error) {
-    console.error('Erreur lors de la mise à jour du statut :', error);
-    this.$notifier.showMessage({
-      content: 'Erreur lors de la mise à jour du statut.',
-      color: 'error',
-    });
-  }
-},
-
     deleteArticle(id) {
       this.currentDeleteId = id;
       this.dialogConfirm = true;
     },
 
     async confirmDelete() {
+      
       this.$axios.defaults.headers.common.Authorization = 'Bearer ' + localStorage.getItem('authToken');
       try {
         await this.$axios.delete(`/commandes/${this.currentDeleteId}`);
@@ -783,7 +842,9 @@ export default {
     cancelDelete() {
       this.dialogConfirm = false;
     },
-    printInvoice() {
+
+  
+printInvoice() {
   const total = this.selectedCommande.articles.reduce(
         (sum, article) => sum + article.produit.prix * article.quantite,
         0
@@ -794,7 +855,7 @@ export default {
         <div style="text-align: center; font-family: monospace, sans-serif; font-size: 14px; margin: 0; padding: 0;">
             <h5 style="text-align: center; margin: 0;">Genard Market</h5>             
               <p style="text-align: center; margin: 0;">               
-                Rue St-Charles, Carrenage, Fort-Liberté, Haiti<br />        
+                +509 3743-3479<br />        
               </p>
             <hr>
             <h5 style="text-align: center; margin: 0;">FACTURE</h5>
@@ -883,122 +944,7 @@ export default {
     printWindow.print();
 },
 
-printInvoicepiti() {
-  const total = this.selectedCommande.articles.reduce(
-    (sum, article) => sum + article.produit.prix * article.quantite,
-    0
-  );  
-
-  const printableContent = `
-    <html>
-    <head>
-      <style>
-        @page {
-          margin: 10mm;
-        }
-        body {
-          margin: 0;
-          padding: 0;
-        }
-        .container {
-          font-family: 'Courier New', monospace;
-          width: 100mm;
-          padding: 5mm;
-          box-sizing: border-box;
-        }
-        .header {
-          text-align: center;
-          margin-bottom: 10px;
-        }
-        .header h2, .header p {
-          margin: 0;
-          font-size: 10px;
-        }
-        table {
-          width: 100%;
-          font-size: 10px;
-          margin-top: 10px;
-          border: none; /* Supprime les bordures du tableau */
-        }
-        table th, table td {
-          text-align: left;
-          border: none; /* Supprime les bordures des cellules */
-          padding: 3px; /* Ajoute un peu d'espace pour la lisibilité */
-        }
-        table th:first-child, table td:first-child {
-          text-align: left;
-        }
-        .footer {
-          text-align: center;
-          font-size: 10px;
-          margin-top: 10px;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h5>Bénédictions de l'Éternel</h5>             
-          <p>               
-            Tél: +509 3779-6764 / +509 3596-7838<br />        
-          </p>
-          <hr style="border: 1px dashed black; margin: 10px 0;" />
-        </div>        
-        <h5 style="text-align: center; margin: 0;">FACTURE</h5>
-        <p style="font-size: 12px;"><strong>Client:</strong> ${this.selectedCommande.client}</p>
-        <p style="font-size: 12px;"><strong>Client:</strong> ${this.selectedCommande.date}</p>
-       
-        <table>
-          <thead>
-            <tr>
-              <th>Produit</th>
-              <th>Qté</th>
-              <th>PU</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${this.selectedCommande.articles
-              .map(
-                (article) => `
-                <tr>
-                  <td>${article.produit.nom}</td>
-                  <td>${article.quantite}</td>
-                  <td>${article.produit.prix.toFixed(2)}</td>
-                  <td>${(article.produit.prix * article.quantite).toFixed(2)}</td>
-                </tr>`
-              )
-              .join("")}
-            <tr>
-              <td colspan="3" style="text-align: right; font-weight: bold;">Total</td>
-              <td style="font-weight: bold;">${total.toFixed(2)}</td>
-            </tr>
-          </tbody>
-        </table>
-        <br>
-        <div class="footer">
-          <i>Une hospitalité gracieuse au cœur de la ville</i>
-          <hr style="border: 1px dashed black; margin: 10px 0;" />
-          Merci pour votre confiance !
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-
-  const newWindow = window.open("", "_blank", "width=600, height=600");      
-  newWindow.document.write(printableContent);
-  newWindow.document.close();
-
-  setTimeout(() => {
-    newWindow.print();
-    newWindow.close();
-  }, 1000);
-},
-
-
-
-printInvoice2() {
+    printInvoiceok() {
       const total = this.selectedCommande.articles.reduce(
         (sum, article) => sum + article.produit.prix * article.quantite,
         0
@@ -1016,7 +962,7 @@ printInvoice2() {
               padding: 0;
             }
             .container {
-              font-family: 'Courier New', monospace;
+              font-family: 'monospace', Courier New;
               width: 100mm;
               padding: 5mm;
               box-sizing: border-box;
@@ -1051,11 +997,11 @@ printInvoice2() {
         <body>
           <div class="container">
             <div class="header">
-              <h5>Bénédictions de l'Éternel</h5>             
-              <p>               
+              <h5 style="text-align: center; margin: 0;">Bénédictions de l'Éternel</h5>             
+              <p style="text-align: center; margin: 0;">               
                 Tél: +509 3779-6764 / +509 3596-7838<br />        
               </p>
-              <hr style="border: 1px dashed black; margin: 10px 0;" />
+              <hr style="border: 1px dashed black; margin: 5px 0;" />
             </div>        
             <h5 style="text-align: center; margin: 0;">FACTURE</h5>
             <p style="font-size: 12px;"><strong>Client:</strong> ${this.selectedCommande.client}</p>
@@ -1097,9 +1043,8 @@ printInvoice2() {
         </html>
       `;
 
-      const newWindow = window.open("", "_blank", "width=600, height=600");      
+      const newWindow = window.open("", "_blank", "width=600,height=600");
       newWindow.document.write(printableContent);
-      // newWindow.document.write();
       newWindow.document.close();
 
       setTimeout(() => {
@@ -1107,49 +1052,6 @@ printInvoice2() {
         newWindow.close();
       }, 1000);
     },
-
-
-    printInvoice1() {
-  // Calculer le total de la commande
-  const total = this.selectedCommande.articles.reduce(
-    (sum, article) => sum + article.produit.prix * article.quantite,
-    0
-  );
-
-  // Préparer les données de la facture à envoyer au backend
-  const invoiceData = {
-    client: this.selectedCommande.client,
-    articles: this.selectedCommande.articles.map((article) => ({
-      name: article.produit.nom,
-      quantity: article.quantite,
-      price: article.produit.prix,
-    })),
-    total,
-  };
-
-  // Envoyer les données au backend pour impression
-  fetch('http://localhost:3000/print', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(invoiceData), // Envoyer les données au backend
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('Erreur lors de l\'impression');
-      }
-      return response.json();
-    })
-    .then((data) => {
-      // Afficher un message de succès
-      alert('Facture imprimée avec succès !');
-    })
-    .catch((error) => {
-      console.error('Erreur :', error);
-      alert('Erreur lors de l\'impression. Veuillez réessayer.');
-    });
-}
   },
 };
 </script>

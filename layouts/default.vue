@@ -35,55 +35,85 @@
         </v-list-item>
 
         <!-- Sous-menu exemple -->
-        <!-- <v-list-group prepend-icon="mdi-folder" no-action>
-        <template #activator>
-          <v-list-item-content>
-            <v-list-item-title>Menu avec sous-menu</v-list-item-title>
-          </v-list-item-content>
-        </template> -->
+        <v-list-group
+          v-if="user && user.user_level > 5"
+          prepend-icon="mdi-shopping"
+          :value="false"
+          color="primary"
+        >
+          <template #activator>
+            <v-list-item-title class="text-uppercase font-weight-bold">
+              Market
+            </v-list-item-title>
+          </template>
 
-        <!-- Éléments du sous-menu -->
-        <!-- <v-list-item v-for="(subItem, index) in subItems" :key="index" :to="subItem.to" router exact>
-          <v-list-item-action>
-            <v-icon>{{ subItem.icon }}</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>{{ subItem.title }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list-group> -->
-      </v-list>
-      <!-- <v-list dense nav>
-        <v-list-item>
-          <v-list-item-avatar class="align-self-center" color="white" contain>
-            <v-img src="images/logo.jpg" max-height="30" />
-          </v-list-item-avatar>
-          <span v-if="user && user.user_level === 2" class="ecole">{{ ecolename }}</span>
-          <span v-if="user && user.user_level === 3" class="ecole">{{ zonename }}</span>
-        </v-list-item>
-      </v-list>
+          <!-- Éléments du sous-menu -->
+          <v-list>
+            <v-list-item
+              v-for="(subItem, index) in subItemResto"
+              :key="index"
+              :to="subItem.to"
+              router
+              exact
+              class="submenu-item"
+            >
+              <v-list-item-icon>
+                <v-icon :color="subItem.color || 'primary'">
+                  {{ subItem.icon }}
+                </v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>{{ subItem.title }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-list-group>
 
-      <v-divider class="mb-2" />
-      <v-list dense nav>
-        <v-list-item v-for="(item, i) in items" :key="i" :to="item.to" router exact>
-          <v-list-item-action>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list> -->
+        <v-list-group
+          v-if="user && user.user_level > 5"
+          prepend-icon="mdi-cash"
+          :value="false"
+          color="primary"
+        >
+          <template #activator>
+            <v-list-item-title class="text-uppercase font-weight-bold">
+              Finance
+            </v-list-item-title>
+          </template>
+
+          <!-- Éléments du sous-menu -->
+          <v-list>
+            <v-list-item
+              v-for="(subItem, index) in subItemFinance"
+              :key="index"
+              :to="subItem.to"
+              router
+              exact
+              class="submenu-item"
+            >
+              <!-- Icône et titre dans une disposition alignée -->
+              <v-list-item-icon>
+                <v-icon :color="subItem.color || 'primary'">
+                  {{ subItem.icon }}
+                </v-icon>
+              </v-list-item-icon>
+              <v-list-item-content>
+                <v-list-item-title>{{ subItem.title }}</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-list-group>
+      </v-list>
     </v-navigation-drawer>
     <v-app-bar :clipped-left="clipped" fixed app color="#000000" dark dense>
-      <v-app-bar-nav-icon v-if="user" color="#FFD700" @click.stop="drawer = !drawer" />
-      <v-btn v-if="user" color="#FFD700" icon @click.stop="miniVariant = !miniVariant">
+      <v-app-bar-nav-icon v-if="user" color="#07ab38" @click.stop="drawer = !drawer" />
+      <v-btn v-if="user" color="#07ab38" icon @click.stop="miniVariant = !miniVariant">
         <v-icon>mdi-{{ `chevron-${miniVariant ? "right" : "left"}` }}</v-icon>
       </v-btn>
       <span href="/inspire" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
         <h3 class="m-0 text-primary">
           <!-- <img src="images/logo.jpg" class="d-inline-block imgLogo" width="30" /> -->
-           Bénédictions de l'Eternel
+          Genard Market
         </h3>
       </span>
       <!-- <div class="text-center">
@@ -142,18 +172,17 @@
         @click="logout"
       >
         {{ privileges[user.user_level] }}, {{ get_initial(user.prenom) }}
-      </v-btn>   
-    </v-app-bar>    
-    <v-main>      
-      
+      </v-btn>
+    </v-app-bar>
+    <v-main>
       <!-- style="background-color: rgb(241, 241, 241);" -->
       <v-container fluid>
         <Nuxt />
       </v-container>
     </v-main>
-   <div v-if="showPopup" class="notification-popup" >
-    {{ message }}
-   </div>
+    <div v-if="showPopup" class="notification-popup">
+      {{ message }}
+    </div>
     <v-footer :absolute="!fixed" app>
       <span class="ecole">&copy; {{ new Date().getFullYear() }} Design by EDROMEDIA</span>
     </v-footer>
@@ -172,8 +201,8 @@ export default {
   data() {
     return {
       message: "",
-      showPopup:false,
-      socket:null,
+      showPopup: false,
+      socket: null,
       loginDialog: false,
       clipped: false,
       drawer: false,
@@ -188,36 +217,39 @@ export default {
       privileges: [],
       lastActivityTime: null,
       isPageRefreshed: false,
-      nouveauUser:null,
+      nouveauUser: null,
     };
   },
   computed: {
     ...mapGetters("auth", ["anac"]),
     ...mapGetters("auth", ["user"]),
-  
+
     items() {
       const items = [
         {
           icon: "mdi-apps",
           title: "Accueil",
           to: "/inspire",
-        },       
-        
+        },
       ];
 
-      if (this.user && parseInt(this.user.user_level) === role.serveur) {
+      if (this.user && parseInt(this.user.user_level) === role.vendeur) {
         items.push({
           icon: "mdi-food",
-          title: "Gestion des Commandes",
-          to: "/commande",
+          title: "Gestion des Ventes",
+          to: "/vente",
         });
-        
+
+        // items.push({
+        //   icon: "mdi-account",
+        //   title: "Clients",
+        //   to: "/clientResto",
+        // });
         items.push({
           icon: "mdi-package-variant",
           title: "Produits",
           to: "/produits",
         });
-       
       }
 
       if (this.user && parseInt(this.user.user_level) === role.superviseur) {
@@ -227,7 +259,12 @@ export default {
           to: "/admin",
         });
         items.push({
-          icon: "mdi-file",
+          icon: "mdi-cash",
+          title: "Gestion des Comptes",
+          to: "/gestionCompte",
+        });
+        items.push({
+          icon: "mdi-clipboard-text",
           title: "Rapport de Ventes",
           to: "/rapportdevente",
         });
@@ -237,12 +274,11 @@ export default {
           to: "/produit",
         });
         items.push({
-          icon: "mdi-basket",
+          icon: "mdi-file",
           title: "Approvisionnement",
           to: "/appro",
-        });      
+        });
 
-        
         items.push({
           icon: "mdi-basket",
           title: "Achats",
@@ -254,92 +290,128 @@ export default {
           icon: "mdi-view-dashboard",
           title: "Tableau de bord",
           to: "/admin",
-        });    
-
-      
-        items.push({
-          icon: "mdi-food",
-          title: "Gestion des Commandes",
-          to: "/commandeAdmin",
-        });       
+        });
        
-        items.push({
-          icon: "mdi-basket",
-          title: "Achats",
-          to: "/achat",
-        });
-
-        items.push({
-          icon: "mdi-basket",
-          title: "Approvisionnement",
-          to: "/appro",
-        });
-        
-
-        items.push({
-          icon: "mdi-package-variant",
-          title: "Produits",
-          to: "/produit",
-        });
-
       }
-        if (this.user && parseInt(this.user.user_level) === role.supadmin) {       
-          items.push({
+      if (this.user && parseInt(this.user.user_level) === role.supadmin) {
+        items.push({
           icon: "mdi-view-dashboard",
           title: "Tableau de bord",
           to: "/admin",
-        });    
-
-      
-        items.push({
-          icon: "mdi-food",
-          title: "Gestion des Commandes",
-          to: "/commandeAdmin",
-        });       
-       
-        items.push({
-          icon: "mdi-basket",
-          title: "Achats",
-          to: "/achat",
         });
+
+       
+
         items.push({
           icon: "mdi-account",
           title: "Gestion Utilisateur",
           to: "/gestionUser",
         });
-      
-      items.push({
+
+        items.push({
           icon: "mdi-account-multiple",
           title: "Inscription User",
           to: "/userInscription",
         });
 
-        items.push({
-          icon: "mdi-basket",
-          title: "Approvisionnement",
-          to: "/appro",
-        });
+        // items.push({
+        //   icon: "mdi-package-variant",
+        //   title: "Bookings",
+        //   to: "/booking",
+        // });
+        // items.push({
+        //   icon: "mdi-package-variant",
+        //   title: "Clients Hotel",
+        //   to: "/clientHotel",
+        // });
+        // items.push({
+        //   icon: "mdi-package-variant",
+        //   title: "Rooms",
+        //   to: "/room",
+        // });
+      }
+      return items;
+    },
 
-        items.push({
-          icon: "mdi-file",
+    subItemHotel() {
+      const subItem = [
+        {
+          icon: "mdi-account",
+          title: "Client Hotel",
+          to: "/clientHotel",
+        },
+        {
+          icon: "mdi-calendar-check",
+          title: "Booking",
+          to: "/booking",
+        },
+        {
+          icon: "mdi-door",
+          title: "Rooms",
+          to: "/room",
+        },
+      ];
+      return subItem;
+    },
+    subItemFinance() {
+      const subItem = [
+        {
+          icon: "mdi-bank",
+          title: "Gestion Comptes",
+          to: "/gestionCompte",
+        },
+        {
+          icon: "mdi-chart-bar",
+          title: "Ligne Budgetaire",
+          to: "/ligneBudgetaire",
+        },
+        {
+          icon: "mdi-cash",
+          title: "Depenses",
+          to: "/gestionDepense",
+        },
+      ];
+      return subItem;
+    },
+    subItemResto() {
+      const subItem = [
+        {
+          icon: "mdi-food",
+          title: "Gestion des ventes",
+          to: "/venteAdmin",
+        },
+        {
+          icon: "mdi-clipboard-text",
           title: "Rapport de Ventes",
           to: "/rapportdevente",
-        });
-
-        items.push({
-          icon: "mdi-basket",
-          title: "Stockage",
-          to: "/stock",
-        });
-
-        items.push({
+        },
+        {
           icon: "mdi-package-variant",
           title: "Produits",
           to: "/produit",
-        });
-       
-      }
-      return items;
+        },
+        {
+          icon: "mdi-basket",
+          title: "Achats",
+          to: "/achat",
+        },
+        {
+          icon: "mdi-account",
+          title: "Fournisseurs",
+          to: "/supplier",
+        },
+        {
+          icon: "mdi-file",
+          title: "Approvisionnement",
+          to: "/appro",
+        },
+        {
+          icon: "mdi-package",
+          title: "Stockage",
+          to: "/stock",
+        },
+      ];
+      return subItem;
     },
 
     subItems() {
@@ -364,14 +436,12 @@ export default {
       axios.defaults.headers.common.Authorization =
         "Bearer " + localStorage.getItem("authToken");
     }
-   // Écouter l'événement 'login' émis par le backend
-  //  this.$socket.on('login', (user) => {
-  //     this.nouveauUser = user;
-  //     this.showNotification(user)
-  //   });
+    // Écouter l'événement 'login' émis par le backend
+    //  this.$socket.on('login', (user) => {
+    //     this.nouveauUser = user;
+    //     this.showNotification(user)
+    //   });
     this.privileges = Object.keys(role);
-
-   
 
     if (localStorage.authToken) {
       const data = {
@@ -392,7 +462,6 @@ export default {
 
   methods: {
     ...mapActions("auth", ["sendLogoutRequest", "getUserData", "setUser"]),
-    
 
     detectWakeup(callback) {
       const myWorker = new Worker("/DetectWakeup.js");
@@ -443,8 +512,8 @@ export default {
       }
     },
 
-    showNotification(user){
-      if(Notification.permission === "granted"){
+    showNotification(user) {
+      if (Notification.permission === "granted") {
         //  new Notification('Nouvelle connexion'),
         // {
         //    body: user.prenom
@@ -453,12 +522,12 @@ export default {
       }
     },
 
-    showPopupNotification(message){
-      this.message = message
-      this.showPopup = true
-      setTimeout(() =>{
+    showPopupNotification(message) {
+      this.message = message;
+      this.showPopup = true;
+      setTimeout(() => {
         this.showPopup = false;
-      }, 5000)
+      }, 5000);
     },
     get_initial(name) {
       const nom = name.split(" ");
@@ -469,14 +538,11 @@ export default {
       return initial;
     },
 
-   
     logout() {
       this.sendLogoutRequest();
       localStorage.removeItem("userToken");
       this.$router.push("/");
     },
-
-   
   },
 };
 </script>
@@ -488,7 +554,7 @@ export default {
   max-width: 1200px; /* Par exemple, pour une largeur maximale de 1200px */
   margin: 0 auto; /* Centrer le conteneur */
 }
-.notification-popup{
+.notification-popup {
   position: fixed;
   bottom: 10px;
   left: 50%;

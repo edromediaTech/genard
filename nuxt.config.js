@@ -13,8 +13,8 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    titleTemplate: '%s - Bénédictions',
-    title: 'Bénédictions de l\'Eternel',
+    titleTemplate: '%s - Genard Market',
+    title: 'Genard Market',
     htmlAttrs: {
       lang: 'en'
     },
@@ -83,21 +83,20 @@ export default {
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
     // https://go.nuxtjs.dev/content
-    '@nuxt/content',
-   
-
-   // 'cookie-universal-nuxt'
-    
+    '@nuxt/content',    
+     // '@nuxtjs/pwa',
+   // 'cookie-universal-nuxt'    
    // '@nuxtjs/proxy'
   ],
+  
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
  
    axios: {
-      // baseURL : 'http://192.168.0.110:3000/api/',
+       baseURL : 'http://192.168.0.113:3000/api/',
       //  baseURL : 'http://192.168.1.40:3000/api/',
       // baseURL : 'http://172.20.10.3:3000/api/',
-        baseURL : 'https://backbenediction.onrender.com/api/',
+      //  baseURL : 'https://backbenediction.onrender.com/api/',
       // //credentials: false,
       // proxy: true           
   },
@@ -122,7 +121,8 @@ export default {
       dark: true,
       themes: {
         dark: {
-          primary: '#FFD700', // Or
+          primary: '#07ab38', // Or
+         // primary: '#FFD700', // Or
           secondary: '#000000', // Noir
           accent: '#FFFFFF', // Blanc
           background: '#F5F5F5', // Gris clair

@@ -77,18 +77,19 @@
                   :float-layout="true"
                   :enable-download="true"
                   :preview-modal="false"
-                  :paginate-elements-by-height="1300"
+                  :paginate-elements-by-height="1000"
                   filename="Rapport de Vente"
                   :pdf-quality="2"
                   :manual-pagination="false"
                   pdf-format="letter"
-                  pdf-orientation="landscape"
-                  pdf-content-width="1000px"
+                  pdf-orientation="portrait"
+                  pdf-content-width="800px"
                 >
                   <template slot="pdf-content">
                     <vente-printer
                       :salesreport="salesReport"
                       :totalventes ="totalVentes"
+                     :texte="texte"
                     />
                   </template>
                 </vue-html2pdf>
@@ -145,6 +146,7 @@ export default {
   data() {
     return {
       visible:false,
+      texte:'',
       filters: {
         dateDebut: "",
         dateFin: "",
@@ -158,9 +160,9 @@ export default {
         { text: "Total des ventes", value: "total" },
       ],
       companyInfo: {
-        name: "Bénédiction de l'Eternel",
-        address: " Angle des Rues Bry & St-Charles, Fort-Liberté, Haïti",
-        phone: "+509 3779-6764 / +509 3596-7838",
+        name: "Genarg Market",
+        address: "Rue St-Charles, Carrenage, Fort-Liberté, Haïti",
+      
       },
       dateDebutErrors: [],
       dateFinErrors: [],
@@ -174,9 +176,9 @@ export default {
   mounted() {
     const today = new Date().toLocaleDateString('fr-CA');   
     this.filters.dateDebut =today
-    this.filters.dateFin =today
-    console.log(today,   this.filters.dateDebut)
+    this.filters.dateFin =today    
   },
+
   methods: {
     validateDates() {
       this.dateDebutErrors = [];
@@ -227,6 +229,7 @@ export default {
     },
     async fetchReport() {
       this.loading = true;
+    
       try {
         const response = await this.$axios.get(
           `commandes/produits?dateDebut=${this.filters.dateDebut}&dateFin=${this.filters.dateFin}`
@@ -246,17 +249,18 @@ export default {
         currency: "HTG",
       }).format(value);
     },
+
     clearErrors() {
       this.dateDebutErrors = [];
       this.dateFinErrors = [];
     },
+
     formatDate(date) {
-      const d = new Date(date);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+      if (!date) return '';
+      const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
+      return new Intl.DateTimeFormat('fr-FR', options).format(date);
     },
+
     async beforeDownload({ html2pdf, options, pdfContent }) {
       await html2pdf()
         .set(options)
@@ -278,9 +282,33 @@ export default {
         })
         .save();
     },
+
+  setTexte() {
+  // Vérification de la présence des dates de début et de fin
+  const dateDebut = this.filters.dateDebut ;
+  const dateFin = this.filters.dateFin;
+
+  // Si les dates sont identiques, on affiche juste une date, sinon on affiche un intervalle
+  if (dateDebut && dateFin) {
+    if (dateDebut === dateFin) {
+      this.texte = 'Rapport ' + dateFin;
+    } else {
+      this.texte = 'Rapport allant du ' + dateDebut + ' au ' + dateFin;
+    }
+  }
+  console.log(dateDebut)
+},
+
+    // setTexte(){
+    //   if(this.filters.dateDebut === this.filters.dateFin)
+    //   this.texte = 'Rapport '+  this.formatDate(this.filters.dateFin)
+    //   else
+    //   this.texte = 'Rapport allant du '+  this.formatDate(this.filters.dateDebut) +' au ' + this.formatDate(this.filters.dateFin)
+    // },
    
     generateReport() {      
       this.$refs.html2Pdf.generatePdf();
+      this.setTexte()
     },
 
   }

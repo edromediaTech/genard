@@ -13,13 +13,11 @@ export default {
     return {
       items: [
         {
-          src: "images/resto.jpg",
+          src: "images/market1.jpg",
         },
+      
         {
-          src: "images/resto1.jpg",
-        },
-        {
-          src: "images/resto2.jpg",
+          src: "images/market2.jpg",
         },
         {
           src: "images/resto3.jpg",

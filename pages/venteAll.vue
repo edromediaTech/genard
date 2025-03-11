@@ -322,14 +322,14 @@ async fetchCommandes() {
     const { data } = await this.$axios.get('/commandes');
     
 
-    const userId = this.user.userId; // Récupérer l'ID de l'utilisateur connecté
-    const today = new Date().toISOString().split("T")[0]; // Récupérer la date d'aujourd'hui au format YYYY-MM-DD
+   // const userId = this.user.userId; // Récupérer l'ID de l'utilisateur connecté
+   // const today = new Date().toISOString().split("T")[0]; // Récupérer la date d'aujourd'hui au format YYYY-MM-DD
     // Filtrer les commandes en fonction du serveur connecté et de la date du jour
     this.commandes = data
-      .filter(commande => {
-        const commandeDate = new Date(commande.createdAt).toISOString().split("T")[0]; // Date de la commande
-        return commande.serveur._id === userId && commandeDate === today;
-      })
+    //   .filter(commande => {
+    //     const commandeDate = new Date(commande.createdAt).toISOString().split("T")[0]; // Date de la commande
+    //     return commande.serveur._id === userId && commandeDate === today;
+    //   })
       .map(commande => ({
         ...commande,
         serveur: commande.serveur.prenom, // Accéder au prénom du serveur

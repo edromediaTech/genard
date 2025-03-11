@@ -44,7 +44,7 @@ actions: {
          localStorage.setItem('userId', response.data.userId)
          localStorage.setItem('prenom', response.data.prenom)         
           localStorage.setItem('user_level', response.data.user_level)
-    console.log("local",localStorage)         
+           
           
           localStorage.setItem('anac', response.data.anac)
           
@@ -85,11 +85,11 @@ actions: {
         await this.$axios
           .get("inspecteur/checkinspecteur/" + this.user.userId)
           .then((res) => {
-            console.log("ip", res.status);
+            
             if (res.status === 400) {
               this.ip = false;
               this.infos = res.data;
-              console.log("ip", this.ip, res.status);
+            
             } else this.ip = true;
           });
       },

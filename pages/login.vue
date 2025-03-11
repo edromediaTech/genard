@@ -114,8 +114,11 @@ export default {
               if (this.user.user_level === role.admin) {
                 this.$router.push({ path: "/inspire" });
               }
+              else if (this.user.user_level === role.supadmin) {
+                this.$router.push({ path: "/admin" });
+              }
               if (this.user.user_level === role.serveur) {
-                this.$router.push({ path: "/commande" });
+                this.$router.push({ path: "/vente" });
               } else {
                 this.$router.push({ path: "/inspire" });
               }

@@ -6,8 +6,8 @@
       <v-col cols="12" md="3">
         <v-card class="pa-4">
           <v-icon color="primary" large>mdi-cash-register</v-icon>
-          <h5>Total Ventes</h5>
-          <p class="headline">{{ formatCurrency(totalSales) }}</p>
+          <h5>Cash Aujourd'hui</h5>
+          <p class="headline">{{ formatCurrency(cashToday) }}</p>
         </v-card>
       </v-col>
 
@@ -40,7 +40,7 @@
     </v-row>
 
     <!-- Graphiques -->
-    <v-row>
+    <!-- <v-row>
       <v-col cols="12" md="6">
         <v-card class="pa-4">
           <v-card-title>Ventes par Catégorie</v-card-title>
@@ -57,7 +57,7 @@
           </v-card-text>
         </v-card>
       </v-col>
-    </v-row>
+    </v-row> -->
 
     <!-- Liste des stocks faibles -->
     <v-row>
@@ -80,7 +80,7 @@
     <v-row>
       <v-col cols="12">
         <v-card class="pa-4">
-          <v-card-title>Commandes Récentes</v-card-title>
+          <v-card-title>Ventes Récentes</v-card-title>
           <v-card-text>
             <v-data-table
               :headers="recentOrdersHeaders"
@@ -102,6 +102,7 @@ export default {
     return {
       // Statistiques principales
       totalSales: 0,
+      cashToday: 0,
       dailySales: 0, // Total des ventes par jour
       monthlySales: 0, // Total des ventes par mois
       completedOrders: 0,
@@ -162,6 +163,7 @@ export default {
     // Récupérer les commandes
     const ordersResponse = await this.$axios.get("/commandes");
     const orders = ordersResponse.data;
+    
 
     // Récupérer les produits
     const productsResponse = await this.$axios.get("/produits");
@@ -169,6 +171,13 @@ export default {
 
     // Obtenir la date d'aujourd'hui au format 'fr-CA' (YYYY-MM-DD)
     const today = new Date().toLocaleDateString('fr-CA');
+
+   this.cashToday = orders
+    .filter(commande => {
+      const commandeDate = new Date(commande.date).toLocaleDateString('fr-CA');
+      return commandeDate === today;
+    })
+    .reduce((total, commande) => total + (commande.reglement || 0), 0);
 
     // Filtrer les commandes d'aujourd'hui
     const todayOrders = orders
@@ -218,11 +227,22 @@ export default {
     // Calculer les ventes par mois
     const currentMonth = new Date().toISOString().slice(0, 7); // Format YYYY-MM
     this.monthlySales = orders
-      .filter(order => order.date.slice(0, 7) === currentMonth)
-      .reduce((sum, order) => {
-        const montant = order.total === 0 ? order.articles.reduce((sum, article) => sum + (article.produit.prix * article.quantite), 0) : order.total;
-        return sum + montant;
-      }, 0);
+  .filter(order => {
+    const orderMonth = new Date(order.date).toISOString().slice(0, 7);
+    return orderMonth === currentMonth;
+  }) 
+  .reduce((sum, order) => {
+    const montant = order.total === 0 
+      ? order.articles.reduce((sum, article) => sum + (article.produit.prix * article.quantite), 0) 
+      : order.total;
+    return sum + montant;
+  }, 0);
+    // this.monthlySales = orders
+    //   .filter(order => order.date.slice(0, 7) === currentMonth)
+    //   .reduce((sum, order) => {
+    //     const montant = order.total === 0 ? order.articles.reduce((sum, article) => sum + (article.produit.prix * article.quantite), 0) : order.total;
+    //     return sum + montant;
+    //   }, 0);
 
     // Récupérer les articles à faible stock
     this.lowStockItems = products.filter(product => product.quantite <= product.critique);
