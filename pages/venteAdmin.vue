@@ -35,8 +35,8 @@
         <v-spacer></v-spacer>
      <!-- Bouton pour basculer entre les commandes du jour et toutes les commandes -->
      <v-btn color="success"  class="mx-4"  fab x-small @click="openAddModal"><v-icon >mdi-plus</v-icon></v-btn>
-     <v-btn color="blue" class="mb-4 mx-4 mr-4 pr-4" @click="fetchCommandes"><v-icon left>mdi-food</v-icon> Commande du jour</v-btn>
-     <v-btn color="pink" class="mb-4 mx-4 mr-4 pr-4" @click="fetchAllCommandes"><v-icon left>mdi-food</v-icon> All
+     <v-btn color="blue" class="mb-4 mx-4 mr-4 pr-4" @click="fetchCommandes"><v-icon left>mdi-shopping</v-icon> ventes du jour</v-btn>
+     <v-btn color="pink" class="mb-4 mx-4 mr-4 pr-4" @click="fetchAllCommandes"><v-icon left>mdi-shopping</v-icon> All
     
     </v-btn>
   
@@ -265,7 +265,7 @@ export default {
       showAllCommands: false,
        editStatutModal: false,
       selectedTableId: null, // ID de la table sélectionnée
-      tablesOptions: ['Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5', 'Table 6', 'Table 7'], // Options des tables
+      tablesOptions: ['client 1', 'client 2', 'client 3', 'client 4', 'client 5'], // Options des tables
       statutOptions: ['En attente', 'En préparation', 'Servie', 'Terminée'],
       dialogConfirm: false,  // État du dialogue de confirmation
       currentDeleteId: null,
@@ -289,8 +289,8 @@ export default {
       headers: [
         { text: "Code", value: "code" },
         { text: "Client", value: "client" },
-        { text: "Serveur", value: "serveur" },
-        { text: "Statut", value: "statut" },
+        { text: "Vendeur", value: "serveur" },
+        // { text: "Statut", value: "statut" },
         { text: "Total (HTG)", value: "total" },
       { text: "Reglement (HTG)", value: "reglement" },
         { text: "Date", value: "date" },

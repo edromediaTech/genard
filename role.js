@@ -1,6 +1,6 @@
 const role = {
     "utilisateur":0,
-    "serveur":1,
+    "vendeur":1,
     "cuisinier":2,   
     "barman":3,   
     "gestionnaire":4,

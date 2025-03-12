@@ -226,7 +226,9 @@ export default {
         { text: "", align: "end", value: "actions" },
       ],
       produits: [],
-      categoriesOptions: ["Plat", "Boisson", "Dessert", "Jus naturel", "Jus emboité", "Boisson Alcoolisé", "Apéritif", "Patisserie", "Mix"],
+      categoriesOptions: ['Boisson', 'Dessert',  'Jus naturel', 'Jus emboité', 
+     'Produits laitier','Produits cosmetiques','Article de nettoyage','Fuits de mer',
+    'Boisson Alcoolisé', 'Apéritif', 'Patisserie' ],
     };
   },
   computed: {
