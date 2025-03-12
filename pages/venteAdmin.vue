@@ -2,42 +2,18 @@
   <v-container>
   
     <v-card>
-      <v-card-title>Liste des Commandes</v-card-title>
-      <v-row v-if="commandes.length > 0">
-                           <!-- Sélection de période -->
-              <v-col cols="12" sm="6" md="3">
-                <v-text-field
-                  v-model="startDate"
-                  label="Date de début"
-                  type="date"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6" md="3">
-                <v-text-field
-                  v-model="endDate"
-                  label="Date de fin"
-                  type="date"
-                ></v-text-field>
-              </v-col>
-
-              <v-col cols="12" sm="6" md="3">
-                <v-btn color="grey" class="mb-4 mx-4" @click="resetFilters">
-                  <v-icon left>mdi-refresh</v-icon> Réinitialiser
-                </v-btn>
-              </v-col>
-            </v-row>           
-
+      <v-card-title>Liste des Ventes</v-card-title>
        
       <v-data-table
         :headers="headers"
-        :items="filteredCommandes"
+        :items="commandes"
         item-value="id"
         dense
         :search="search"
-        item-key="_id"
+        item-key="_id"         
         class="elevation-1"
-        :loading="loading"
-        loading-text="Chargement en cours..."
+         :loading="loading"
+       loading-text="Chargement en cours..."
       >
       <template #top>
         <v-row>
@@ -53,20 +29,21 @@
                   single-line
                   hide-details
                ></v-text-field>
-             </v-col>  
-           
+             </v-col>             
+
        
         <v-spacer></v-spacer>
      <!-- Bouton pour basculer entre les commandes du jour et toutes les commandes -->
      <v-btn color="success"  class="mx-4"  fab x-small @click="openAddModal"><v-icon >mdi-plus</v-icon></v-btn>
      <v-btn color="blue" class="mb-4 mx-4 mr-4 pr-4" @click="fetchCommandes"><v-icon left>mdi-food</v-icon> Commande du jour</v-btn>
-     <v-btn color="pink" class="mb-4 mx-4 mr-4 pr-4" @click="fetchAllCommandes"><v-icon left>mdi-food</v-icon> All    
+     <v-btn color="pink" class="mb-4 mx-4 mr-4 pr-4" @click="fetchAllCommandes"><v-icon left>mdi-food</v-icon> All
+    
     </v-btn>
   
   </v-row>
       </template>
         <template #[`item.actions`]="{ item }">
-          <v-btn icon small title="Details de la Commande" @click="viewDetails(item)">
+          <v-btn icon small title="Details de la Vente" @click="viewDetails(item)">
             <v-icon>mdi-eye</v-icon>
           </v-btn>
           <v-btn v-if="isAdmin" icon small color="error" @click="deleteArticle(item._id)">
@@ -90,11 +67,7 @@
          <template #[`item.code`]="{ item }">
         {{ getLastThreeDigits(item.code) }}
       </template>
-      </v-data-table>      
-      <!-- Afficher le total des commandes filtrées -->
-      <v-card-text v-if="commandes.length > 0">
-        <strong>Total des commandes filtrées :</strong> {{ totalFilteredCommandes }} HTG
-      </v-card-text>
+      </v-data-table>
     </v-card>
 
     <!-- Modal pour ajouter un article -->
@@ -167,14 +140,14 @@
     <!-- Modal des détails de la commande -->
     <v-dialog v-model="detailsModal" max-width="800px">
       <v-card>
-        <v-card-title>Détails de la Commande {{ totalCommande }} HTG</v-card-title>
+        <v-card-title>Détails de la Vente {{ totalCommande }} HTG</v-card-title>
         <v-card-text>
           <v-list dense>
             <v-list-item>
               <v-list-item-content>
                 <v-list-item-title><strong>Date :</strong> {{ formatDate(selectedCommande.createdAt) }}</v-list-item-title>
                 <v-list-item-title><strong>Client:</strong> {{ selectedCommande.client }}</v-list-item-title>
-                <v-list-item-title><strong>Serveur:</strong> {{ selectedCommande.serveur }}</v-list-item-title>
+                <v-list-item-title><strong>Vendeur:</strong> {{ selectedCommande.serveur }}</v-list-item-title>
               </v-list-item-content>
             </v-list-item>
 
@@ -288,10 +261,6 @@ export default {
   data() {
     return {
       loading : false,
-      selectedDate: null, // Date sélectionnée
-      startDate: null,    // Date de début de la période
-      endDate: null,      // Date de fin de la période
-      dateMenu: false,
       search:'',
       showAllCommands: false,
        editStatutModal: false,
@@ -378,34 +347,6 @@ export default {
     isAdmin() {
       return this.user && parseInt(this.user.user_level) === role.supadmin;
     },
-   
-    filteredCommandes() {
-    console.log("startDate:", this.startDate);
-    console.log("endDate:", this.endDate);
-
-    return this.commandes.filter(commande => {
-      const commandeDate = new Date(commande.date).getTime();
-      const start = this.startDate ? new Date(this.startDate).getTime() : null;
-      const end = this.endDate ? new Date(this.endDate).getTime() : null;
-
-      console.log("Commande :", commande.client, " | Date :", new Date(commandeDate));
-
-      if (start && end) {
-        return commandeDate >= start && commandeDate <= end;
-      } else if (start) {
-        return commandeDate >= start;
-      } else if (end) {
-        return commandeDate <= end;
-      }
-      return true;
-    });
-  },
-    // Calcule le total des commandes filtrées
-    totalFilteredCommandes() {
-      return this.filteredCommandes.reduce((sum, commande) => {
-        return sum + commande.total;
-      }, 0);
-    },
     // Propriété calculée pour le total de la commande
     totalCommande() {
       if (!this.selectedCommande.articles) return 0;
@@ -424,10 +365,6 @@ export default {
   },
   methods: {
     ...mapActions("auth", ["sendLoginRequest"]),
-    resetFilters() {
-    this.startDate = null;
-    this.endDate = null;
-  },
     onProductChange(selectedValue) {
       const selectedProduct = this.produitsOptions.find(
         (produit) => produit.value === selectedValue
@@ -860,7 +797,7 @@ async fetchCommandes() {
           }
 
           this.$notifier.showMessage({
-            content: "Produit ajouté à la commande.",
+            content: "Produit ajouté à la vente.",
             color: "success",
           });
           this.addProductModal = false;
@@ -898,7 +835,7 @@ async fetchCommandes() {
         this.fetchCommandes();
         this.dialogConfirm = false;
       } catch (error) {
-        console.error('Erreur lors de la suppression de la commande:', error);
+        console.error('Erreur lors de la suppression de la vente:', error);
       }
     },
 
@@ -916,9 +853,9 @@ printInvoice() {
       
     const invoiceContent = `
         <div style="text-align: center; font-family: monospace, sans-serif; font-size: 14px; margin: 0; padding: 0;">
-            <h5 style="text-align: center; margin: 0;">Bénédictions de l'Éternel</h5>             
+            <h5 style="text-align: center; margin: 0;">Genard Market</h5>             
               <p style="text-align: center; margin: 0;">               
-                +509 3779-6764 / +509 3596-7838<br />        
+                +509 3743-3479<br />        
               </p>
             <hr>
             <h5 style="text-align: center; margin: 0;">FACTURE</h5>

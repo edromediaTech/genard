@@ -3,7 +3,7 @@ import colors from 'vuetify/es5/util/colors'
 export default {
   env: {
   
-    baseURL: process.env.BASE_URL  || 'https://backbenediction.onrender.com/api/' 
+    baseURL: process.env.BASE_URL  || 'https://genardback.onrender.com/api/' 
     // : 'https://base.ddne.net/api/'
   },
 
@@ -13,8 +13,8 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    titleTemplate: '%s - Bénédictions',
-    title: 'Bénédictions de l\'Eternel',
+    titleTemplate: '%s -Genard Market',
+    title: 'Genard Market',
     htmlAttrs: {
       lang: 'en'
     },
@@ -94,10 +94,10 @@ export default {
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
  
    axios: {
-      // baseURL : 'http://192.168.0.109:3000/api/',
-      // baseURL : 'http://192.168.1.6:3000/api/',
+      // baseURL : 'http://192.168.0.114:3000/api/',
+       // baseURL : 'http://192.168.1.9:3000/api/',
       // baseURL : 'http://172.20.10.3:3000/api/',
-         baseURL : 'https://backbenediction.onrender.com/api/',
+         baseURL : 'https://genardback.onrender.com/api/',
       // //credentials: false,
       // proxy: true           
   },
@@ -123,7 +123,7 @@ export default {
       dark: true,
       themes: {
         dark: {
-          primary: '#FFD700', // Or
+          primary: '#07ab38', // Or
           secondary: '#000000', // Noir
           accent: '#FFFFFF', // Blanc
           background: '#F5F5F5', // Gris clair

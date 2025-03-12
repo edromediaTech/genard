@@ -5,9 +5,9 @@
       <div>
         <!-- <center><img src='images/logo.jpg' width="60" class="imag"></center> -->
     </div>
-      <div  class="entete"><h3>Bénédiction de l'Eternel</h3>
-         <center> <h5>Rue Bory & St-Charles, Fort-Liberté, Haiti</h5></center>
-      </div>      
+    <div  class="entete"><h3>Genard Market</h3>
+         <center> <h5>Rue St-Charles, Carrenage, Fort-Liberté, Haiti</h5></center>
+      </div>     
       
     </div>
     <center ><h5 class="ecole">Liste des Achats</h5></center>

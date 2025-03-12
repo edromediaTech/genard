@@ -163,7 +163,7 @@ export default {
     // Récupérer les commandes
     const ordersResponse = await this.$axios.get("/commandes");
     const orders = ordersResponse.data;
-    console.log(orders)
+    
 
     // Récupérer les produits
     const productsResponse = await this.$axios.get("/produits");

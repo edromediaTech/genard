@@ -3,7 +3,7 @@
     <!-- <v-dialog v-model="loginDialog" persistent max-width="800px"> -->
       <v-card>
         <v-card-title>
-          <v-icon class="mr-2" color="#FFD700">mdi-account-multiple</v-icon>
+          <v-icon class="mr-2" color="#07ab38">mdi-account-multiple</v-icon>
           Fiche d'Enregistrement 
         </v-card-title>
 
@@ -60,7 +60,7 @@
               user.prenom === null ||
               user.tel === null            
             "
-            color="#FFD700"
+            color="#07ab38"
             type="button"
             @click="register"
           >
